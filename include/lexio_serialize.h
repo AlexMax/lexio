@@ -25,10 +25,10 @@
 namespace LexIO
 {
 
-template <typename T> uint8_t ReadU8(T &buffer)
+uint8_t ReadU8(Type::Reader &buffer)
 {
     uint8_t buf[sizeof(uint8_t)] = {0};
-    const size_t count = buffer.Read(buf);
+    const size_t count = RawRead(buffer, buf);
     if (count != sizeof(uint8_t))
     {
         throw std::runtime_error("could not read 1 byte");
@@ -36,10 +36,10 @@ template <typename T> uint8_t ReadU8(T &buffer)
     return buf[0];
 }
 
-template <typename T> uint16_t ReadU16LE(T &buffer)
+uint16_t ReadU16LE(Type::Reader &buffer)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = buffer.Read(buf);
+    const size_t count = RawRead(buffer, buf);
     if (count != sizeof(uint16_t))
     {
         throw std::runtime_error("could not read 2 bytes");
@@ -47,10 +47,10 @@ template <typename T> uint16_t ReadU16LE(T &buffer)
     return buf[0] | (buf[1] << 8);
 }
 
-template <typename T> uint32_t ReadU32LE(T &buffer)
+uint32_t ReadU32LE(Type::Reader &buffer)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = buffer.Read(buf);
+    const size_t count = RawRead(buffer, buf);
     if (count != sizeof(uint32_t))
     {
         throw std::runtime_error("could not read 4 bytes");
@@ -58,10 +58,10 @@ template <typename T> uint32_t ReadU32LE(T &buffer)
     return buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
 }
 
-template <typename T> uint64_t ReadU64LE(T &buffer)
+uint64_t ReadU64LE(Type::Reader &buffer)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = buffer.Read(buf);
+    const size_t count = RawRead(buffer, buf);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not read 8 bytes");
@@ -72,30 +72,30 @@ template <typename T> uint64_t ReadU64LE(T &buffer)
            (static_cast<uint64_t>(buf[6]) << 48) | (static_cast<uint64_t>(buf[7]) << 56);
 }
 
-template <typename T> void WriteU8(T &buffer, const uint8_t value)
+void WriteU8(Type::Writer &buffer, const uint8_t value)
 {
     uint8_t buf[sizeof(uint8_t)] = {value};
-    const size_t count = buffer.Write(buf);
+    const size_t count = RawWrite(buffer, buf);
     if (count != sizeof(uint8_t))
     {
         throw std::runtime_error("could not write 1 byte");
     }
 }
 
-template <typename T> void WriteU16LE(T &buffer, const uint16_t value)
+void WriteU16LE(Type::Writer &buffer, const uint16_t value)
 {
     uint8_t buf[sizeof(uint16_t)] = {
         static_cast<uint8_t>(value & 0xff),
         static_cast<uint8_t>((value & 0xff00) >> 8),
     };
-    const size_t count = buffer.Write(buf);
+    const size_t count = RawWrite(buffer, buf);
     if (count != sizeof(uint16_t))
     {
         throw std::runtime_error("could not write 2 bytes");
     }
 }
 
-template <typename T> void WriteU32LE(T &buffer, const uint32_t value)
+void WriteU32LE(Type::Writer &buffer, const uint32_t value)
 {
     uint8_t buf[sizeof(uint32_t)] = {
         static_cast<uint8_t>(value & 0xff),
@@ -103,14 +103,14 @@ template <typename T> void WriteU32LE(T &buffer, const uint32_t value)
         static_cast<uint8_t>((value & 0xff0000) >> 16),
         static_cast<uint8_t>((value & 0xff000000) >> 24),
     };
-    const size_t count = buffer.Write(buf);
+    const size_t count = RawWrite(buffer, buf);
     if (count != sizeof(uint32_t))
     {
         throw std::runtime_error("could not write 4 bytes");
     }
 }
 
-template <typename T> void WriteU64LE(T &buffer, const uint64_t value)
+void WriteU64LE(Type::Writer &buffer, const uint64_t value)
 {
     uint8_t buf[sizeof(uint64_t)] = {
         static_cast<uint8_t>(value & 0xff),
@@ -122,7 +122,7 @@ template <typename T> void WriteU64LE(T &buffer, const uint64_t value)
         static_cast<uint8_t>((value & 0xff000000000000) >> 48),
         static_cast<uint8_t>((value & 0xff00000000000000) >> 56),
     };
-    const size_t count = buffer.Write(buf);
+    const size_t count = RawWrite(buffer, buf);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not write 8 bytes");

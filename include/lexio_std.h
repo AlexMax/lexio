@@ -37,9 +37,13 @@ namespace LexIO
 template <typename T>
 class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, public Type::Seekable
 {
-  protected:
+  private:
     T m_buffer;
     size_t m_offset = 0;
+
+  protected:
+    T &Buffer() { return m_buffer; }
+    size_t &Offset() { return m_offset; }
 
     void OffsetCheck(const ptrdiff_t offset)
     {
@@ -54,7 +58,7 @@ class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, 
     StdBufferBase(const T &buffer) : m_buffer(buffer) {}
     StdBufferBase(T &&buffer) : m_buffer(buffer) {}
 
-    size_t Read(span_type buffer) override
+    size_t RawRead(span_type buffer) override
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_offset + buffer.size());
@@ -68,7 +72,7 @@ class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, 
 
     const_span_type Data() const noexcept override { return const_span_type(m_buffer.data(), m_buffer.size()); }
 
-    size_t Write(const_span_type buffer) override
+    size_t RawWrite(const_span_type buffer) override
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_buffer.size());
@@ -110,7 +114,7 @@ class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, 
 template <typename T> class FixedStdBuffer : public StdBufferBase<T>
 {
   public:
-    explicit FixedStdBuffer(const size_t size) : StdBufferBase<T>(T()) { this->m_buffer.resize(size); }
+    explicit FixedStdBuffer(const size_t size) : StdBufferBase<T>(T()) { Buffer().resize(size); }
 };
 
 /**
@@ -141,7 +145,7 @@ template <typename T> class StdBuffer : public StdBufferBase<T>
      *
      * @param size Size of underlying type.
      */
-    explicit StdBuffer(const size_t size) : StdBufferBase<T>(T()) { this->m_buffer.resize(size); }
+    explicit StdBuffer(const size_t size) : StdBufferBase<T>(T()) { Buffer().resize(size); }
 
     /**
      * @brief Construct a StdBuffer with data already written into the buffer.
@@ -150,20 +154,17 @@ template <typename T> class StdBuffer : public StdBufferBase<T>
      */
     StdBuffer(std::initializer_list<uint8_t> list) : StdBufferBase<T>(T())
     {
-        this->m_buffer.resize(list.size());
-        std::copy(list.begin(), list.end(), this->m_buffer.begin());
+        Buffer().resize(list.size());
+        std::copy(list.begin(), list.end(), Buffer().begin());
     }
 
-    size_t Write(const_span_type buffer) override
+    size_t RawWrite(const_span_type buffer) override
     {
-        T &m_buffer = this->m_buffer;
-        size_t &m_offset = this->m_offset;
-
         // Writes off the end of the burffer grow the buffer to fit.
-        const size_t wantedOffset = m_offset + buffer.size();
-        m_buffer.resize(std::max(wantedOffset, m_buffer.size()));
-        std::copy(buffer.begin(), buffer.end(), m_buffer.begin() + m_offset);
-        m_offset += buffer.size();
+        const size_t wantedOffset = Offset() + buffer.size();
+        Buffer().resize(std::max(wantedOffset, Buffer().size()));
+        std::copy(buffer.begin(), buffer.end(), Buffer().begin() + Offset());
+        Offset() += buffer.size();
         return buffer.size();
     }
 };

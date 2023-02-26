@@ -74,17 +74,9 @@ class Reader
     virtual ~Reader() {}
 
     /**
-     * @brief Read data from the current offset, inserting it into the passed
-     *        buffer and advancing the offset.
-     *
-     * @param buffer A span to read data into, the size of which is the number
-     *               of bytes to read.
-     * @return Actual number of bytes read.  Must be between 0 and the requested
-     *         length.  0 can mean EOF or empty buffer.
-     * @throws std::runtime_error if an error with the read operation was
-     *         encountered.  EOF is _not_ considered an error.
+     * @brief See LexIO::RawRead
      */
-    virtual size_t Read(span_type buffer) = 0;
+    virtual size_t RawRead(span_type buffer) = 0;
 };
 
 /**
@@ -96,20 +88,14 @@ class Writer
     virtual ~Writer() {}
 
     /**
-     * @brief Flushes data to underlying storage.  Can be a no-op.
+     * @brief See LexIO::RawWrite
      */
-    virtual void Flush() = 0;
+    virtual size_t RawWrite(const_span_type buffer) = 0;
 
     /**
-     * @brief Write a span of data at the current offset, overwriting any
-     *        existing data.
-     *
-     * @param buffer Bytes to write into the data stream.
-     * @return Actual number of bytes written.
-     * @throws std::runtime_error if an error with the write operation was
-     *         encountered.  A partial write is _not_ considered an error.
+     * @brief See LexIO::Flush
      */
-    virtual size_t Write(const_span_type buffer) = 0;
+    virtual void Flush() = 0;
 };
 
 /**
@@ -121,32 +107,17 @@ class Seekable
     virtual ~Seekable() {}
 
     /**
-     * @brief Seek to a position relative to the start of the underlying data.
-     *
-     * @param whence Offset from start to seek.
-     * @return Absolute position in stream after seek.
-     * @throws std::runtime_error if underlying seek operation goes past start
-     *         of data, or has some other error condition.
+     * @brief See LexIO::Seek
      */
     virtual size_t Seek(const WhenceStart whence) = 0;
 
     /**
-     * @brief Seek to a position relative to the current offset.
-     *
-     * @param whence Offset from current position to seek.
-     * @return Absolute position in stream after seek.
-     * @throws std::runtime_error if underlying seek operation goes past start
-     *         of data, or has some other error condition.
+     * @brief See LexIO::Seek
      */
     virtual size_t Seek(const WhenceCurrent whence) = 0;
 
     /**
-     * @brief Seek to a position relative to the end of the underlying data.
-     *
-     * @param whence Offset from end to seek.
-     * @return Absolute position in stream after seek.
-     * @throws std::runtime_error if underlying seek operation goes past start
-     *         of data, or has some other error condition.
+     * @brief See LexIO::Seek
      */
     virtual size_t Seek(const WhenceEnd whence) = 0;
 };
@@ -158,9 +129,7 @@ class SeekableReader : public Reader
 {
   public:
     /**
-     * @brief Return a read-only view of the entire data stream.
-     *
-     * @return A span of the entire data stream, from offset 0 to EOF.
+     * @brief See LexIO::Data
      */
     virtual const_span_type Data() const noexcept = 0;
 };
@@ -171,22 +140,94 @@ class SeekableReader : public Reader
 class SeekableWriter : public Writer
 {
   public:
+    /**
+     * @brief See LexIO::Data
+     */
     virtual span_type Data() noexcept = 0;
 };
 
 } // namespace Type
 
-template <typename T> size_t Seek(T &buffer, const WhenceStart whence)
+/**
+ * @brief Read data from the current offset, inserting it into the passed
+ *        buffer and advancing the offset.
+ *
+ * @param buffer Buffer to operate on.
+ * @param outBytes A span to read data into, the size of which is the number
+ *                 of bytes to read.
+ * @return Actual number of bytes read.  Must be between 0 and the requested
+ *         length.  0 can mean EOF or empty buffer.
+ * @throws std::runtime_error if an error with the read operation was
+ *         encountered.  EOF is _not_ considered an error.
+ */
+size_t RawRead(Type::Reader &buffer, span_type outBytes)
+{
+    return buffer.RawRead(outBytes);
+}
+
+/**
+ * @brief Write a span of data at the current offset, overwriting any
+ *        existing data.
+ *
+ * @param buffer Buffer to operate on.
+ * @param bytes Bytes to write into the data stream.
+ * @return Actual number of bytes written.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.  A partial write is _not_ considered an error.
+ */
+size_t RawWrite(Type::Writer &buffer, const_span_type bytes)
+{
+    return buffer.RawWrite(bytes);
+}
+
+/**
+ * @brief Flushes data to underlying storage.  Can be a no-op.
+ *
+ * @param buffer Buffer to operate on.
+ */
+void Flush(Type::Writer &buffer)
+{
+    return buffer.Flush();
+}
+
+/**
+ * @brief Seek to a position relative to the start of the underlying data.
+ *
+ * @param buffer Buffer to operate on.
+ * @param whence Offset from start to seek.
+ * @return Absolute position in stream after seek.
+ * @throws std::runtime_error if underlying seek operation goes past start
+ *         of data, or has some other error condition.
+ */
+size_t Seek(Type::Seekable &buffer, const WhenceStart whence)
 {
     return buffer.Seek(whence);
 }
 
-template <typename T> size_t Seek(T &buffer, const WhenceCurrent whence)
+/**
+ * @brief Seek to a position relative to the current offset.
+ *
+ * @param buffer Buffer to operate on.
+ * @param whence Offset from current position to seek.
+ * @return Absolute position in stream after seek.
+ * @throws std::runtime_error if underlying seek operation goes past start
+ *         of data, or has some other error condition.
+ */
+size_t Seek(Type::Seekable &buffer, const WhenceCurrent whence)
 {
     return buffer.Seek(whence);
 }
 
-template <typename T> size_t Seek(T &buffer, const WhenceEnd whence)
+/**
+ * @brief Seek to a position relative to the end of the underlying data.
+ *
+ * @param buffer Buffer to operate on.
+ * @param whence Offset from end to seek.
+ * @return Absolute position in stream after seek.
+ * @throws std::runtime_error if underlying seek operation goes past start
+ *         of data, or has some other error condition.
+ */
+size_t Seek(Type::Seekable &buffer, const WhenceEnd whence)
 {
     return buffer.Seek(whence);
 }
@@ -194,12 +235,12 @@ template <typename T> size_t Seek(T &buffer, const WhenceEnd whence)
 /**
  * @brief Return the current offset position.
  *
- * @param buffer Buffer to get position for.
+ * @param buffer Buffer to operate on.
  * @return Absolute position in stream.
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename T> size_t Tell(T &buffer)
+size_t Tell(Type::Seekable &buffer)
 {
     return buffer.Seek(WhenceCurrent(0));
 }
@@ -207,17 +248,39 @@ template <typename T> size_t Tell(T &buffer)
 /**
  * @brief Return length of underlying data.
  *
- * @param buffer Buffer to get length for.
+ * @param buffer Buffer to operate on.
  * @return Length of underlying data.
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename T> size_t Length(T &buffer)
+size_t Length(Type::Seekable &buffer)
 {
     const size_t old = buffer.Seek(WhenceCurrent(0));
     const size_t len = buffer.Seek(WhenceEnd(0));
     buffer.Seek(WhenceStart(old));
     return len;
+}
+
+/**
+ * @brief Return a read-only view of the entire data stream.
+ *
+ * @param buffer Buffer to operate on.
+ * @return A span of the entire data stream, from offset 0 to EOF.
+ */
+const_span_type Data(Type::SeekableReader &buffer) noexcept
+{
+    return buffer.Data();
+}
+
+/**
+ * @brief Return a mutable view of the entire data stream.
+ *
+ * @param buffer Buffer to operate on.
+ * @return A span of the entire data stream, from offset 0 to EOF.
+ */
+span_type Data(Type::SeekableWriter &buffer) noexcept
+{
+    return buffer.Data();
 }
 
 } // namespace LexIO
