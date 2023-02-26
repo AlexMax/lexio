@@ -1,0 +1,126 @@
+//
+// Copyright 2023 Lexi Mayfield
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+#pragma once
+
+#include "lexio_core.h"
+
+namespace LexIO
+{
+
+/**
+ * @brief A seekable reader/writer that uses a backing type exposing STL
+ *        conventions.  Initialized with a preset buffer that does not grow.
+ *
+ * @tparam T Type to wrap.
+ */
+template <typename T> class StdBuffer : public Type::SeekableReader, Type::SeekableWriter
+{
+  protected:
+    T m_buffer;
+    size_t m_offset = 0;
+
+    void OffsetCheck(const ptrdiff_t offset)
+    {
+        if (offset < 0)
+        {
+            throw std::runtime_error("attempted seek to negative position");
+        }
+    }
+
+  public:
+    StdBuffer(const T &buffer) : m_buffer(buffer) {}
+    StdBuffer(T &&buffer) : m_buffer(buffer) {}
+
+    size_t Read(span_type buffer) override
+    {
+        const size_t wantedOffset = m_offset + buffer.size();
+        const size_t destOffset = std::min(wantedOffset, buffer.size());
+        const size_t actualLength = destOffset - m_offset;
+        std::copy(m_buffer.begin() + m_offset, m_buffer.begin() + m_offset + actualLength, buffer.begin());
+        m_offset += actualLength;
+        return actualLength;
+    }
+
+    void Flush() override {}
+
+    const_span_type Data() const noexcept override { return const_span_type(m_buffer.data(), m_buffer.size()); }
+
+    size_t Write(const_span_type buffer) override
+    {
+        const size_t wantedOffset = m_offset + buffer.size();
+        const size_t destOffset = std::min(wantedOffset, buffer.size());
+        const size_t actualLength = destOffset - m_offset;
+        std::copy(buffer.begin(), buffer.begin() + actualLength, m_buffer.begin() + m_offset);
+        m_offset += actualLength;
+        return actualLength;
+    }
+
+    span_type Data() noexcept override { return span_type(m_buffer.data(), m_buffer.size()); }
+
+    size_t Seek(const WhenceStart whence) override
+    {
+        OffsetCheck(whence.offset);
+        m_offset = static_cast<size_t>(whence.offset);
+        return m_offset;
+    }
+
+    size_t Seek(const WhenceCurrent whence) override
+    {
+        const ptrdiff_t offset = static_cast<ptrdiff_t>(m_offset) + whence.offset;
+        OffsetCheck(offset);
+        m_offset = static_cast<size_t>(offset);
+        return m_offset;
+    }
+
+    size_t Seek(const WhenceEnd whence) override
+    {
+        const ptrdiff_t offset = static_cast<ptrdiff_t>(m_buffer.size()) - whence.offset;
+        OffsetCheck(offset);
+        m_offset = static_cast<size_t>(offset);
+        return m_offset;
+    }
+};
+
+/**
+ * @brief A StdBuffer where writing off the end of the buffer grows it
+ *        using a resize member function.
+ */
+template <typename T> class StdBufferResize : public StdBuffer<T>
+{
+  public:
+    StdBufferResize() : StdBuffer<T>::m_buffer(T()) {}
+
+    size_t Write(const_span_type buffer) override
+    {
+        T &m_buffer = this->m_buffer;
+        size_t &m_offset = this->m_offset;
+
+        // Writes off the end of the burffer grow the buffer to fit.
+        const size_t wantedOffset = m_offset + buffer.size();
+        m_buffer.resize(std::max(wantedOffset, m_buffer.size()));
+        std::copy(buffer.begin(), buffer.end(), m_buffer.begin() + m_offset);
+        m_offset += buffer.size();
+        return buffer.size();
+    }
+};
+
+/**
+ * @brief A span buffer using the current span type.
+ */
+using SpanBuffer = StdBuffer<span_type>;
+
+} // namespace LexIO
