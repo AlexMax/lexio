@@ -22,75 +22,69 @@
 
 #pragma region "Read/Write Tests"
 
+using VectorBuffer = LexIO::StdBuffer<std::vector<uint8_t>>;
+
 TEST_CASE("Read UInt8", "[read]")
 {
-    std::array<uint8_t, 1> data = {0x88};
-    LexIO::SpanBuffer buffer(std::span<uint8_t>(data.begin(), data.end()));
+    VectorBuffer buffer = {0x88};
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
 TEST_CASE("Write UInt8", "[write]")
 {
-    std::array<uint8_t, 1> data;
-    LexIO::SpanBuffer buffer(std::span<uint8_t>(data.begin(), data.end()));
+    VectorBuffer buffer;
     LexIO::WriteU8(buffer, 0x88);
-    REQUIRE(data[0] == 0x88);
+    REQUIRE(buffer.Data()[0] == 0x88);
 }
 
 TEST_CASE("Read U16LE", "[read]")
 {
-    std::array<uint8_t, 2> data = {0x88, 0x99};
-    LexIO::SpanBuffer buffer(std::span<uint8_t>(data.begin(), data.end()));
+    VectorBuffer buffer({0x88, 0x99});
     REQUIRE(LexIO::ReadU16LE(buffer) == 0x9988);
 }
 
 TEST_CASE("Write UInt16LE", "[write]")
 {
-    std::array<uint8_t, 2> data;
-    LexIO::SpanBuffer buffer(std::span<uint8_t>(data.begin(), data.end()));
+    VectorBuffer buffer;
     LexIO::WriteU16LE(buffer, 0x9988);
-    REQUIRE(data[0] == 0x88);
-    REQUIRE(data[1] == 0x99);
+    REQUIRE(buffer.Data()[0] == 0x88);
+    REQUIRE(buffer.Data()[1] == 0x99);
 }
 
 TEST_CASE("Read UInt32", "[read]")
 {
-    std::array<uint8_t, 4> data = {0x88, 0x99, 0xaa, 0xbb};
-    LexIO::SpanBuffer buffer(std::span<uint8_t>(data.begin(), data.end()));
+    VectorBuffer buffer({0x88, 0x99, 0xaa, 0xbb});
     REQUIRE(LexIO::ReadU32LE(buffer) == 0xbbaa9988);
 }
 
 TEST_CASE("Write UInt32LE", "[write]")
 {
-    std::array<uint8_t, 4> data;
-    LexIO::SpanBuffer buffer(std::span<uint8_t>(data.begin(), data.end()));
+    VectorBuffer buffer;
     LexIO::WriteU32LE(buffer, 0xbbaa9988);
-    REQUIRE(data[0] == 0x88);
-    REQUIRE(data[1] == 0x99);
-    REQUIRE(data[2] == 0xaa);
-    REQUIRE(data[3] == 0xbb);
+    REQUIRE(buffer.Data()[0] == 0x88);
+    REQUIRE(buffer.Data()[1] == 0x99);
+    REQUIRE(buffer.Data()[2] == 0xaa);
+    REQUIRE(buffer.Data()[3] == 0xbb);
 }
 
 TEST_CASE("Read UInt64", "[read]")
 {
-    std::array<uint8_t, 8> data = {0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-    LexIO::SpanBuffer buffer(std::span<uint8_t>(data.begin(), data.end()));
+    VectorBuffer buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
     REQUIRE(LexIO::ReadU64LE(buffer) == 0xffeeddccbbaa9988);
 }
 
 TEST_CASE("Write UInt64LE", "[write]")
 {
-    std::array<uint8_t, 8> data;
-    LexIO::SpanBuffer buffer(std::span<uint8_t>(data.begin(), data.end()));
+    VectorBuffer buffer;
     LexIO::WriteU64LE(buffer, 0xffeeddccbbaa9988);
-    REQUIRE(data[0] == 0x88);
-    REQUIRE(data[1] == 0x99);
-    REQUIRE(data[2] == 0xaa);
-    REQUIRE(data[3] == 0xbb);
-    REQUIRE(data[4] == 0xcc);
-    REQUIRE(data[5] == 0xdd);
-    REQUIRE(data[6] == 0xee);
-    REQUIRE(data[7] == 0xff);
+    REQUIRE(buffer.Data()[0] == 0x88);
+    REQUIRE(buffer.Data()[1] == 0x99);
+    REQUIRE(buffer.Data()[2] == 0xaa);
+    REQUIRE(buffer.Data()[3] == 0xbb);
+    REQUIRE(buffer.Data()[4] == 0xcc);
+    REQUIRE(buffer.Data()[5] == 0xdd);
+    REQUIRE(buffer.Data()[6] == 0xee);
+    REQUIRE(buffer.Data()[7] == 0xff);
 }
 
 #pragma endregion
@@ -107,28 +101,16 @@ TEST_CASE("Write UInt64LE", "[write]")
 
 TEST_CASE("LexIO::StdBuffer", "[seqbuf]")
 {
-    std::array<uint8_t, 4> data = {0x88, 0x99, 0xaa, 0xbb};
-    std::span<uint8_t> dataSpan(data.data(), data.size());
-
-    SECTION("Test std::span")
+    SECTION("Test StaticStdBuffer with std::array")
     {
-        LexIO::SpanBuffer buf(dataSpan);
+        using ArrayBuffer = LexIO::StaticStdBuffer<std::array<uint8_t, 4>>;
+        ArrayBuffer buf;
     }
 
-    SECTION("Test std::array")
+    SECTION("Test FixedStdBuffer with pre-allocated size")
     {
-        using ArrayBuffer = LexIO::StdBuffer<std::array<uint8_t, 4>>;
-
-        //ArrayBuffer buf(data.begin(), data.end());
-    }
-
-    SECTION("Test std::vector")
-    {
-        using VectorBuffer = LexIO::StdBuffer<std::vector<uint8_t>>;
-        using VectorBufferResize = LexIO::StdBufferResize<std::vector<uint8_t>>;
-
-        //VectorBuffer buf(data.begin(), data.end();
-        //VectorBufferResize buf;
+        using FixedVectorBuffer = LexIO::FixedStdBuffer<std::vector<uint8_t>>;
+        FixedVectorBuffer(size_t(4));
     }
 }
 

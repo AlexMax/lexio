@@ -23,11 +23,14 @@ namespace LexIO
 
 /**
  * @brief A seekable reader/writer that uses a backing type exposing STL
- *        conventions.  Initialized with a preset buffer that does not grow.
+ *        conventions.
+ *
+ * @details This class is very inconvenient to construct, prefer one of
+ *          the other StdBuffer types.
  *
  * @tparam T Type to wrap.
  */
-template <typename T> class StdBuffer : public Type::SeekableReader, Type::SeekableWriter
+template <typename T> class StdBufferBase : public Type::SeekableReader, Type::SeekableWriter
 {
   protected:
     T m_buffer;
@@ -42,8 +45,9 @@ template <typename T> class StdBuffer : public Type::SeekableReader, Type::Seeka
     }
 
   public:
-    StdBuffer(const T &buffer) : m_buffer(buffer) {}
-    StdBuffer(T &&buffer) : m_buffer(buffer) {}
+    StdBufferBase() = delete;
+    StdBufferBase(const T &buffer) : m_buffer(buffer) {}
+    StdBufferBase(T &&buffer) : m_buffer(buffer) {}
 
     size_t Read(span_type buffer) override
     {
@@ -96,13 +100,54 @@ template <typename T> class StdBuffer : public Type::SeekableReader, Type::Seeka
 };
 
 /**
- * @brief A StdBuffer where writing off the end of the buffer grows it
- *        using a resize member function.
+ * @brief StdBuffer wrapping a type whose size is permanent after construction.
  */
-template <typename T> class StdBufferResize : public StdBuffer<T>
+template <typename T> class FixedStdBuffer : public StdBufferBase<T>
 {
   public:
-    StdBufferResize() : StdBuffer<T>::m_buffer(T()) {}
+    explicit FixedStdBuffer(const size_t size) : StdBufferBase<T>(T()) { this->m_buffer.resize(size); }
+};
+
+/**
+ * @brief StdBuffer wrapping a type of default-constructed size.
+ *
+ * @detail Useful for types where size is known at compile-time, like std::array.
+ */
+template <typename T> class StaticStdBuffer : public StdBufferBase<T>
+{
+  public:
+    explicit StaticStdBuffer() : StdBufferBase<T>(T()) {}
+};
+
+/**
+ * @brief The standard StdBuffer, where writing off the end of the buffer
+ *        resizes the underlying type.
+ */
+template <typename T> class StdBuffer : public StdBufferBase<T>
+{
+  public:
+    /**
+     * @brief Constructs an empty StdBuffer.
+     */
+    StdBuffer() : StdBufferBase<T>(T()) {}
+
+    /**
+     * @brief Constructs a StdBuffer with a pre-allocated size.
+     *
+     * @param size Size of underlying type.
+     */
+    explicit StdBuffer(const size_t size) : StdBufferBase<T>(T()) { this->m_buffer.resize(size); }
+
+    /**
+     * @brief Construct a StdBuffer with data already written into the buffer.
+     *
+     * @param list Initializer list of data.
+     */
+    StdBuffer(std::initializer_list<uint8_t> list) : StdBufferBase<T>(T())
+    {
+        this->m_buffer.resize(list.size());
+        std::copy(list.begin(), list.end(), this->m_buffer.begin());
+    }
 
     size_t Write(const_span_type buffer) override
     {
