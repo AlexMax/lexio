@@ -14,6 +14,10 @@
 //  limitations under the License.
 //
 
+//
+// Core interfaces and functions needed by everything else.
+//
+
 #pragma once
 
 #include <cstdint>
@@ -145,30 +149,6 @@ class Seekable
      *         of data, or has some other error condition.
      */
     virtual size_t Seek(const WhenceEnd whence) = 0;
-
-    /**
-     * @brief Return the current offset position.
-     *
-     * @return Absolute position in stream.
-     * @throws std::runtime_error if Seek call throws, or some other error
-     *         condition occurrs.
-     */
-    size_t Tell() { return Seek(WhenceCurrent(0)); }
-
-    /**
-     * @brief Return length of underlying data.
-     *
-     * @return Length of underlying data.
-     * @throws std::runtime_error if Seek call throws, or some other error
-     *         condition occurrs.
-     */
-    size_t Length()
-    {
-        const size_t old = Seek(WhenceCurrent(0));
-        const size_t len = Seek(WhenceEnd(0));
-        Seek(WhenceStart(old));
-        return len;
-    }
 };
 
 /**
@@ -211,118 +191,33 @@ template <typename T> size_t Seek(T &buffer, const WhenceEnd whence)
     return buffer.Seek(whence);
 }
 
-template <typename T> size_t Length(T &buffer)
-{
-    return buffer.Length();
-}
-
+/**
+ * @brief Return the current offset position.
+ *
+ * @param buffer Buffer to get position for.
+ * @return Absolute position in stream.
+ * @throws std::runtime_error if Seek call throws, or some other error
+ *         condition occurrs.
+ */
 template <typename T> size_t Tell(T &buffer)
 {
-    return buffer.Tell();
+    return buffer.Seek(WhenceCurrent(0));
 }
 
-template <typename T> uint8_t ReadU8(T &buffer)
+/**
+ * @brief Return length of underlying data.
+ *
+ * @param buffer Buffer to get length for.
+ * @return Length of underlying data.
+ * @throws std::runtime_error if Seek call throws, or some other error
+ *         condition occurrs.
+ */
+template <typename T> size_t Length(T &buffer)
 {
-    uint8_t buf[sizeof(uint8_t)] = {0};
-    const size_t count = buffer.Read(buf);
-    if (count != sizeof(uint8_t))
-    {
-        throw std::runtime_error("could not read 1 byte");
-    }
-    return buf[0];
-}
-
-template <typename T> uint16_t ReadU16LE(T &buffer)
-{
-    uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = buffer.Read(buf);
-    if (count != sizeof(uint16_t))
-    {
-        throw std::runtime_error("could not read 2 bytes");
-    }
-    return buf[0] | (buf[1] << 8);
-}
-
-template <typename T> uint32_t ReadU32LE(T &buffer)
-{
-    uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = buffer.Read(buf);
-    if (count != sizeof(uint32_t))
-    {
-        throw std::runtime_error("could not read 4 bytes");
-    }
-    return buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
-}
-
-template <typename T> uint64_t ReadU64LE(T &buffer)
-{
-    uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = buffer.Read(buf);
-    if (count != sizeof(uint64_t))
-    {
-        throw std::runtime_error("could not read 8 bytes");
-    }
-    return static_cast<uint64_t>(buf[0]) | (static_cast<uint64_t>(buf[1]) << 8) |
-           (static_cast<uint64_t>(buf[2]) << 16) | (static_cast<uint64_t>(buf[3]) << 24) |
-           (static_cast<uint64_t>(buf[4]) << 32) | (static_cast<uint64_t>(buf[5]) << 40) |
-           (static_cast<uint64_t>(buf[6]) << 48) | (static_cast<uint64_t>(buf[7]) << 56);
-}
-
-template <typename T> void WriteU8(T &buffer, const uint8_t value)
-{
-    uint8_t buf[sizeof(uint8_t)] = {value};
-    const size_t count = buffer.Write(buf);
-    if (count != sizeof(uint8_t))
-    {
-        throw std::runtime_error("could not write 1 byte");
-    }
-}
-
-template <typename T> void WriteU16LE(T &buffer, const uint16_t value)
-{
-    uint8_t buf[sizeof(uint16_t)] = {
-        static_cast<uint8_t>(value & 0xff),
-        static_cast<uint8_t>((value & 0xff00) >> 8),
-    };
-    const size_t count = buffer.Write(buf);
-    if (count != sizeof(uint16_t))
-    {
-        throw std::runtime_error("could not write 2 bytes");
-    }
-}
-
-template <typename T> void WriteU32LE(T &buffer, const uint32_t value)
-{
-    uint8_t buf[sizeof(uint32_t)] = {
-        static_cast<uint8_t>(value & 0xff),
-        static_cast<uint8_t>((value & 0xff00) >> 8),
-        static_cast<uint8_t>((value & 0xff0000) >> 16),
-        static_cast<uint8_t>((value & 0xff000000) >> 24),
-    };
-    const size_t count = buffer.Write(buf);
-    if (count != sizeof(uint32_t))
-    {
-        throw std::runtime_error("could not write 4 bytes");
-    }
-}
-
-template <typename T> void WriteU64LE(T &buffer, const uint64_t value)
-{
-    uint8_t buf[sizeof(uint64_t)] = {
-        static_cast<uint8_t>(value & 0xff),
-        static_cast<uint8_t>((value & 0xff00) >> 8),
-        static_cast<uint8_t>((value & 0xff0000) >> 16),
-        static_cast<uint8_t>((value & 0xff000000) >> 24),
-        static_cast<uint8_t>((value & 0xff00000000) >> 32),
-        static_cast<uint8_t>((value & 0xff0000000000) >> 40),
-        static_cast<uint8_t>((value & 0xff000000000000) >> 48),
-        static_cast<uint8_t>((value & 0xff00000000000000) >> 56),
-    };
-    const size_t count = buffer.Write(buf);
-    if (count != sizeof(uint64_t))
-    {
-        throw std::runtime_error("could not write 8 bytes");
-    }
+    const size_t old = buffer.Seek(WhenceCurrent(0));
+    const size_t len = buffer.Seek(WhenceEnd(0));
+    buffer.Seek(WhenceStart(old));
+    return len;
 }
 
 } // namespace LexIO

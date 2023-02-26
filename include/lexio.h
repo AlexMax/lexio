@@ -18,3 +18,4 @@
 
 #include "lexio_core.h"
 #include "lexio_std.h"
+#include "lexio_serialize.h"

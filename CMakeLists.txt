@@ -14,6 +14,7 @@ FetchContent_MakeAvailable(Catch2)
 set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_core.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_serialize.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_std.h")
 
 add_executable(test "${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp" ${LEXIO_HEADERS})

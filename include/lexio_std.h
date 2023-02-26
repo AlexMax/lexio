@@ -14,6 +14,10 @@
 //  limitations under the License.
 //
 
+//
+// Sample buffer abstraction that wraps STL-like types.
+//
+
 #pragma once
 
 #include "lexio_core.h"
