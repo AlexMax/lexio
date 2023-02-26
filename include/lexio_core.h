@@ -174,7 +174,7 @@ class Seekable
 /**
  * @brief Reader interface for seekable data.
  */
-class SeekableReader : public Reader, public Seekable
+class SeekableReader : public Reader
 {
   public:
     /**
@@ -188,13 +188,38 @@ class SeekableReader : public Reader, public Seekable
 /**
  * @brief Writer interface for seekable data.
  */
-class SeekableWriter : public Writer, public Seekable
+class SeekableWriter : public Writer
 {
   public:
     virtual span_type Data() noexcept = 0;
 };
 
 } // namespace Type
+
+template <typename T> size_t Seek(T &buffer, const WhenceStart whence)
+{
+    return buffer.Seek(whence);
+}
+
+template <typename T> size_t Seek(T &buffer, const WhenceCurrent whence)
+{
+    return buffer.Seek(whence);
+}
+
+template <typename T> size_t Seek(T &buffer, const WhenceEnd whence)
+{
+    return buffer.Seek(whence);
+}
+
+template <typename T> size_t Length(T &buffer)
+{
+    return buffer.Length();
+}
+
+template <typename T> size_t Tell(T &buffer)
+{
+    return buffer.Tell();
+}
 
 template <typename T> uint8_t ReadU8(T &buffer)
 {

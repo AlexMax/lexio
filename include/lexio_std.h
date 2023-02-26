@@ -30,7 +30,8 @@ namespace LexIO
  *
  * @tparam T Type to wrap.
  */
-template <typename T> class StdBufferBase : public Type::SeekableReader, Type::SeekableWriter
+template <typename T>
+class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, public Type::Seekable
 {
   protected:
     T m_buffer;
@@ -52,7 +53,7 @@ template <typename T> class StdBufferBase : public Type::SeekableReader, Type::S
     size_t Read(span_type buffer) override
     {
         const size_t wantedOffset = m_offset + buffer.size();
-        const size_t destOffset = std::min(wantedOffset, buffer.size());
+        const size_t destOffset = std::min(wantedOffset, m_offset + buffer.size());
         const size_t actualLength = destOffset - m_offset;
         std::copy(m_buffer.begin() + m_offset, m_buffer.begin() + m_offset + actualLength, buffer.begin());
         m_offset += actualLength;
@@ -66,7 +67,7 @@ template <typename T> class StdBufferBase : public Type::SeekableReader, Type::S
     size_t Write(const_span_type buffer) override
     {
         const size_t wantedOffset = m_offset + buffer.size();
-        const size_t destOffset = std::min(wantedOffset, buffer.size());
+        const size_t destOffset = std::min(wantedOffset, m_buffer.size());
         const size_t actualLength = destOffset - m_offset;
         std::copy(buffer.begin(), buffer.begin() + actualLength, m_buffer.begin() + m_offset);
         m_offset += actualLength;

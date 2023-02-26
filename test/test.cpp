@@ -91,26 +91,78 @@ TEST_CASE("Write UInt64LE", "[write]")
 
 //------------------------------------------------------------------------------
 
-#pragma region "Sequence Buffer Tests"
+#pragma region "Std Buffer Tests"
 
-#include <array>
-#include <deque>
-#include <forward_list>
-#include <list>
-#include <vector>
-
-TEST_CASE("LexIO::StdBuffer", "[seqbuf]")
+template <typename T> void CommonTest(T &buf)
 {
+    // Test reading.
+    LexIO::WriteU8(buf, 192);
+    REQUIRE(LexIO::Tell(buf) == 1);
+    LexIO::WriteU16LE(buf, 1993);
+    REQUIRE(LexIO::Tell(buf) == 3);
+    LexIO::WriteU32LE(buf, 20200602);
+    REQUIRE(LexIO::Tell(buf) == 7);
+    LexIO::WriteU64LE(buf, uint64_t(UINT32_MAX) + 20200613);
+    REQUIRE(LexIO::Tell(buf) == 15);
+    REQUIRE(LexIO::Length(buf) == 15);
+
+    // Test writing.
+    LexIO::Seek(buf, LexIO::WhenceStart(0));
+    REQUIRE(LexIO::Tell(buf) == 0);
+    REQUIRE(LexIO::ReadU8(buf) == 192);
+    REQUIRE(LexIO::ReadU16LE(buf) == 1993);
+    REQUIRE(LexIO::ReadU32LE(buf) == 20200602);
+    REQUIRE(LexIO::ReadU64LE(buf) == uint64_t(UINT32_MAX) + 20200613);
+    REQUIRE(LexIO::Tell(buf) == 15);
+
+    // Test seeking.
+    LexIO::Seek(buf, LexIO::WhenceStart(2));
+    REQUIRE(LexIO::Tell(buf) == 2);
+    LexIO::Seek(buf, LexIO::WhenceCurrent(2));
+    REQUIRE(LexIO::Tell(buf) == 4);
+    LexIO::Seek(buf, LexIO::WhenceCurrent(-2));
+    REQUIRE(LexIO::Tell(buf) == 2);
+    LexIO::Seek(buf, LexIO::WhenceEnd(2));
+    REQUIRE(LexIO::Tell(buf) == 13);
+
+    // Test overwriting data.
+    LexIO::WriteU16LE(buf, 1993);
+    REQUIRE(LexIO::Tell(buf) == 15);
+    REQUIRE(LexIO::Length(buf) == 15);
+    LexIO::Seek(buf, LexIO::WhenceCurrent(-2));
+    REQUIRE(LexIO::Tell(buf) == 13);
+    REQUIRE(LexIO::Length(buf) == 15);
+    REQUIRE(LexIO::ReadU16LE(buf) == 1993);
+}
+
+TEST_CASE("LexIO::StdBuffer", "[stdbuf]")
+{
+    constexpr size_t SIZE = 15;
+
+    SECTION("Test StdBuffer with std::vector")
+    {
+        VectorBuffer buf;
+        CommonTest(buf);
+        REQUIRE_NOTHROW(LexIO::WriteU8(buf, 0));
+        REQUIRE(LexIO::Tell(buf) == SIZE + 1);
+    }
+
     SECTION("Test StaticStdBuffer with std::array")
     {
-        using ArrayBuffer = LexIO::StaticStdBuffer<std::array<uint8_t, 4>>;
+        using ArrayBuffer = LexIO::StaticStdBuffer<std::array<uint8_t, SIZE>>;
         ArrayBuffer buf;
+        CommonTest(buf);
+        REQUIRE_THROWS(LexIO::WriteU8(buf, 0));
+        REQUIRE(LexIO::Tell(buf) == SIZE);
     }
 
     SECTION("Test FixedStdBuffer with pre-allocated size")
     {
         using FixedVectorBuffer = LexIO::FixedStdBuffer<std::vector<uint8_t>>;
-        FixedVectorBuffer(size_t(4));
+        FixedVectorBuffer buf(SIZE);
+        CommonTest(buf);
+        REQUIRE_THROWS(LexIO::WriteU8(buf, 0));
+        REQUIRE(LexIO::Tell(buf) == SIZE);
     }
 }
 
