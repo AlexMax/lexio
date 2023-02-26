@@ -16,7 +16,7 @@
 
 #include "nonstd/span.hpp"
 
-#define LEXIO_SPAN_TYPE nonstd ::span<uint8_t>
+#define LEXIO_SPAN_TYPE nonstd::span<uint8_t>
 #define LEXIO_CONST_SPAN_TYPE nonstd::span<const uint8_t>
 
 #include "./test_std.cpp"
