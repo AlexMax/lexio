@@ -2,6 +2,8 @@ LexIO
 =====
 A library containing an API for reading and writing data to byte-based streams.
 
+[![Testing](https://github.com/AlexMax/lexio/actions/workflows/cpp20.yml/badge.svg)](https://github.com/AlexMax/lexio/actions/workflows/cpp20.yml)
+
 Requirements
 ------------
 You need a C++14 compatible compiler and an implementation of std::span.
