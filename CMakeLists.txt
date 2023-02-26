@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
 
+find_program(CLANG_TIDY_EXE clang-tidy)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD "14" CACHE INTERNAL "")
+else()
+    set(CMAKE_CXX_STANDARD "${CMAKE_CXX_STANDARD}" CACHE INTERNAL "")
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(USE_FOLDERS ON)
@@ -24,6 +28,10 @@ set(LEXIO_HEADERS
 option(LEXIO_TEST_NONSTD "Test using nonstd::span" OFF)
 
 add_executable(test ${LEXIO_HEADERS})
+
+if(CLANG_TIDY_EXE)
+    set_target_properties(test PROPERTIES CXX_CLANG_TIDY ${CLANG_TIDY_EXE})
+endif()
 
 if(LEXIO_TEST_NONSTD)
     target_sources(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.cpp")
