@@ -1,6 +1,10 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
+endif()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(USE_FOLDERS ON)
 
 project(lexio LANGUAGES CXX)
@@ -17,13 +21,20 @@ set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_serialize.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_std.h")
 
-add_executable(test "${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp" ${LEXIO_HEADERS})
-set_property(TARGET test PROPERTY CXX_STANDARD 20)
+option(LEXIO_TEST_NONSTD "Test using nonstd::span" OFF)
+
+add_executable(test ${LEXIO_HEADERS})
+
+if(LEXIO_TEST_NONSTD)
+    target_sources(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.cpp")
+else()
+    target_sources(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/test_std.cpp")
+endif()
 
 if(MSVC)
     target_compile_options(test PUBLIC /W4)
 else()
-    target_compile_options(test PUBLIC -Wall -Wextra)
+    target_compile_options(test PUBLIC -Wall -Wextra -Wno-unknown-pragmas)
 endif()
 target_include_directories(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(test PUBLIC Catch2::Catch2WithMain)

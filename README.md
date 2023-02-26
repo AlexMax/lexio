@@ -2,6 +2,19 @@ LexIO
 =====
 A library containing an API for reading and writing data to byte-based streams.
 
+Requirements
+------------
+You need a C++14 compatible compiler and an implementation of std::span.
+
+You can use spans other than std::span with this library.  Define `LEXIO_SPAN_TYPE` and `LEXIO_CONST_SPAN_TYPE` to the type names the library should use before including `lexio.h`.
+
+```cpp
+#define LEXIO_SPAN_TYPE nonstd ::span<uint8_t>
+#define LEXIO_CONST_SPAN_TYPE nonstd::span<const uint8_t>
+
+#include "lexio.h"
+```
+
 Why?
 ----
 I tend to run into situations where I need to read and write various data types to byte-based streams, but found many common API designs cumbersome to use.  After doing some research and picking and choosing what I liked and disliked about previous API's I had used, this is what I came up with.  It's heavily inspired by Rust's std::io traits.
