@@ -1,0 +1,46 @@
+name: Testing C++20
+on: push
+env:
+  BUILD_TYPE: Debug
+jobs:
+  build-linux-clang:
+    runs-on: ubuntu-latest
+    env:
+      CC: /usr/bin/clang
+      CXX: /usr/bin/clang++
+      CXX_STANDARD: 20
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_STANDARD=${{env.CXX_STANDARD}}
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build
+    - name: Run Tests
+      run: ${{github.workspace}}/build/test
+  build-linux-gcc:
+    runs-on: ubuntu-latest
+    env:
+      CC: /usr/bin/gcc
+      CXX: /usr/bin/g++
+      CXX_STANDARD: 20
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_STANDARD=${{env.CXX_STANDARD}}
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build
+    - name: Run Tests
+      run: ${{github.workspace}}/build/test
+  build-windows-msvc:
+    runs-on: windows-latest
+    env:
+      GENERATOR: "Visual Studio 17 2022"
+      CXX_STANDARD: 20
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -G ${{env.GENERATOR}} -DCMAKE_CXX_STANDARD=${{env.CXX_STANDARD}}
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+    - name: Run Tests
+      run: ${{github.workspace}}/build/Debug/test.exe
