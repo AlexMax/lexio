@@ -71,7 +71,12 @@ namespace Type
 class Reader
 {
   public:
-    virtual ~Reader() {}
+    Reader() = default;
+    virtual ~Reader() = default;
+    Reader(const Reader &other) = delete;
+    Reader(Reader &&other) noexcept = default;
+    Reader &operator=(const Reader &other) = delete;
+    Reader &operator=(Reader &&other) noexcept = default;
 
     /**
      * @brief See LexIO::RawRead
@@ -85,7 +90,12 @@ class Reader
 class Writer
 {
   public:
-    virtual ~Writer() {}
+    Writer() = default;
+    virtual ~Writer() = default;
+    Writer(const Writer &other) = delete;
+    Writer(Writer &&other) noexcept = default;
+    Writer &operator=(const Writer &other) = delete;
+    Writer &operator=(Writer &&other) noexcept = default;
 
     /**
      * @brief See LexIO::RawWrite
@@ -104,7 +114,12 @@ class Writer
 class Seekable
 {
   public:
-    virtual ~Seekable() {}
+    Seekable() = default;
+    virtual ~Seekable() = default;
+    Seekable(const Seekable &other) = delete;
+    Seekable(Seekable &&other) noexcept = default;
+    Seekable &operator=(const Seekable &other) = delete;
+    Seekable &operator=(Seekable &&other) noexcept = default;
 
     /**
      * @brief See LexIO::Seek
@@ -257,7 +272,7 @@ size_t Length(Type::Seekable &buffer)
 {
     const size_t old = buffer.Seek(WhenceCurrent(0));
     const size_t len = buffer.Seek(WhenceEnd(0));
-    buffer.Seek(WhenceStart(old));
+    buffer.Seek(WhenceStart(size_t(old)));
     return len;
 }
 

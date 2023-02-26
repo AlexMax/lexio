@@ -114,7 +114,7 @@ class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, 
 template <typename T> class FixedStdBuffer : public StdBufferBase<T>
 {
   public:
-    explicit FixedStdBuffer(const size_t size) : StdBufferBase<T>(T()) { Buffer().resize(size); }
+    explicit FixedStdBuffer(const size_t size) : StdBufferBase<T>(T()) { this->Buffer().resize(size); }
 };
 
 /**
@@ -145,7 +145,7 @@ template <typename T> class StdBuffer : public StdBufferBase<T>
      *
      * @param size Size of underlying type.
      */
-    explicit StdBuffer(const size_t size) : StdBufferBase<T>(T()) { Buffer().resize(size); }
+    explicit StdBuffer(const size_t size) : StdBufferBase<T>(T()) { this->Buffer().resize(size); }
 
     /**
      * @brief Construct a StdBuffer with data already written into the buffer.
@@ -154,17 +154,17 @@ template <typename T> class StdBuffer : public StdBufferBase<T>
      */
     StdBuffer(std::initializer_list<uint8_t> list) : StdBufferBase<T>(T())
     {
-        Buffer().resize(list.size());
-        std::copy(list.begin(), list.end(), Buffer().begin());
+        this->Buffer().resize(list.size());
+        std::copy(list.begin(), list.end(), this->Buffer().begin());
     }
 
     size_t RawWrite(const_span_type buffer) override
     {
         // Writes off the end of the burffer grow the buffer to fit.
-        const size_t wantedOffset = Offset() + buffer.size();
-        Buffer().resize(std::max(wantedOffset, Buffer().size()));
-        std::copy(buffer.begin(), buffer.end(), Buffer().begin() + Offset());
-        Offset() += buffer.size();
+        const size_t wantedOffset = this->Offset() + buffer.size();
+        this->Buffer().resize(std::max(wantedOffset, this->Buffer().size()));
+        std::copy(buffer.begin(), buffer.end(), this->Buffer().begin() + this->Offset());
+        this->Offset() += buffer.size();
         return buffer.size();
     }
 };
