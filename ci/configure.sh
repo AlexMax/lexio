@@ -12,10 +12,6 @@ if [[ -z $GENERATOR ]]; then
     GENERATOR="Ninja Multi-Config"
 fi
 
-if [[ -z $BUILD_TYPE ]]; then
-    BUILD_TYPE="Debug"
-fi
-
 if [[ -z $CXX_STANDARD ]]; then
     CXX_STANDARD="20"
 fi

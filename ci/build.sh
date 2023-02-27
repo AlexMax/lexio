@@ -2,6 +2,10 @@
 
 SCRIPT_DIR=$(dirname -- "$0")
 
-echo "CMAKE_BUILD_TYPE=${BUILD_TYPE}" \
+if [[ -z $BUILD_TYPE ]]; then
+    BUILD_TYPE="Debug"
+fi
+
+echo "CMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 cmake --build "${SCRIPT_DIR}/../build" --config "${CMAKE_BUILD_TYPE}"
