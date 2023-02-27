@@ -1,0 +1,42 @@
+name: Testing
+on: push
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - cc: /usr/bin/clang
+            cxx: /usr/bin/clang++
+          - cc: /usr/bin/clang
+            cxx: /usr/bin/clang++
+            cxx_standard: 14
+            lexio_test_nonstd: "ON"
+          - cc: /usr/bin/gcc
+            cxx: /usr/bin/g++
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+      CXX_STANDARD: ${{ matrix.cxx_standard }}
+      LEXIO_TEST_NONSTD: ${{ matrix.lexio_test_nonstd }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure
+      run: bash ${{github.workspace}}/ci/configure.sh
+    - name: Build
+      run: bash ${{github.workspace}}/ci/build.sh
+    - name: Run Tests
+      run: ${{github.workspace}}/build/test
+  build-windows:
+    runs-on: windows-latest
+    env:
+      GENERATOR: Visual Studio 17 2022
+      CXX_STANDARD: 20
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure
+      run: cmake -B ${{github.workspace}}/build -G "${{env.GENERATOR}}" -DCMAKE_CXX_STANDARD=${{env.CXX_STANDARD}}
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
+    - name: Run Tests
+      run: ${{github.workspace}}/build/Debug/test.exe
