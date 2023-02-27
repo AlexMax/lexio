@@ -175,7 +175,7 @@ class SeekableWriter : public Writer
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-size_t RawRead(Type::Reader &buffer, span_type outBytes)
+inline size_t RawRead(Type::Reader &buffer, span_type outBytes)
 {
     return buffer.RawRead(outBytes);
 }
@@ -190,7 +190,7 @@ size_t RawRead(Type::Reader &buffer, span_type outBytes)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-size_t RawWrite(Type::Writer &buffer, const_span_type bytes)
+inline size_t RawWrite(Type::Writer &buffer, const_span_type bytes)
 {
     return buffer.RawWrite(bytes);
 }
@@ -200,7 +200,7 @@ size_t RawWrite(Type::Writer &buffer, const_span_type bytes)
  *
  * @param buffer Buffer to operate on.
  */
-void Flush(Type::Writer &buffer)
+inline void Flush(Type::Writer &buffer)
 {
     return buffer.Flush();
 }
@@ -214,7 +214,7 @@ void Flush(Type::Writer &buffer)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-size_t Seek(Type::Seekable &buffer, const WhenceStart whence)
+inline size_t Seek(Type::Seekable &buffer, const WhenceStart whence)
 {
     return buffer.Seek(whence);
 }
@@ -228,7 +228,7 @@ size_t Seek(Type::Seekable &buffer, const WhenceStart whence)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-size_t Seek(Type::Seekable &buffer, const WhenceCurrent whence)
+inline size_t Seek(Type::Seekable &buffer, const WhenceCurrent whence)
 {
     return buffer.Seek(whence);
 }
@@ -242,7 +242,7 @@ size_t Seek(Type::Seekable &buffer, const WhenceCurrent whence)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-size_t Seek(Type::Seekable &buffer, const WhenceEnd whence)
+inline size_t Seek(Type::Seekable &buffer, const WhenceEnd whence)
 {
     return buffer.Seek(whence);
 }
@@ -255,7 +255,7 @@ size_t Seek(Type::Seekable &buffer, const WhenceEnd whence)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-size_t Tell(Type::Seekable &buffer)
+inline size_t Tell(Type::Seekable &buffer)
 {
     return buffer.Seek(WhenceCurrent(0));
 }
@@ -268,7 +268,7 @@ size_t Tell(Type::Seekable &buffer)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-size_t Length(Type::Seekable &buffer)
+inline size_t Length(Type::Seekable &buffer)
 {
     const size_t old = buffer.Seek(WhenceCurrent(0));
     const size_t len = buffer.Seek(WhenceEnd(0));
@@ -282,7 +282,7 @@ size_t Length(Type::Seekable &buffer)
  * @param buffer Buffer to operate on.
  * @return A span of the entire data stream, from offset 0 to EOF.
  */
-const_span_type Data(Type::SeekableReader &buffer) noexcept
+inline const_span_type Data(Type::SeekableReader &buffer) noexcept
 {
     return buffer.Data();
 }
@@ -293,7 +293,7 @@ const_span_type Data(Type::SeekableReader &buffer) noexcept
  * @param buffer Buffer to operate on.
  * @return A span of the entire data stream, from offset 0 to EOF.
  */
-span_type Data(Type::SeekableWriter &buffer) noexcept
+inline span_type Data(Type::SeekableWriter &buffer) noexcept
 {
     return buffer.Data();
 }
