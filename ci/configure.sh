@@ -2,7 +2,9 @@
 
 SCRIPT_DIR=$(dirname -- "$0")
 
-sudo apt-get install ninja-build
+if ! hash ninja; then
+    sudo apt-get install ninja-build
+fi
 
 rm -rfv "${SCRIPT_DIR}/../build"
 

@@ -30,7 +30,7 @@ add_executable(test
      ${LEXIO_HEADERS})
 
 if(LEXIO_TEST_NONSTD)
-    set_target_properties(test PROPERTIES LEXIO_TEST_NONSTD ${LEXIO_TEST_NONSTD})
+    target_compile_definitions(test PUBLIC LEXIO_TEST_NONSTD)
 endif()
 
 if(CLANG_TIDY_EXE)
