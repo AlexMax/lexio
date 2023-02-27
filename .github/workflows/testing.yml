@@ -26,7 +26,7 @@ jobs:
     - name: Build
       run: bash ${{github.workspace}}/ci/build.sh
     - name: Run Tests
-      run: ${{github.workspace}}/build/test
+      run: ${{github.workspace}}/build/{{ env.CMAKE_BUILD_TYPE }}/test
   build-windows:
     runs-on: windows-latest
     env:
