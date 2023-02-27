@@ -2,4 +2,6 @@
 
 SCRIPT_DIR=$(dirname -- "$0")
 
-cmake --build "${SCRIPT_DIR}/../build"
+echo "CMAKE_BUILD_TYPE=${BUILD_TYPE}" \
+
+cmake --build "${SCRIPT_DIR}/../build" --config "${CMAKE_BUILD_TYPE}"

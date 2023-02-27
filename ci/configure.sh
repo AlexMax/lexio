@@ -2,10 +2,12 @@
 
 SCRIPT_DIR=$(dirname -- "$0")
 
+apt install ninja-build
+
 rm -rfv "${SCRIPT_DIR}/../build"
 
 if [[ -z $GENERATOR ]]; then
-    GENERATOR="Ninja"
+    GENERATOR="Ninja Multi-Config"
 fi
 
 if [[ -z $BUILD_TYPE ]]; then
@@ -24,6 +26,5 @@ cmake \
     -S "${SCRIPT_DIR}/.." \
     -B "${SCRIPT_DIR}/../build" \
     -G "${GENERATOR}" \
-    -D "CMAKE_BUILD_TYPE=${BUILD_TYPE}" \
     -D "CMAKE_CXX_STANDARD=${CXX_STANDARD}" \
     -D "LEXIO_TEST_NONSTD=${LEXIO_TEST_NONSTD}"
