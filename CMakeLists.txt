@@ -26,16 +26,15 @@ set(LEXIO_HEADERS
 
 add_executable(test
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.h"
      ${LEXIO_HEADERS})
+
+if(LEXIO_TEST_NONSTD)
+    set_target_properties(test PROPERTIES LEXIO_TEST_NONSTD ${LEXIO_TEST_NONSTD})
+endif()
 
 if(CLANG_TIDY_EXE)
     set_target_properties(test PROPERTIES CXX_CLANG_TIDY ${CLANG_TIDY_EXE})
-endif()
-
-if(LEXIO_TEST_NONSTD)
-    target_sources(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.cpp")
-else()
-    target_sources(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/test_std.cpp")
 endif()
 
 if(MSVC)
@@ -43,6 +42,7 @@ if(MSVC)
 else()
     target_compile_options(test PUBLIC -Wall -Wextra -Wno-unknown-pragmas)
 endif()
+
 target_include_directories(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(test PUBLIC Catch2::Catch2WithMain)
 
