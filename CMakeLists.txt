@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
-find_program(CLANG_TIDY_EXE clang-tidy)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
+include(FindSanitizers)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
@@ -33,6 +34,7 @@ if(LEXIO_TEST_NONSTD)
     target_compile_definitions(test PUBLIC LEXIO_TEST_NONSTD)
 endif()
 
+find_program(CLANG_TIDY_EXE clang-tidy)
 if(CLANG_TIDY_EXE)
     set_target_properties(test PROPERTIES CXX_CLANG_TIDY ${CLANG_TIDY_EXE})
 endif()
@@ -42,6 +44,9 @@ if(MSVC)
 else()
     target_compile_options(test PUBLIC -Wall -Wextra -Wno-unknown-pragmas)
 endif()
+
+find_package(Sanitizers)
+add_sanitizers(test)
 
 target_include_directories(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(test PUBLIC Catch2::Catch2WithMain)
@@ -56,7 +61,5 @@ if(CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "CMAKE_CXX_STANDARD: ${CMAKE_CXX_STANDARD}")
 message(STATUS "LEXIO_TEST_NONSTD: ${LEXIO_TEST_NONSTD}")
-
-# target_compile_options(Catch2 PUBLIC "$<$<CONFIG:Debug>:-fsanitize=address>")
-# target_compile_options(Catch2WithMain PUBLIC "$<$<CONFIG:Debug>:-fsanitize=address>")
-# target_compile_options(test PUBLIC "$<$<CONFIG:Debug>:-fsanitize=address>")
+message(STATUS "SANITIZE_ADDRESS: ${SANITIZE_ADDRESS}")
+message(STATUS "SANITIZE_UNDEFINED: ${SANITIZE_UNDEFINED}")

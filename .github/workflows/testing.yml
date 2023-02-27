@@ -37,6 +37,6 @@ jobs:
     - name: Configure
       run: cmake -B ${{github.workspace}}/build -G "${{env.GENERATOR}}" -DCMAKE_CXX_STANDARD=${{env.CXX_STANDARD}}
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
+      run: cmake --build ${{github.workspace}}/build --config Debug --parallel
     - name: Run Tests
       run: ${{github.workspace}}/build/Debug/test.exe
