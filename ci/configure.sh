@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$(dirname -- "$0")
 
-apt install ninja-build
+sudo apt-get install ninja-build
 
 rm -rfv "${SCRIPT_DIR}/../build"
 
