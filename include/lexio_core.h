@@ -32,8 +32,8 @@
 namespace LexIO
 {
 
-using span_type = LEXIO_SPAN_TYPE;
-using const_span_type = LEXIO_CONST_SPAN_TYPE;
+using SpanT = LEXIO_SPAN_TYPE;
+using ConstSpanT = LEXIO_CONST_SPAN_TYPE;
 
 /**
  * @brief Parameter for Seek() that seeks from the start of the stream.
@@ -74,7 +74,7 @@ class Reader final
     /**
      * @brief See LexIO::RawRead
      */
-    virtual size_t RawRead(span_type buffer) = 0;
+    virtual size_t RawRead(SpanT buffer) = 0;
 };
 
 /**
@@ -86,7 +86,7 @@ class Writer final
     /**
      * @brief See LexIO::RawWrite
      */
-    virtual size_t RawWrite(const_span_type buffer) = 0;
+    virtual size_t RawWrite(ConstSpanT buffer) = 0;
 
     /**
      * @brief See LexIO::Flush
@@ -125,7 +125,7 @@ class SeekableReader final
     /**
      * @brief See LexIO::Data
      */
-    virtual const_span_type Data() const noexcept = 0;
+    virtual ConstSpanT Data() const noexcept = 0;
 };
 
 /**
@@ -137,7 +137,7 @@ class SeekableWriter final
     /**
      * @brief See LexIO::Data
      */
-    virtual span_type Data() noexcept = 0;
+    virtual SpanT Data() noexcept = 0;
 };
 
 } // namespace Type
@@ -154,7 +154,7 @@ class SeekableWriter final
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-template <typename READER> inline size_t RawRead(READER &buffer, span_type outBytes)
+template <typename READER> inline size_t RawRead(READER &buffer, SpanT outBytes)
 {
     return buffer.RawRead(outBytes);
 }
@@ -169,7 +169,7 @@ template <typename READER> inline size_t RawRead(READER &buffer, span_type outBy
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-template <typename WRITER> inline size_t RawWrite(WRITER &buffer, const_span_type bytes)
+template <typename WRITER> inline size_t RawWrite(WRITER &buffer, ConstSpanT bytes)
 {
     return buffer.RawWrite(bytes);
 }
@@ -261,7 +261,7 @@ template <typename SEEKABLE> inline size_t Length(SEEKABLE &buffer)
  * @param buffer Buffer to operate on.
  * @return A span of the entire data stream, from offset 0 to EOF.
  */
-template <typename SEEKABLE_READER> inline const_span_type Data(SEEKABLE_READER &buffer) noexcept
+template <typename SEEKABLE_READER> inline ConstSpanT Data(SEEKABLE_READER &buffer) noexcept
 {
     return buffer.Data();
 }
@@ -272,7 +272,7 @@ template <typename SEEKABLE_READER> inline const_span_type Data(SEEKABLE_READER 
  * @param buffer Buffer to operate on.
  * @return A span of the entire data stream, from offset 0 to EOF.
  */
-template <typename SEEKABLE_WRITER> inline span_type Data(SEEKABLE_WRITER &buffer) noexcept
+template <typename SEEKABLE_WRITER> inline SpanT Data(SEEKABLE_WRITER &buffer) noexcept
 {
     return buffer.Data();
 }

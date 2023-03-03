@@ -58,7 +58,7 @@ class StdBufferBase
     StdBufferBase(const T &buffer) : m_buffer(buffer) {}
     StdBufferBase(T &&buffer) : m_buffer(buffer) {}
 
-    size_t RawRead(span_type buffer)
+    size_t RawRead(SpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_offset + buffer.size());
@@ -70,9 +70,9 @@ class StdBufferBase
 
     void Flush() {}
 
-    const_span_type Data() const noexcept { return const_span_type(m_buffer.data(), m_buffer.size()); }
+    ConstSpanT Data() const noexcept { return ConstSpanT(m_buffer.data(), m_buffer.size()); }
 
-    size_t RawWrite(const_span_type buffer)
+    size_t RawWrite(ConstSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_buffer.size());
@@ -82,7 +82,7 @@ class StdBufferBase
         return actualLength;
     }
 
-    span_type Data() noexcept { return span_type(m_buffer.data(), m_buffer.size()); }
+    SpanT Data() noexcept { return SpanT(m_buffer.data(), m_buffer.size()); }
 
     size_t Seek(const WhenceStart whence)
     {
@@ -158,7 +158,7 @@ template <typename T> class StdBuffer : public StdBufferBase<T>
         std::copy(list.begin(), list.end(), this->Buffer().begin());
     }
 
-    size_t RawWrite(const_span_type buffer)
+    size_t RawWrite(ConstSpanT buffer)
     {
         // Writes off the end of the burffer grow the buffer to fit.
         const size_t wantedOffset = this->Offset() + buffer.size();
@@ -172,6 +172,6 @@ template <typename T> class StdBuffer : public StdBufferBase<T>
 /**
  * @brief A span buffer using the current span type.
  */
-using SpanBuffer = StdBuffer<span_type>;
+using SpanBuffer = StdBuffer<SpanT>;
 
 } // namespace LexIO
