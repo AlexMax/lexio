@@ -66,18 +66,11 @@ namespace Type
 {
 
 /**
- * @brief Basic reader interface.
+ * @brief Signature of basic Reader interface.
  */
-class Reader
+class Reader final
 {
   public:
-    Reader() = default;
-    virtual ~Reader() = default;
-    Reader(const Reader &other) = delete;
-    Reader(Reader &&other) noexcept = default;
-    Reader &operator=(const Reader &other) = delete;
-    Reader &operator=(Reader &&other) noexcept = default;
-
     /**
      * @brief See LexIO::RawRead
      */
@@ -85,18 +78,11 @@ class Reader
 };
 
 /**
- * @brief Writer interface.
+ * @brief Signature of basic Writer interface.
  */
-class Writer
+class Writer final
 {
   public:
-    Writer() = default;
-    virtual ~Writer() = default;
-    Writer(const Writer &other) = delete;
-    Writer(Writer &&other) noexcept = default;
-    Writer &operator=(const Writer &other) = delete;
-    Writer &operator=(Writer &&other) noexcept = default;
-
     /**
      * @brief See LexIO::RawWrite
      */
@@ -109,18 +95,11 @@ class Writer
 };
 
 /**
- * @brief Seekable interface.
+ * @brief Signature of basic Seekable interface.
  */
-class Seekable
+class Seekable final
 {
   public:
-    Seekable() = default;
-    virtual ~Seekable() = default;
-    Seekable(const Seekable &other) = delete;
-    Seekable(Seekable &&other) noexcept = default;
-    Seekable &operator=(const Seekable &other) = delete;
-    Seekable &operator=(Seekable &&other) noexcept = default;
-
     /**
      * @brief See LexIO::Seek
      */
@@ -138,9 +117,9 @@ class Seekable
 };
 
 /**
- * @brief Reader interface for seekable data.
+ * @brief Signature of Reader interface for seekable data.
  */
-class SeekableReader : public Reader
+class SeekableReader final
 {
   public:
     /**
@@ -150,9 +129,9 @@ class SeekableReader : public Reader
 };
 
 /**
- * @brief Writer interface for seekable data.
+ * @brief Signature of Writer interface for seekable data.
  */
-class SeekableWriter : public Writer
+class SeekableWriter final
 {
   public:
     /**
@@ -175,7 +154,7 @@ class SeekableWriter : public Writer
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-inline size_t RawRead(Type::Reader &buffer, span_type outBytes)
+template <typename READER> inline size_t RawRead(READER &buffer, span_type outBytes)
 {
     return buffer.RawRead(outBytes);
 }
@@ -190,7 +169,7 @@ inline size_t RawRead(Type::Reader &buffer, span_type outBytes)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-inline size_t RawWrite(Type::Writer &buffer, const_span_type bytes)
+template <typename WRITER> inline size_t RawWrite(WRITER &buffer, const_span_type bytes)
 {
     return buffer.RawWrite(bytes);
 }
@@ -200,7 +179,7 @@ inline size_t RawWrite(Type::Writer &buffer, const_span_type bytes)
  *
  * @param buffer Buffer to operate on.
  */
-inline void Flush(Type::Writer &buffer)
+template <typename WRITER> inline void Flush(WRITER &buffer)
 {
     return buffer.Flush();
 }
@@ -214,7 +193,7 @@ inline void Flush(Type::Writer &buffer)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-inline size_t Seek(Type::Seekable &buffer, const WhenceStart whence)
+template <typename SEEKABLE> inline size_t Seek(SEEKABLE &buffer, const WhenceStart whence)
 {
     return buffer.Seek(whence);
 }
@@ -228,7 +207,7 @@ inline size_t Seek(Type::Seekable &buffer, const WhenceStart whence)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-inline size_t Seek(Type::Seekable &buffer, const WhenceCurrent whence)
+template <typename SEEKABLE> inline size_t Seek(SEEKABLE &buffer, const WhenceCurrent whence)
 {
     return buffer.Seek(whence);
 }
@@ -242,7 +221,7 @@ inline size_t Seek(Type::Seekable &buffer, const WhenceCurrent whence)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-inline size_t Seek(Type::Seekable &buffer, const WhenceEnd whence)
+template <typename SEEKABLE> inline size_t Seek(SEEKABLE &buffer, const WhenceEnd whence)
 {
     return buffer.Seek(whence);
 }
@@ -255,7 +234,7 @@ inline size_t Seek(Type::Seekable &buffer, const WhenceEnd whence)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-inline size_t Tell(Type::Seekable &buffer)
+template <typename SEEKABLE> inline size_t Tell(SEEKABLE &buffer)
 {
     return buffer.Seek(WhenceCurrent(0));
 }
@@ -268,7 +247,7 @@ inline size_t Tell(Type::Seekable &buffer)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-inline size_t Length(Type::Seekable &buffer)
+template <typename SEEKABLE> inline size_t Length(SEEKABLE &buffer)
 {
     const size_t old = buffer.Seek(WhenceCurrent(0));
     const size_t len = buffer.Seek(WhenceEnd(0));
@@ -282,7 +261,7 @@ inline size_t Length(Type::Seekable &buffer)
  * @param buffer Buffer to operate on.
  * @return A span of the entire data stream, from offset 0 to EOF.
  */
-inline const_span_type Data(Type::SeekableReader &buffer) noexcept
+template <typename SEEKABLE_READER> inline const_span_type Data(SEEKABLE_READER &buffer) noexcept
 {
     return buffer.Data();
 }
@@ -293,7 +272,7 @@ inline const_span_type Data(Type::SeekableReader &buffer) noexcept
  * @param buffer Buffer to operate on.
  * @return A span of the entire data stream, from offset 0 to EOF.
  */
-inline span_type Data(Type::SeekableWriter &buffer) noexcept
+template <typename SEEKABLE_WRITER> inline span_type Data(SEEKABLE_WRITER &buffer) noexcept
 {
     return buffer.Data();
 }

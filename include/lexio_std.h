@@ -35,7 +35,7 @@ namespace LexIO
  * @tparam T Type to wrap.
  */
 template <typename T>
-class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, public Type::Seekable
+class StdBufferBase
 {
   private:
     T m_buffer;
@@ -58,7 +58,7 @@ class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, 
     StdBufferBase(const T &buffer) : m_buffer(buffer) {}
     StdBufferBase(T &&buffer) : m_buffer(buffer) {}
 
-    size_t RawRead(span_type buffer) override
+    size_t RawRead(span_type buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_offset + buffer.size());
@@ -68,11 +68,11 @@ class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, 
         return actualLength;
     }
 
-    void Flush() override {}
+    void Flush() {}
 
-    const_span_type Data() const noexcept override { return const_span_type(m_buffer.data(), m_buffer.size()); }
+    const_span_type Data() const noexcept { return const_span_type(m_buffer.data(), m_buffer.size()); }
 
-    size_t RawWrite(const_span_type buffer) override
+    size_t RawWrite(const_span_type buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_buffer.size());
@@ -82,16 +82,16 @@ class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, 
         return actualLength;
     }
 
-    span_type Data() noexcept override { return span_type(m_buffer.data(), m_buffer.size()); }
+    span_type Data() noexcept { return span_type(m_buffer.data(), m_buffer.size()); }
 
-    size_t Seek(const WhenceStart whence) override
+    size_t Seek(const WhenceStart whence)
     {
         OffsetCheck(whence.offset);
         m_offset = static_cast<size_t>(whence.offset);
         return m_offset;
     }
 
-    size_t Seek(const WhenceCurrent whence) override
+    size_t Seek(const WhenceCurrent whence)
     {
         const ptrdiff_t offset = static_cast<ptrdiff_t>(m_offset) + whence.offset;
         OffsetCheck(offset);
@@ -99,7 +99,7 @@ class StdBufferBase : public Type::SeekableReader, public Type::SeekableWriter, 
         return m_offset;
     }
 
-    size_t Seek(const WhenceEnd whence) override
+    size_t Seek(const WhenceEnd whence)
     {
         const ptrdiff_t offset = static_cast<ptrdiff_t>(m_buffer.size()) - whence.offset;
         OffsetCheck(offset);
@@ -158,7 +158,7 @@ template <typename T> class StdBuffer : public StdBufferBase<T>
         std::copy(list.begin(), list.end(), this->Buffer().begin());
     }
 
-    size_t RawWrite(const_span_type buffer) override
+    size_t RawWrite(const_span_type buffer)
     {
         // Writes off the end of the burffer grow the buffer to fit.
         const size_t wantedOffset = this->Offset() + buffer.size();

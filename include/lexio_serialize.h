@@ -25,7 +25,7 @@
 namespace LexIO
 {
 
-inline uint8_t ReadU8(Type::Reader &buffer)
+template <typename READER> inline uint8_t ReadU8(READER &buffer)
 {
     uint8_t buf[sizeof(uint8_t)] = {0};
     const size_t count = RawRead(buffer, buf);
@@ -36,7 +36,7 @@ inline uint8_t ReadU8(Type::Reader &buffer)
     return buf[0];
 }
 
-inline uint16_t ReadU16LE(Type::Reader &buffer)
+template <typename READER> inline uint16_t ReadU16LE(READER &buffer)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
     const size_t count = RawRead(buffer, buf);
@@ -47,7 +47,7 @@ inline uint16_t ReadU16LE(Type::Reader &buffer)
     return buf[0] | (buf[1] << 8);
 }
 
-inline uint32_t ReadU32LE(Type::Reader &buffer)
+template <typename READER> inline uint32_t ReadU32LE(READER &buffer)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
     const size_t count = RawRead(buffer, buf);
@@ -58,7 +58,7 @@ inline uint32_t ReadU32LE(Type::Reader &buffer)
     return buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
 }
 
-inline uint64_t ReadU64LE(Type::Reader &buffer)
+template <typename READER> inline uint64_t ReadU64LE(READER &buffer)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
     const size_t count = RawRead(buffer, buf);
@@ -72,7 +72,7 @@ inline uint64_t ReadU64LE(Type::Reader &buffer)
            (static_cast<uint64_t>(buf[6]) << 48) | (static_cast<uint64_t>(buf[7]) << 56);
 }
 
-inline void WriteU8(Type::Writer &buffer, const uint8_t value)
+template <typename WRITER> inline void WriteU8(WRITER &buffer, const uint8_t value)
 {
     uint8_t buf[sizeof(uint8_t)] = {value};
     const size_t count = RawWrite(buffer, buf);
@@ -82,7 +82,7 @@ inline void WriteU8(Type::Writer &buffer, const uint8_t value)
     }
 }
 
-inline void WriteU16LE(Type::Writer &buffer, const uint16_t value)
+template <typename WRITER> inline void WriteU16LE(WRITER &buffer, const uint16_t value)
 {
     uint8_t buf[sizeof(uint16_t)] = {
         static_cast<uint8_t>(value & 0xff),
@@ -95,7 +95,7 @@ inline void WriteU16LE(Type::Writer &buffer, const uint16_t value)
     }
 }
 
-inline void WriteU32LE(Type::Writer &buffer, const uint32_t value)
+template <typename WRITER> inline void WriteU32LE(WRITER &buffer, const uint32_t value)
 {
     uint8_t buf[sizeof(uint32_t)] = {
         static_cast<uint8_t>(value & 0xff),
@@ -110,7 +110,7 @@ inline void WriteU32LE(Type::Writer &buffer, const uint32_t value)
     }
 }
 
-inline void WriteU64LE(Type::Writer &buffer, const uint64_t value)
+template <typename WRITER> inline void WriteU64LE(WRITER &buffer, const uint64_t value)
 {
     uint8_t buf[sizeof(uint64_t)] = {
         static_cast<uint8_t>(value & 0xff),
