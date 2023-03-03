@@ -29,6 +29,12 @@
 #define LEXIO_CONST_SPAN_TYPE std::span<const uint8_t>
 #endif
 
+#ifdef __cpp_inline_variables
+#define LEXIO_INLINE_VAR inline
+#else
+#define LEXIO_INLINE_VAR
+#endif
+
 namespace LexIO
 {
 
@@ -62,85 +68,31 @@ struct WhenceEnd
     WhenceEnd(const ptrdiff_t off) : offset(off) {}
 };
 
-namespace Type
+namespace Detail
 {
 
-/**
- * @brief Signature of basic Reader interface.
- */
-class Reader final
+template <typename, typename _ = void>
+struct HasRawRead : std::false_type
 {
-  public:
-    /**
-     * @brief See LexIO::RawRead
-     */
-    virtual size_t RawRead(SpanT buffer) = 0;
 };
 
-/**
- * @brief Signature of basic Writer interface.
- */
-class Writer final
+template <typename T>
+struct HasRawRead<T,                                                                                       //
+                  std::enable_if_t<                                                                        //
+                      std::is_same_v<size_t, decltype(std::declval<T>().RawRead(std::declval<SpanT>()))>>> //
+    : std::true_type
 {
-  public:
-    /**
-     * @brief See LexIO::RawWrite
-     */
-    virtual size_t RawWrite(ConstSpanT buffer) = 0;
-
-    /**
-     * @brief See LexIO::Flush
-     */
-    virtual void Flush() = 0;
 };
 
-/**
- * @brief Signature of basic Seekable interface.
- */
-class Seekable final
+} // namespace Detail
+
+template <typename T>
+LEXIO_INLINE_VAR constexpr bool IsReaderV = Detail::HasRawRead<T>::value;
+
+template <typename T>
+struct IsReader : std::bool_constant<IsReaderV<T>>
 {
-  public:
-    /**
-     * @brief See LexIO::Seek
-     */
-    virtual size_t Seek(const WhenceStart whence) = 0;
-
-    /**
-     * @brief See LexIO::Seek
-     */
-    virtual size_t Seek(const WhenceCurrent whence) = 0;
-
-    /**
-     * @brief See LexIO::Seek
-     */
-    virtual size_t Seek(const WhenceEnd whence) = 0;
 };
-
-/**
- * @brief Signature of Reader interface for seekable data.
- */
-class SeekableReader final
-{
-  public:
-    /**
-     * @brief See LexIO::Data
-     */
-    virtual ConstSpanT Data() const noexcept = 0;
-};
-
-/**
- * @brief Signature of Writer interface for seekable data.
- */
-class SeekableWriter final
-{
-  public:
-    /**
-     * @brief See LexIO::Data
-     */
-    virtual SpanT Data() noexcept = 0;
-};
-
-} // namespace Type
 
 /**
  * @brief Read data from the current offset, inserting it into the passed
@@ -154,7 +106,8 @@ class SeekableWriter final
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-template <typename READER> inline size_t RawRead(READER &buffer, SpanT outBytes)
+template <typename READER>
+inline size_t RawRead(READER &buffer, SpanT outBytes)
 {
     return buffer.RawRead(outBytes);
 }
@@ -169,7 +122,8 @@ template <typename READER> inline size_t RawRead(READER &buffer, SpanT outBytes)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-template <typename WRITER> inline size_t RawWrite(WRITER &buffer, ConstSpanT bytes)
+template <typename WRITER>
+inline size_t RawWrite(WRITER &buffer, ConstSpanT bytes)
 {
     return buffer.RawWrite(bytes);
 }
@@ -179,7 +133,8 @@ template <typename WRITER> inline size_t RawWrite(WRITER &buffer, ConstSpanT byt
  *
  * @param buffer Buffer to operate on.
  */
-template <typename WRITER> inline void Flush(WRITER &buffer)
+template <typename WRITER>
+inline void Flush(WRITER &buffer)
 {
     return buffer.Flush();
 }
@@ -193,7 +148,8 @@ template <typename WRITER> inline void Flush(WRITER &buffer)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-template <typename SEEKABLE> inline size_t Seek(SEEKABLE &buffer, const WhenceStart whence)
+template <typename SEEKABLE>
+inline size_t Seek(SEEKABLE &buffer, const WhenceStart whence)
 {
     return buffer.Seek(whence);
 }
@@ -207,7 +163,8 @@ template <typename SEEKABLE> inline size_t Seek(SEEKABLE &buffer, const WhenceSt
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-template <typename SEEKABLE> inline size_t Seek(SEEKABLE &buffer, const WhenceCurrent whence)
+template <typename SEEKABLE>
+inline size_t Seek(SEEKABLE &buffer, const WhenceCurrent whence)
 {
     return buffer.Seek(whence);
 }
@@ -221,7 +178,8 @@ template <typename SEEKABLE> inline size_t Seek(SEEKABLE &buffer, const WhenceCu
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-template <typename SEEKABLE> inline size_t Seek(SEEKABLE &buffer, const WhenceEnd whence)
+template <typename SEEKABLE>
+inline size_t Seek(SEEKABLE &buffer, const WhenceEnd whence)
 {
     return buffer.Seek(whence);
 }
@@ -234,7 +192,8 @@ template <typename SEEKABLE> inline size_t Seek(SEEKABLE &buffer, const WhenceEn
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename SEEKABLE> inline size_t Tell(SEEKABLE &buffer)
+template <typename SEEKABLE>
+inline size_t Tell(SEEKABLE &buffer)
 {
     return buffer.Seek(WhenceCurrent(0));
 }
@@ -247,7 +206,8 @@ template <typename SEEKABLE> inline size_t Tell(SEEKABLE &buffer)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename SEEKABLE> inline size_t Length(SEEKABLE &buffer)
+template <typename SEEKABLE>
+inline size_t Length(SEEKABLE &buffer)
 {
     const size_t old = buffer.Seek(WhenceCurrent(0));
     const size_t len = buffer.Seek(WhenceEnd(0));
@@ -261,7 +221,8 @@ template <typename SEEKABLE> inline size_t Length(SEEKABLE &buffer)
  * @param buffer Buffer to operate on.
  * @return A span of the entire data stream, from offset 0 to EOF.
  */
-template <typename SEEKABLE_READER> inline ConstSpanT Data(SEEKABLE_READER &buffer) noexcept
+template <typename SEEKABLE_READER>
+inline ConstSpanT Data(SEEKABLE_READER &buffer) noexcept
 {
     return buffer.Data();
 }
@@ -272,7 +233,8 @@ template <typename SEEKABLE_READER> inline ConstSpanT Data(SEEKABLE_READER &buff
  * @param buffer Buffer to operate on.
  * @return A span of the entire data stream, from offset 0 to EOF.
  */
-template <typename SEEKABLE_WRITER> inline SpanT Data(SEEKABLE_WRITER &buffer) noexcept
+template <typename SEEKABLE_WRITER>
+inline SpanT Data(SEEKABLE_WRITER &buffer) noexcept
 {
     return buffer.Data();
 }

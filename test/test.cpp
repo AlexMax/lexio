@@ -95,7 +95,8 @@ TEST_CASE("Write UInt64LE", "[write]")
 
 #pragma region "Std Buffer Tests"
 
-template <typename T> void CommonTest(T &buf)
+template <typename T>
+void CommonTest(T &buf)
 {
     // Test reading.
     LexIO::WriteU8(buf, 192);
@@ -177,3 +178,65 @@ int main(int argc, char *argv[])
     const int result = Catch::Session().run(argc, argv);
     return result;
 }
+
+//------------------------------------------------------------------------------
+
+class GoodReader final
+{
+  public:
+    size_t RawRead(LexIO::SpanT buffer)
+    {
+        (void)buffer;
+        return 0;
+    }
+};
+
+static_assert(LexIO::IsReader<GoodReader>::value, "GoodReader does not fulfill IsReader");
+static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReaderV");
+
+//------------------------------------------------------------------------------
+
+class GoodWriter final
+{
+  public:
+    size_t RawWrite(LexIO::ConstSpanT buffer)
+    {
+        (void)buffer;
+        return 0;
+    }
+    void Flush() {}
+};
+
+//------------------------------------------------------------------------------
+
+class GoodSeekable
+{
+  public:
+    size_t Seek(const LexIO::WhenceStart whence)
+    {
+        (void)whence;
+        return 0;
+    }
+    size_t Seek(const LexIO::WhenceCurrent whence)
+    {
+        (void)whence;
+        return 0;
+    }
+    size_t Seek(const LexIO::WhenceEnd whence)
+    {
+        (void)whence;
+        return 0;
+    }
+};
+
+class GoodSeekableReader final : public GoodSeekable
+{
+  public:
+    LexIO::ConstSpanT Data() const noexcept { return LexIO::ConstSpanT(); }
+};
+
+class GoodSeekableWriter final : public GoodSeekable
+{
+  public:
+    LexIO::SpanT Data() noexcept { return LexIO::SpanT(); }
+};
