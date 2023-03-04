@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 
 //------------------------------------------------------------------------------
 
-class GoodReader final
+class GoodReader
 {
   public:
     size_t RawRead(LexIO::SpanT buffer)
@@ -196,7 +196,7 @@ static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReade
 
 //------------------------------------------------------------------------------
 
-class GoodWriter final
+class GoodWriter
 {
   public:
     size_t RawWrite(LexIO::ConstSpanT buffer)
@@ -206,6 +206,9 @@ class GoodWriter final
     }
     void Flush() {}
 };
+
+static_assert(LexIO::IsWriter<GoodWriter>::value, "GoodWriter does not fulfill IsWriter");
+static_assert(LexIO::IsWriterV<GoodWriter>, "GoodWriter does not fulfill IsWriterV");
 
 //------------------------------------------------------------------------------
 
@@ -229,14 +232,5 @@ class GoodSeekable
     }
 };
 
-class GoodSeekableReader final : public GoodSeekable
-{
-  public:
-    LexIO::ConstSpanT Data() const noexcept { return LexIO::ConstSpanT(); }
-};
-
-class GoodSeekableWriter final : public GoodSeekable
-{
-  public:
-    LexIO::SpanT Data() noexcept { return LexIO::SpanT(); }
-};
+static_assert(LexIO::IsSeekable<GoodSeekable>::value, "GoodSeekable does not fulfill IsSeekable");
+static_assert(LexIO::IsSeekableV<GoodSeekable>, "GoodSeekable does not fulfill IsSeekableV");

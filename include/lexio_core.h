@@ -71,6 +71,11 @@ struct WhenceEnd
 namespace Detail
 {
 
+/**
+ * @brief SFINAE struct for detecting a valid "RawRead" method in a Reader type.
+ *
+ * @tparam T Type to check.
+ */
 template <typename, typename _ = void>
 struct HasRawRead : std::false_type
 {
@@ -84,13 +89,113 @@ struct HasRawRead<T,                                                            
 {
 };
 
+/**
+ * @brief SFINAE struct for detecting a valid "RawWrite" method in a Writer type.
+ *
+ * @tparam T Type to check.
+ */
+template <typename T, typename _ = void>
+struct HasRawWrite : std::false_type
+{
+};
+
+template <typename T>
+struct HasRawWrite<T,                                                                                             //
+                   std::enable_if_t<                                                                              //
+                       std::is_same_v<size_t, decltype(std::declval<T>().RawWrite(std::declval<ConstSpanT>()))>>> //
+    : std::true_type
+{
+};
+
+/**
+ * @brief SFINAE struct for detecting a valid "Flush" method in a Writer type.
+ *
+ * @tparam T Type to check.
+ */
+template <typename, typename _ = void>
+struct HasFlush : std::false_type
+{
+};
+
+template <typename T>
+struct HasFlush<T,                                                              //
+                std::enable_if_t<                                               //
+                    std::is_same_v<void, decltype(std::declval<T>().Flush())>>> //
+    : std::true_type
+{
+};
+
+/**
+ * @brief SFINAE struct for detecting a valid "Seek" method in a Writer type.
+ *
+ * @tparam T Type to check.
+ * @tparam U "Whence" overload to check with.
+ */
+template <typename T, typename U, typename _ = void>
+struct HasSeek : std::false_type
+{
+};
+
+template <typename T, typename U>
+struct HasSeek<T, U,                                                                             //
+               std::enable_if_t<                                                                 //
+                   std::is_same_v<size_t, decltype(std::declval<T>().Seek(std::declval<U>()))>>> //
+    : std::true_type
+{
+};
+
 } // namespace Detail
 
+/**
+ * @brief Helper variable for IsReader trait.
+ */
 template <typename T>
 LEXIO_INLINE_VAR constexpr bool IsReaderV = Detail::HasRawRead<T>::value;
 
+/**
+ * @brief If the template parameter is a valid Reader, provides a member
+ *        constant "value" of true.  Otherwise, "value" is false.
+ *
+ * @tparam T Type to check.
+ */
 template <typename T>
-struct IsReader : std::bool_constant<IsReaderV<T>>
+struct IsReader : std::integral_constant<bool, IsReaderV<T>>
+{
+};
+
+/**
+ * @brief Helper variable for IsWriter trait.
+ */
+template <typename T>
+LEXIO_INLINE_VAR constexpr bool IsWriterV = Detail::HasRawWrite<T>::value && Detail::HasFlush<T>::value;
+
+/**
+ * @brief If the template parameter is a valid Writer, provides a member
+ *        constant "value" of true.  Otherwise, "value" is false.
+ *
+ * @tparam T Type to check.
+ */
+template <typename T>
+struct IsWriter : std::integral_constant<bool, IsWriterV<T>>
+{
+};
+
+/**
+ * @brief Helper variable for Seekable trait.
+ */
+template <typename T>
+LEXIO_INLINE_VAR constexpr bool IsSeekableV =
+    Detail::HasSeek<T, WhenceStart>::value && Detail::HasSeek<T, WhenceCurrent>::value &&
+    Detail::HasSeek<T, WhenceEnd>::value;
+
+/**
+ * @brief If the template parameter is a valid SeekableReader, provides a
+ *        member constant "value" of true.  Otherwise, "value" is false.
+ *
+ * @tparam T Type to check.
+ */
+template <typename T>
+struct IsSeekable : std::integral_constant<bool, IsSeekableV<T>>
 {
 };
 

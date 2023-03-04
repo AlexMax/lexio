@@ -19,7 +19,9 @@ You can use spans other than std::span with this library.  Define `LEXIO_SPAN_TY
 
 Why?
 ----
-I tend to run into situations where I need to read and write various data types to byte-based streams, but found many common API designs cumbersome to use.  After doing some research and picking and choosing what I liked and disliked about previous API's I had used, this is what I came up with.  It's heavily inspired by Rust's std::io traits.
+I tend to run into situations where I need to read and write various data types to byte-based streams, but found many common C++ API designs made for this purpose cumbersome to use.  After doing some research and picking and choosing what I liked and disliked about previous API's I had used, this is what I came up with.
+
+The base interfaces are heavily inspired by Rust's std::io traits, as they seem like a reasonable and flexible set of primitives to build on top of.
 
 Design
 ------
