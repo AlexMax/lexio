@@ -27,6 +27,9 @@ set(LEXIO_HEADERS
 
 add_executable(test
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_core.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_serialize.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_std.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.h"
      ${LEXIO_HEADERS})
 
