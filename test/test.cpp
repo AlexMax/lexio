@@ -36,7 +36,9 @@ TEST_CASE("Write UInt8", "[write]")
 {
     VectorBuffer buffer;
     LexIO::WriteU8(buffer, 0x88);
-    REQUIRE(buffer.Data()[0] == 0x88);
+
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
 TEST_CASE("Read U16LE", "[read]")
@@ -49,8 +51,10 @@ TEST_CASE("Write UInt16LE", "[write]")
 {
     VectorBuffer buffer;
     LexIO::WriteU16LE(buffer, 0x9988);
-    REQUIRE(buffer.Data()[0] == 0x88);
-    REQUIRE(buffer.Data()[1] == 0x99);
+
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
 }
 
 TEST_CASE("Read UInt32", "[read]")
@@ -63,10 +67,12 @@ TEST_CASE("Write UInt32LE", "[write]")
 {
     VectorBuffer buffer;
     LexIO::WriteU32LE(buffer, 0xbbaa9988);
-    REQUIRE(buffer.Data()[0] == 0x88);
-    REQUIRE(buffer.Data()[1] == 0x99);
-    REQUIRE(buffer.Data()[2] == 0xaa);
-    REQUIRE(buffer.Data()[3] == 0xbb);
+
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
 }
 
 TEST_CASE("Read UInt64", "[read]")
@@ -79,14 +85,16 @@ TEST_CASE("Write UInt64LE", "[write]")
 {
     VectorBuffer buffer;
     LexIO::WriteU64LE(buffer, 0xffeeddccbbaa9988);
-    REQUIRE(buffer.Data()[0] == 0x88);
-    REQUIRE(buffer.Data()[1] == 0x99);
-    REQUIRE(buffer.Data()[2] == 0xaa);
-    REQUIRE(buffer.Data()[3] == 0xbb);
-    REQUIRE(buffer.Data()[4] == 0xcc);
-    REQUIRE(buffer.Data()[5] == 0xdd);
-    REQUIRE(buffer.Data()[6] == 0xee);
-    REQUIRE(buffer.Data()[7] == 0xff);
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xcc);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xee);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
 }
 
 #pragma endregion
@@ -193,6 +201,24 @@ class GoodReader
 
 static_assert(LexIO::IsReader<GoodReader>::value, "GoodReader does not fulfill IsReader");
 static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReaderV");
+
+//------------------------------------------------------------------------------
+
+class GoodBufferedReader
+{
+  public:
+    LexIO::ConstSpanT GetBuffer() const { return LexIO::ConstSpanT(); }
+    LexIO::ConstSpanT FillBuffer(const size_t qwCount)
+    {
+        (void)qwCount;
+        return LexIO::ConstSpanT();
+    }
+    void ConsumeBuffer(const size_t qwCount) { (void)qwCount; }
+};
+
+static_assert(LexIO::IsBufferedReader<GoodBufferedReader>::value,
+              "GoodBufferedReader does not fulfill IsBufferedReader");
+static_assert(LexIO::IsBufferedReaderV<GoodBufferedReader>, "GoodBufferedReader does not fulfill IsBufferedReaderV");
 
 //------------------------------------------------------------------------------
 

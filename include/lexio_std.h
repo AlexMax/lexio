@@ -70,8 +70,6 @@ class StdBufferBase
 
     void Flush() {}
 
-    ConstSpanT Data() const noexcept { return ConstSpanT(m_buffer.data(), m_buffer.size()); }
-
     size_t RawWrite(ConstSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
@@ -81,8 +79,6 @@ class StdBufferBase
         m_offset += actualLength;
         return actualLength;
     }
-
-    SpanT Data() noexcept { return SpanT(m_buffer.data(), m_buffer.size()); }
 
     size_t Seek(const WhenceStart whence)
     {

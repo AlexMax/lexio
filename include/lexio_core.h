@@ -144,6 +144,61 @@ struct HasSeek<T, U,                                                            
 {
 };
 
+/**
+ * @brief SFINAE struct for detecting a valid "GetBuffer" method in a BufferedReader type.
+ *
+ * @tparam T Type to check.
+ */
+template <typename, typename _ = void>
+struct HasGetBuffer : std::false_type
+{
+};
+
+template <typename T>
+struct HasGetBuffer<T,                                                                               //
+                    std::enable_if_t<                                                                //
+                        std::is_same_v<LexIO::ConstSpanT, decltype(std::declval<T>().GetBuffer())>>> //
+    : std::true_type
+{
+};
+
+/**
+ * @brief SFINAE struct for detecting a valid "FillBuffer" method in a BufferedReader type.
+ *
+ * @tparam T Type to check.
+ */
+template <typename, typename _ = void>
+struct HasFillBuffer : std::false_type
+{
+};
+
+template <typename T>
+struct HasFillBuffer<
+    T,                                                                                                      //
+    std::enable_if_t<                                                                                       //
+        std::is_same_v<LexIO::ConstSpanT, decltype(std::declval<T>().FillBuffer(std::declval<size_t>()))>>> //
+    : std::true_type
+{
+};
+
+/**
+ * @brief SFINAE struct for detecting a valid "ConsumeBuffer" method in a BufferedReader type.
+ *
+ * @tparam T Type to check.
+ */
+template <typename, typename _ = void>
+struct HasConsumeBuffer : std::false_type
+{
+};
+
+template <typename T>
+struct HasConsumeBuffer<T,                                                                                            //
+                        std::enable_if_t<                                                                             //
+                            std::is_same_v<void, decltype(std::declval<T>().ConsumeBuffer(std::declval<size_t>()))>>> //
+    : std::true_type
+{
+};
+
 } // namespace Detail
 
 /**
@@ -181,7 +236,7 @@ struct IsWriter : std::integral_constant<bool, IsWriterV<T>>
 };
 
 /**
- * @brief Helper variable for Seekable trait.
+ * @brief Helper variable for IsSeekable trait.
  */
 template <typename T>
 LEXIO_INLINE_VAR constexpr bool IsSeekableV =
@@ -196,6 +251,24 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV =
  */
 template <typename T>
 struct IsSeekable : std::integral_constant<bool, IsSeekableV<T>>
+{
+};
+
+/**
+ * @brief Helper variable for IsBufferedReader trait.
+ */
+template <typename T>
+LEXIO_INLINE_VAR constexpr bool IsBufferedReaderV =
+    Detail::HasGetBuffer<T>::value && Detail::HasFillBuffer<T>::value && Detail::HasConsumeBuffer<T>::value;
+
+/**
+ * @brief If the template parameter is a valid BufferedReader, provides a
+ *        member constant "value" of true.  Otherwise, "value" is false.
+ *
+ * @tparam T Type to check.
+ */
+template <typename T>
+struct IsBufferedReader : std::integral_constant<bool, IsBufferedReaderV<T>>
 {
 };
 
@@ -318,30 +391,6 @@ inline size_t Length(SEEKABLE &buffer)
     const size_t len = buffer.Seek(WhenceEnd(0));
     buffer.Seek(WhenceStart(size_t(old)));
     return len;
-}
-
-/**
- * @brief Return a read-only view of the entire data stream.
- *
- * @param buffer Buffer to operate on.
- * @return A span of the entire data stream, from offset 0 to EOF.
- */
-template <typename SEEKABLE_READER>
-inline ConstSpanT Data(SEEKABLE_READER &buffer) noexcept
-{
-    return buffer.Data();
-}
-
-/**
- * @brief Return a mutable view of the entire data stream.
- *
- * @param buffer Buffer to operate on.
- * @return A span of the entire data stream, from offset 0 to EOF.
- */
-template <typename SEEKABLE_WRITER>
-inline SpanT Data(SEEKABLE_WRITER &buffer) noexcept
-{
-    return buffer.Data();
 }
 
 } // namespace LexIO
