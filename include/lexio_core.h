@@ -299,7 +299,7 @@ inline size_t RawRead(READER &reader, SpanT outBytes)
  * @return Span view of the internal buffer.
  */
 template <typename BUFFERED_READER>
-LexIO::ConstSpanT GetBuffer(BUFFERED_READER &bufReader) noexcept
+inline LexIO::ConstSpanT GetBuffer(BUFFERED_READER &bufReader) noexcept
 {
     return bufReader.GetBuffer();
 }
@@ -318,7 +318,7 @@ LexIO::ConstSpanT GetBuffer(BUFFERED_READER &bufReader) noexcept
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename BUFFERED_READER>
-LexIO::ConstSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
+inline LexIO::ConstSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
 {
     return bufReader.FillBuffer(size);
 }
@@ -334,7 +334,7 @@ LexIO::ConstSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
  *         in the visible buffer is passed to the function.
  */
 template <typename BUFFERED_READER>
-void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
+inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
 {
     bufReader.ConsumeBuffer(size);
 }
