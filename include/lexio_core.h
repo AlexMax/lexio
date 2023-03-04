@@ -82,9 +82,9 @@ struct HasRawRead : std::false_type
 };
 
 template <typename T>
-struct HasRawRead<T,                                                                                       //
-                  std::enable_if_t<                                                                        //
-                      std::is_same_v<size_t, decltype(std::declval<T>().RawRead(std::declval<SpanT>()))>>> //
+struct HasRawRead<T,                                                                                            //
+                  std::enable_if_t<                                                                             //
+                      std::is_same<size_t, decltype(std::declval<T>().RawRead(std::declval<SpanT>()))>::value>> //
     : std::true_type
 {
 };
@@ -100,9 +100,10 @@ struct HasRawWrite : std::false_type
 };
 
 template <typename T>
-struct HasRawWrite<T,                                                                                             //
-                   std::enable_if_t<                                                                              //
-                       std::is_same_v<size_t, decltype(std::declval<T>().RawWrite(std::declval<ConstSpanT>()))>>> //
+struct HasRawWrite<
+    T,                                                                                                  //
+    std::enable_if_t<                                                                                   //
+        std::is_same<size_t, decltype(std::declval<T>().RawWrite(std::declval<ConstSpanT>()))>::value>> //
     : std::true_type
 {
 };
@@ -118,9 +119,9 @@ struct HasFlush : std::false_type
 };
 
 template <typename T>
-struct HasFlush<T,                                                              //
-                std::enable_if_t<                                               //
-                    std::is_same_v<void, decltype(std::declval<T>().Flush())>>> //
+struct HasFlush<T,                                                                   //
+                std::enable_if_t<                                                    //
+                    std::is_same<void, decltype(std::declval<T>().Flush())>::value>> //
     : std::true_type
 {
 };
@@ -137,9 +138,9 @@ struct HasSeek : std::false_type
 };
 
 template <typename T, typename U>
-struct HasSeek<T, U,                                                                             //
-               std::enable_if_t<                                                                 //
-                   std::is_same_v<size_t, decltype(std::declval<T>().Seek(std::declval<U>()))>>> //
+struct HasSeek<T, U,                                                                                  //
+               std::enable_if_t<                                                                      //
+                   std::is_same<size_t, decltype(std::declval<T>().Seek(std::declval<U>()))>::value>> //
     : std::true_type
 {
 };
@@ -155,9 +156,9 @@ struct HasGetBuffer : std::false_type
 };
 
 template <typename T>
-struct HasGetBuffer<T,                                                                               //
-                    std::enable_if_t<                                                                //
-                        std::is_same_v<LexIO::ConstSpanT, decltype(std::declval<T>().GetBuffer())>>> //
+struct HasGetBuffer<T,                                                                                    //
+                    std::enable_if_t<                                                                     //
+                        std::is_same<LexIO::ConstSpanT, decltype(std::declval<T>().GetBuffer())>::value>> //
     : std::true_type
 {
 };
@@ -174,9 +175,9 @@ struct HasFillBuffer : std::false_type
 
 template <typename T>
 struct HasFillBuffer<
-    T,                                                                                                      //
-    std::enable_if_t<                                                                                       //
-        std::is_same_v<LexIO::ConstSpanT, decltype(std::declval<T>().FillBuffer(std::declval<size_t>()))>>> //
+    T,                                                                                                           //
+    std::enable_if_t<                                                                                            //
+        std::is_same<LexIO::ConstSpanT, decltype(std::declval<T>().FillBuffer(std::declval<size_t>()))>::value>> //
     : std::true_type
 {
 };
@@ -192,9 +193,10 @@ struct HasConsumeBuffer : std::false_type
 };
 
 template <typename T>
-struct HasConsumeBuffer<T,                                                                                            //
-                        std::enable_if_t<                                                                             //
-                            std::is_same_v<void, decltype(std::declval<T>().ConsumeBuffer(std::declval<size_t>()))>>> //
+struct HasConsumeBuffer<
+    T,                                                                                                 //
+    std::enable_if_t<                                                                                  //
+        std::is_same<void, decltype(std::declval<T>().ConsumeBuffer(std::declval<size_t>()))>::value>> //
     : std::true_type
 {
 };
@@ -239,9 +241,8 @@ struct IsWriter : std::integral_constant<bool, IsWriterV<T>>
  * @brief Helper variable for IsSeekable trait.
  */
 template <typename T>
-LEXIO_INLINE_VAR constexpr bool IsSeekableV =
-    Detail::HasSeek<T, WhenceStart>::value && Detail::HasSeek<T, WhenceCurrent>::value &&
-    Detail::HasSeek<T, WhenceEnd>::value;
+LEXIO_INLINE_VAR constexpr bool IsSeekableV = Detail::HasSeek<T, WhenceStart>::value
+    && Detail::HasSeek<T, WhenceCurrent>::value && Detail::HasSeek<T, WhenceEnd>::value;
 
 /**
  * @brief If the template parameter is a valid SeekableReader, provides a
