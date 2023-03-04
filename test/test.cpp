@@ -189,9 +189,8 @@ int main(int argc, char *argv[])
 
 //------------------------------------------------------------------------------
 
-class GoodReader
+struct GoodReader
 {
-  public:
     size_t RawRead(LexIO::SpanT buffer)
     {
         (void)buffer;
@@ -204,9 +203,8 @@ static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReade
 
 //------------------------------------------------------------------------------
 
-class GoodBufferedReader
+struct GoodBufferedReader
 {
-  public:
     LexIO::ConstSpanT GetBuffer() const { return LexIO::ConstSpanT(); }
     LexIO::ConstSpanT FillBuffer(const size_t qwCount)
     {
@@ -222,9 +220,8 @@ static_assert(LexIO::IsBufferedReaderV<GoodBufferedReader>, "GoodBufferedReader 
 
 //------------------------------------------------------------------------------
 
-class GoodWriter
+struct GoodWriter
 {
-  public:
     size_t RawWrite(LexIO::ConstSpanT buffer)
     {
         (void)buffer;
@@ -238,9 +235,8 @@ static_assert(LexIO::IsWriterV<GoodWriter>, "GoodWriter does not fulfill IsWrite
 
 //------------------------------------------------------------------------------
 
-class GoodSeekable
+struct GoodSeekable
 {
-  public:
     size_t Seek(const LexIO::WhenceStart whence)
     {
         (void)whence;
@@ -260,3 +256,30 @@ class GoodSeekable
 
 static_assert(LexIO::IsSeekable<GoodSeekable>::value, "GoodSeekable does not fulfill IsSeekable");
 static_assert(LexIO::IsSeekableV<GoodSeekable>, "GoodSeekable does not fulfill IsSeekableV");
+
+//------------------------------------------------------------------------------
+
+struct BadReaderMissingClass
+{
+};
+
+static_assert(!LexIO::IsReaderV<BadReaderMissingClass>, "BadReaderMissingClass incorrectly fulfills IsReaderV");
+
+struct BadReaderBadParam
+{
+    size_t RawRead(uint8_t *&buffer, const size_t size)
+    {
+        (void)buffer;
+        (void)size;
+        return 0;
+    }
+};
+
+static_assert(!LexIO::IsReaderV<BadReaderBadParam>, "BadReaderBadParam incorrectly fulfills IsReaderV");
+
+struct BadReaderBadReturn
+{
+    void RawRead(LexIO::SpanT buffer) { (void)buffer; }
+};
+
+static_assert(!LexIO::IsReaderV<BadReaderBadReturn>, "BadReaderBadReturn incorrectly fulfills IsReaderV");
