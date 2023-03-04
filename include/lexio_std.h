@@ -107,7 +107,8 @@ class StdBufferBase
 /**
  * @brief StdBuffer wrapping a type whose size is permanent after construction.
  */
-template <typename T> class FixedStdBuffer : public StdBufferBase<T>
+template <typename T>
+class FixedStdBuffer : public StdBufferBase<T>
 {
   public:
     explicit FixedStdBuffer(const size_t size) : StdBufferBase<T>(T()) { this->Buffer().resize(size); }
@@ -118,7 +119,8 @@ template <typename T> class FixedStdBuffer : public StdBufferBase<T>
  *
  * @detail Useful for types where size is known at compile-time, like std::array.
  */
-template <typename T> class StaticStdBuffer : public StdBufferBase<T>
+template <typename T>
+class StaticStdBuffer : public StdBufferBase<T>
 {
   public:
     explicit StaticStdBuffer() : StdBufferBase<T>(T()) {}
@@ -128,7 +130,8 @@ template <typename T> class StaticStdBuffer : public StdBufferBase<T>
  * @brief The standard StdBuffer, where writing off the end of the buffer
  *        resizes the underlying type.
  */
-template <typename T> class StdBuffer : public StdBufferBase<T>
+template <typename T>
+class StdBuffer : public StdBufferBase<T>
 {
   public:
     /**
