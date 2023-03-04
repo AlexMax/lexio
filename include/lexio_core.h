@@ -221,6 +221,24 @@ struct IsReader : std::integral_constant<bool, IsReaderV<T>>
 };
 
 /**
+ * @brief Helper variable for IsBufferedReader trait.
+ */
+template <typename T>
+LEXIO_INLINE_VAR constexpr bool IsBufferedReaderV =
+    Detail::HasGetBuffer<T>::value && Detail::HasFillBuffer<T>::value && Detail::HasConsumeBuffer<T>::value;
+
+/**
+ * @brief If the template parameter is a valid BufferedReader, provides a
+ *        member constant "value" of true.  Otherwise, "value" is false.
+ *
+ * @tparam T Type to check.
+ */
+template <typename T>
+struct IsBufferedReader : std::integral_constant<bool, IsBufferedReaderV<T>>
+{
+};
+
+/**
  * @brief Helper variable for IsWriter trait.
  */
 template <typename T>
@@ -241,8 +259,9 @@ struct IsWriter : std::integral_constant<bool, IsWriterV<T>>
  * @brief Helper variable for IsSeekable trait.
  */
 template <typename T>
-LEXIO_INLINE_VAR constexpr bool IsSeekableV = Detail::HasSeek<T, WhenceStart>::value
-    && Detail::HasSeek<T, WhenceCurrent>::value && Detail::HasSeek<T, WhenceEnd>::value;
+LEXIO_INLINE_VAR constexpr bool IsSeekableV =
+    Detail::HasSeek<T, WhenceStart>::value && Detail::HasSeek<T, WhenceCurrent>::value &&
+    Detail::HasSeek<T, WhenceEnd>::value;
 
 /**
  * @brief If the template parameter is a valid SeekableReader, provides a
@@ -256,29 +275,11 @@ struct IsSeekable : std::integral_constant<bool, IsSeekableV<T>>
 };
 
 /**
- * @brief Helper variable for IsBufferedReader trait.
- */
-template <typename T>
-LEXIO_INLINE_VAR constexpr bool IsBufferedReaderV =
-    Detail::HasGetBuffer<T>::value && Detail::HasFillBuffer<T>::value && Detail::HasConsumeBuffer<T>::value;
-
-/**
- * @brief If the template parameter is a valid BufferedReader, provides a
- *        member constant "value" of true.  Otherwise, "value" is false.
- *
- * @tparam T Type to check.
- */
-template <typename T>
-struct IsBufferedReader : std::integral_constant<bool, IsBufferedReaderV<T>>
-{
-};
-
-/**
  * @brief Read data from the current offset, inserting it into the passed
  *        buffer and advancing the offset.
  *
- * @param buffer Buffer to operate on.
- * @param outBytes A span to read data into, the size of which is the number
+ * @param reader Reader to operate on.
+ * @param outBytes A span to read data into, the length of which is the number
  *                 of bytes to read.
  * @return Actual number of bytes read.  Must be between 0 and the requested
  *         length.  0 can mean EOF or empty buffer.
@@ -286,111 +287,158 @@ struct IsBufferedReader : std::integral_constant<bool, IsBufferedReaderV<T>>
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename READER>
-inline size_t RawRead(READER &buffer, SpanT outBytes)
+inline size_t RawRead(READER &reader, SpanT outBytes)
 {
-    return buffer.RawRead(outBytes);
+    return reader.RawRead(outBytes);
+}
+
+/**
+ * @brief Return a view of the internal buffer used by the reader.
+ *
+ * @param bufReader BufferedReader to operate on.
+ * @return Span view of the internal buffer.
+ */
+template <typename BUFFERED_READER>
+LexIO::ConstSpanT GetBuffer(BUFFERED_READER &bufReader) noexcept
+{
+    return bufReader.GetBuffer();
+}
+
+/**
+ * @brief Fill the internal buffer of data to the requested size without
+ *        advancing the offset.  If EOF is encountered, the rest of the
+ *        data up to the EOF is buffered.
+ *
+ * @param bufReader BufferedReader to operate on.
+ * @param size Amount of data to buffer in bytes.
+ * @return Span view of the internal buffer after buffering data to the
+ *         requested size.  Must be a span with a size between 0 and the
+ *         given size.  A span of size 0 indicates EOF was reached.
+ * @throws std::runtime_error if an error with the read operation was
+ *         encountered.  EOF is _not_ considered an error.
+ */
+template <typename BUFFERED_READER>
+LexIO::ConstSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
+{
+    return bufReader.FillBuffer(size);
+}
+
+/**
+ * @brief Signal to the reader that the given number of bytes have been
+ *        "consumed" and should no longer be returned by
+ *
+ * @param bufReader BufferedReader to operate on.
+ * @param size Amount of data to consume in bytes.  Must be less than or
+ *        equal to the amount of data in the visible buffer.
+ * @throws std::runtime_error if a size greater than the amount of data
+ *         in the visible buffer is passed to the function.
+ */
+template <typename BUFFERED_READER>
+void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
+{
+    bufReader.ConsumeBuffer(size);
 }
 
 /**
  * @brief Write a span of data at the current offset, overwriting any
  *        existing data.
  *
- * @param buffer Buffer to operate on.
+ * @param writer Writer to operate on.
  * @param bytes Bytes to write into the data stream.
  * @return Actual number of bytes written.
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename WRITER>
-inline size_t RawWrite(WRITER &buffer, ConstSpanT bytes)
+inline size_t RawWrite(WRITER &writer, ConstSpanT bytes)
 {
-    return buffer.RawWrite(bytes);
+    return writer.RawWrite(bytes);
 }
 
 /**
  * @brief Flushes data to underlying storage.  Can be a no-op.
  *
- * @param buffer Buffer to operate on.
+ * @param writer Writer to operate on.
  */
 template <typename WRITER>
-inline void Flush(WRITER &buffer)
+inline void Flush(WRITER &writer)
 {
-    return buffer.Flush();
+    return writer.Flush();
 }
 
 /**
  * @brief Seek to a position relative to the start of the underlying data.
  *
- * @param buffer Buffer to operate on.
+ * @param seekable Seekable to operate on.
  * @param whence Offset from start to seek.
  * @return Absolute position in stream after seek.
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
 template <typename SEEKABLE>
-inline size_t Seek(SEEKABLE &buffer, const WhenceStart whence)
+inline size_t Seek(SEEKABLE &seekable, const WhenceStart whence)
 {
-    return buffer.Seek(whence);
+    return seekable.Seek(whence);
 }
 
 /**
  * @brief Seek to a position relative to the current offset.
  *
- * @param buffer Buffer to operate on.
+ * @param seekable Seekable to operate on.
  * @param whence Offset from current position to seek.
  * @return Absolute position in stream after seek.
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
 template <typename SEEKABLE>
-inline size_t Seek(SEEKABLE &buffer, const WhenceCurrent whence)
+inline size_t Seek(SEEKABLE &seekable, const WhenceCurrent whence)
 {
-    return buffer.Seek(whence);
+    return seekable.Seek(whence);
 }
 
 /**
  * @brief Seek to a position relative to the end of the underlying data.
  *
- * @param buffer Buffer to operate on.
+ * @param seekable Seekable to operate on.
  * @param whence Offset from end to seek.
  * @return Absolute position in stream after seek.
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
 template <typename SEEKABLE>
-inline size_t Seek(SEEKABLE &buffer, const WhenceEnd whence)
+inline size_t Seek(SEEKABLE &seekable, const WhenceEnd whence)
 {
-    return buffer.Seek(whence);
+    return seekable.Seek(whence);
 }
 
 /**
  * @brief Return the current offset position.
  *
- * @param buffer Buffer to operate on.
+ * @param seekable Seekable to operate on.
  * @return Absolute position in stream.
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
 template <typename SEEKABLE>
-inline size_t Tell(SEEKABLE &buffer)
+inline size_t Tell(SEEKABLE &seekable)
 {
-    return buffer.Seek(WhenceCurrent(0));
+    return seekable.Seek(WhenceCurrent(0));
 }
 
 /**
  * @brief Return length of underlying data.
  *
- * @param buffer Buffer to operate on.
+ * @param seekable Seekable to operate on.
  * @return Length of underlying data.
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
 template <typename SEEKABLE>
-inline size_t Length(SEEKABLE &buffer)
+inline size_t Length(SEEKABLE &seekable)
 {
-    const size_t old = buffer.Seek(WhenceCurrent(0));
-    const size_t len = buffer.Seek(WhenceEnd(0));
-    buffer.Seek(WhenceStart(size_t(old)));
+    const size_t old = seekable.Seek(WhenceCurrent(0));
+    const size_t len = seekable.Seek(WhenceEnd(0));
+    seekable.Seek(WhenceStart(size_t(old)));
     return len;
 }
 

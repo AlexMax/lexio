@@ -206,12 +206,12 @@ static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReade
 struct GoodBufferedReader
 {
     LexIO::ConstSpanT GetBuffer() const { return LexIO::ConstSpanT(); }
-    LexIO::ConstSpanT FillBuffer(const size_t qwCount)
+    LexIO::ConstSpanT FillBuffer(const size_t size)
     {
-        (void)qwCount;
+        (void)size;
         return LexIO::ConstSpanT();
     }
-    void ConsumeBuffer(const size_t qwCount) { (void)qwCount; }
+    void ConsumeBuffer(const size_t size) { (void)size; }
 };
 
 static_assert(LexIO::IsBufferedReader<GoodBufferedReader>::value,
