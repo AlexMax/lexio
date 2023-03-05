@@ -47,5 +47,5 @@ TEST_CASE("Test file opened in read mode", "[lfile]")
     REQUIRE(pos == 8);
 
     pos = LexIO::Seek(file, LexIO::WhenceEnd(2));
-    REQUIRE(pos == 47);
+    REQUIRE((pos == 47 || pos == 49)); // File contains two newlines.
 }
