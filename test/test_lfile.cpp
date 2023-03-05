@@ -22,16 +22,30 @@
 
 //------------------------------------------------------------------------------
 
-#if defined(_WIN32)
-
-TEST_CASE("Test LFile Reader", "[lfile]")
+TEST_CASE("Test file opened in read mode", "[lfile]")
 {
-    LexIO::LFileWin32 file = LexIO::LFileWin32::Open("CMakeCache.txt");
+    constexpr const char *firstLine = "The quick brown fox";
 
-    uint8_t buffer[32];
-    LexIO::RawRead(file, buffer);
+    auto file = LexIO::LOpen("../test/test_file.txt", LexIO::LOpenMode::read);
 
-    printf("Done!\n");
+    // Test reading.
+    uint8_t readBuffer[32];
+    LexIO::RawRead(file, readBuffer);
+    size_t testLen = strlen(firstLine);
+    readBuffer[testLen] = '\0';
+    REQUIRE(!strcmp((const char *)&readBuffer[0], firstLine));
+
+    // Test writing.
+    const uint8_t writeBuffer[32] = {0x00};
+    REQUIRE_THROWS(LexIO::RawWrite(file, writeBuffer));
+
+    // Test seeking.
+    size_t pos = LexIO::Seek(file, LexIO::WhenceStart(2));
+    REQUIRE(pos == 2);
+
+    pos = LexIO::Seek(file, LexIO::WhenceCurrent(6));
+    REQUIRE(pos == 8);
+
+    pos = LexIO::Seek(file, LexIO::WhenceEnd(2));
+    REQUIRE(pos == 47);
 }
-
-#endif

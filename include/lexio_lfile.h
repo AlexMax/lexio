@@ -20,6 +20,32 @@
 
 #include "lexio_core.h"
 
+namespace LexIO
+{
+
+enum class LOpenMode
+{
+    // Read only, file must exist.
+    read,
+
+    // Write only, file is created or truncated.
+    write,
+
+    // Append only, file is created if it does not exist.
+    append,
+
+    // Read and Write, file must exist.
+    readPlus,
+
+    // Read and Write, file is created or truncated.
+    writePlus,
+
+    // Read and Append, file is create if it does not exist.
+    appendPlus,
+};
+
+} // namespace LexIO
+
 #if defined(_WIN32)
 
 #define WIN32_LEAN_AND_MEAN
@@ -59,6 +85,8 @@ class LFileWin32
      * @brief Open a file for reading.
      *
      * @param path Path to filename, assumed to be a null-terminated UTF-8 string.
+     * @return A constructed LFileWin32 object.
+     * @throws Win32Error if error was encountered.
      */
     static LFileWin32 Open(const char *path)
     {
@@ -94,7 +122,7 @@ class LFileWin32
      */
     void Close()
     {
-        BOOL ok = CloseHandle(m_fileHandle);
+        const BOOL ok = CloseHandle(m_fileHandle);
         if (ok == FALSE)
         {
             throw Win32Error("Could not close file.", GetLastError());
@@ -104,7 +132,7 @@ class LFileWin32
     size_t RawRead(SpanT buffer)
     {
         DWORD bytesRead = 0;
-        BOOL ok = ReadFile(m_fileHandle, buffer.data(), buffer.size(), &bytesRead, NULL);
+        const BOOL ok = ReadFile(m_fileHandle, buffer.data(), buffer.size(), &bytesRead, NULL);
         if (ok == FALSE)
         {
             throw Win32Error("Could not read file.", GetLastError());
@@ -115,7 +143,7 @@ class LFileWin32
     size_t RawWrite(ConstSpanT buffer)
     {
         DWORD bytesRead = 0;
-        BOOL ok = WriteFile(m_fileHandle, buffer.data(), buffer.size(), &bytesRead, NULL);
+        const BOOL ok = WriteFile(m_fileHandle, buffer.data(), buffer.size(), &bytesRead, NULL);
         if (ok == FALSE)
         {
             throw Win32Error("Could not write file.", GetLastError());
@@ -123,13 +151,20 @@ class LFileWin32
         return bytesRead;
     }
 
-    void Flush() { FlushFileBuffers(m_fileHandle); }
+    void Flush()
+    {
+        const BOOL ok = FlushFileBuffers(m_fileHandle);
+        if (ok == FALSE)
+        {
+            throw Win32Error("Could not flush file.", GetLastError());
+        }
+    }
 
     size_t Seek(const WhenceStart whence)
     {
         LARGE_INTEGER offset, newOffset;
         offset.QuadPart = whence.offset;
-        BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, FILE_BEGIN);
+        const BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, FILE_BEGIN);
         if (ok == 0)
         {
             throw Win32Error("Could not seek file.", GetLastError());
@@ -141,7 +176,7 @@ class LFileWin32
     {
         LARGE_INTEGER offset, newOffset;
         offset.QuadPart = whence.offset;
-        BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, FILE_CURRENT);
+        const BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, FILE_CURRENT);
         if (ok == 0)
         {
             throw Win32Error("Could not seek file.", GetLastError());
@@ -153,7 +188,7 @@ class LFileWin32
     {
         LARGE_INTEGER offset, newOffset;
         offset.QuadPart = whence.offset;
-        BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, FILE_END);
+        const BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, FILE_END);
         if (ok == 0)
         {
             throw Win32Error("Could not seek file.", GetLastError());
@@ -169,5 +204,157 @@ static_assert(IsSeekableV<LFileWin32>, "not a Seekable");
 } // namespace LexIO
 
 #else
+
+#include <fcntl.h>
+#include <unistd.h>
+
+namespace LexIO
+{
+
+class POSIXError : public std::runtime_error
+{
+    int m_error = 0;
+
+  public:
+    POSIXError(const char *what, const int error) : std::runtime_error(what), m_error(error) {}
+    int GetError() const noexcept { return m_error; }
+};
+
+class LFilePOSIX
+{
+    int m_fd = -1;
+    LFilePOSIX(const int fd) : m_fd(fd) {}
+
+  public:
+    LFilePOSIX(const LFilePOSIX &other) = delete;
+    LFilePOSIX &operator=(const LFilePOSIX &other) = delete;
+    LFilePOSIX(LFilePOSIX &&other) noexcept = default;
+    LFilePOSIX &operator=(LFilePOSIX &&other) noexcept = delete;
+
+    /**
+     * @brief Destructor closes file handle with no error handling.
+     */
+    ~LFilePOSIX() { close(m_fd); }
+
+    /**
+     * @brief Open a file for reading.
+     *
+     * @param path Path to filename, assumed to be a null-terminated string.
+     * @param flags flags to pass to open(2) call.
+     * @param mode mode to pass to open(2) call.
+     * @return A constructed LFilePOSIX object.
+     * @throws POSIXError if error was encountered.
+     */
+    static LFilePOSIX Open(const char *path, const int flags, mode_t mode)
+    {
+        const int fd = open(path, flags, mode);
+        if (fd == -1)
+        {
+            throw POSIXError("Could not open file.", errno);
+        }
+
+        return LFilePOSIX(fd);
+    }
+
+    /**
+     * @brief Close the file.
+     */
+    void Close()
+    {
+        const int ok = close(m_fd);
+        if (ok == -1)
+        {
+            throw POSIXError("Could not close file.", errno);
+        }
+    }
+
+    size_t RawRead(SpanT buffer)
+    {
+        const ssize_t bytesRead = read(m_fd, buffer.data(), buffer.size());
+        if (bytesRead == -1)
+        {
+            throw POSIXError("Could not read file.", errno);
+        }
+        return static_cast<size_t>(bytesRead);
+    }
+
+    size_t RawWrite(ConstSpanT buffer)
+    {
+        const ssize_t bytesRead = write(m_fd, buffer.data(), buffer.size());
+        if (bytesRead == -1)
+        {
+            throw POSIXError("Could not write file.", errno);
+        }
+        return static_cast<size_t>(bytesRead);
+    }
+
+    void Flush()
+    {
+        const int ok = fsync(m_fd);
+        if (ok == -1)
+        {
+            throw POSIXError("Could not flush file.", errno);
+        }
+    }
+
+    size_t Seek(const WhenceStart whence)
+    {
+        const off_t newOffset = lseek(m_fd, static_cast<off_t>(whence.offset), SEEK_SET);
+        if (newOffset == -1)
+        {
+            throw POSIXError("Could not seek file.", errno);
+        }
+        return static_cast<size_t>(newOffset);
+    }
+
+    size_t Seek(const WhenceCurrent whence)
+    {
+        const off_t newOffset = lseek(m_fd, static_cast<off_t>(whence.offset), SEEK_CUR);
+        if (newOffset == -1)
+        {
+            throw POSIXError("Could not seek file.", errno);
+        }
+        return static_cast<size_t>(newOffset);
+    }
+
+    size_t Seek(const WhenceEnd whence)
+    {
+        const off_t newOffset = lseek(m_fd, static_cast<off_t>(whence.offset), SEEK_END);
+        if (newOffset == -1)
+        {
+            throw POSIXError("Could not seek file.", errno);
+        }
+        return static_cast<size_t>(newOffset);
+    }
+};
+
+using LFile = LFilePOSIX;
+
+static_assert(IsReaderV<LFile>, "LFile is not a Reader");
+static_assert(IsWriterV<LFile>, "LFile is not a Writer");
+static_assert(IsSeekableV<LFile>, "LFile is not a Seekable");
+
+inline LFile LOpen(const char *path, const LOpenMode mode)
+{
+    switch (mode)
+    {
+    case LOpenMode::read:
+        return LFilePOSIX::Open(path, O_RDONLY, 0666);
+    case LOpenMode::write:
+        return LFilePOSIX::Open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    case LOpenMode::append:
+        return LFilePOSIX::Open(path, O_WRONLY | O_CREAT, 0666);
+    case LOpenMode::readPlus:
+        return LFilePOSIX::Open(path, O_RDWR, 0666);
+    case LOpenMode::writePlus:
+        return LFilePOSIX::Open(path, O_RDWR | O_CREAT | O_TRUNC, 0666);
+    case LOpenMode::appendPlus:
+        return LFilePOSIX::Open(path, O_RDWR | O_CREAT, 0666);
+    default:
+        throw std::runtime_error("Unknown open mode type.");
+    }
+}
+
+} // namespace LexIO
 
 #endif
