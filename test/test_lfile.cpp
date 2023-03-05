@@ -14,10 +14,24 @@
 //  limitations under the License.
 //
 
-#pragma once
+#include "test_nonstd.h"
 
-#include "lexio_core.h"
+#include "lexio.h"
 
-#include "lexio_lfile.h"
-#include "lexio_serialize.h"
-#include "lexio_std.h"
+#include <catch2/catch_all.hpp>
+
+//------------------------------------------------------------------------------
+
+#if defined(_WIN32)
+
+TEST_CASE("Test LFile Reader", "[lfile]")
+{
+    LexIO::LFileWin32 file = LexIO::LFileWin32::Open("CMakeCache.txt");
+
+    uint8_t buffer[32];
+    LexIO::RawRead(file, buffer);
+
+    printf("Done!\n");
+}
+
+#endif

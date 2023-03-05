@@ -22,12 +22,14 @@ FetchContent_MakeAvailable(Catch2)
 set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_core.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_lfile.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_serialize.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_std.h")
 
 add_executable(test
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_core.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_lfile.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_serialize.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_std.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.h"
