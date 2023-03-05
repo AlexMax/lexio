@@ -8,4 +8,6 @@ fi
 
 echo "CMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
-"${SCRIPT_DIR}/../build/${BUILD_TYPE}/test"
+cd "${SCRIPT_DIR}/../build"
+
+"./${BUILD_TYPE}/test"
