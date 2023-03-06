@@ -21,6 +21,7 @@ FetchContent_MakeAvailable(Catch2)
 
 set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_buf.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_core.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_lfile.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_serialize.h"
@@ -28,6 +29,7 @@ set(LEXIO_HEADERS
 
 add_executable(test
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_buf.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_core.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_lfile.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_serialize.cpp"
@@ -35,8 +37,13 @@ add_executable(test
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.h"
      ${LEXIO_HEADERS})
 
+add_executable(compile
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/compile.cpp"
+    ${LEXIO_HEADERS}) 
+
 if(LEXIO_TEST_NONSTD)
     target_compile_definitions(test PUBLIC LEXIO_TEST_NONSTD)
+    target_compile_definitions(compile PUBLIC LEXIO_TEST_NONSTD)
 endif()
 
 find_program(CLANG_TIDY_EXE clang-tidy)
@@ -46,14 +53,17 @@ endif()
 
 if(MSVC)
     target_compile_options(test PUBLIC /W4)
+    target_compile_options(compile PUBLIC /W4)
 else()
     target_compile_options(test PUBLIC -Wall -Wextra -Wno-unknown-pragmas)
+    target_compile_options(compile PUBLIC -Wall -Wextra -Wno-unknown-pragmas)
 endif()
 
 find_package(Sanitizers)
 add_sanitizers(test)
 
 target_include_directories(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(compile PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(test PUBLIC Catch2::Catch2WithMain)
 
 if(NOT LEXIO_TEST_NONSTD)

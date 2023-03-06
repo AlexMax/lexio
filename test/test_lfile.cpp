@@ -33,7 +33,7 @@ TEST_CASE("Test file opened in read mode", "[lfile]")
     LexIO::RawRead(file, readBuffer);
     size_t testLen = strlen(firstLine);
     readBuffer[testLen] = '\0';
-    REQUIRE(!strcmp((const char *)&readBuffer[0], firstLine));
+    REQUIRE(!strcmp(reinterpret_cast<const char *>(&readBuffer[0]), firstLine));
 
     // Test writing.
     const uint8_t writeBuffer[32] = {0x00};

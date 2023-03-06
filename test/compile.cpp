@@ -14,11 +14,27 @@
 //  limitations under the License.
 //
 
-#pragma once
+//
+//  This is a test TU that does not include Catch2, used to test compile speed.
+//
 
-#include "lexio_core.h"
+#include "test_nonstd.h"
 
-#include "lexio_buf.h"
-#include "lexio_lfile.h"
-#include "lexio_serialize.h"
-#include "lexio_std.h"
+#include "lexio.h"
+
+#include <stdio.h>
+
+using LFileBufReader = LexIO::StdBufReader<LexIO::LFile>;
+
+int main()
+{
+    auto file = LexIO::LOpen("../test/test_file.txt", LexIO::LOpenMode::read);
+    auto buffer = LFileBufReader::FromReader(std::move(file));
+
+    std::vector<uint8_t> data;
+    LexIO::StdReadAll(buffer, data);
+    data.push_back(0x00);
+
+    printf("%s\n", reinterpret_cast<const char*>(data.data()));
+    return 0;
+}

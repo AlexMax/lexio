@@ -14,9 +14,21 @@
 //  limitations under the License.
 //
 
+//******************************************************************************
 //
-// Core interfaces and functions needed by everything else.
+// Core interfaces and functions needed by LexIO streams.
 //
+// LexIO streams are not derived from abstract classes, but by classes that
+// adhere to traits that are enforced by the type traits in this file.  There
+// are four basic types of stream.
+//
+// - Reader: These classes can read from a data source.
+// - BufferedReader: These classes read from a data source and keep said
+//                   data in an internal buffer.
+// - Writer: These classes can write to a data source.
+// - Seekable: These classes can seek to various points in the stream.
+//
+//******************************************************************************
 
 #pragma once
 
@@ -90,6 +102,62 @@ struct HasRawRead<T,                                                            
 };
 
 /**
+ * @brief SFINAE struct for detecting a valid "GetBufferSize" method in a BufferedReader type.
+ *
+ * @tparam T Type to check.
+ */
+template <typename, typename _ = void>
+struct HasGetBufferSize : std::false_type
+{
+};
+
+template <typename T>
+struct HasGetBufferSize<T,                                                                             //
+                        std::enable_if_t<                                                              //
+                            std::is_same<size_t, decltype(std::declval<T>().GetBufferSize())>::value>> //
+    : std::true_type
+{
+};
+
+/**
+ * @brief SFINAE struct for detecting a valid "FillBuffer" method in a BufferedReader type.
+ *
+ * @tparam T Type to check.
+ */
+template <typename, typename _ = void>
+struct HasFillBuffer : std::false_type
+{
+};
+
+template <typename T>
+struct HasFillBuffer<
+    T,                                                                                                    //
+    std::enable_if_t<                                                                                     //
+        std::is_same<ConstSpanT, decltype(std::declval<T>().FillBuffer(std::declval<size_t>()))>::value>> //
+    : std::true_type
+{
+};
+
+/**
+ * @brief SFINAE struct for detecting a valid "ConsumeBuffer" method in a BufferedReader type.
+ *
+ * @tparam T Type to check.
+ */
+template <typename, typename _ = void>
+struct HasConsumeBuffer : std::false_type
+{
+};
+
+template <typename T>
+struct HasConsumeBuffer<
+    T,                                                                                                 //
+    std::enable_if_t<                                                                                  //
+        std::is_same<void, decltype(std::declval<T>().ConsumeBuffer(std::declval<size_t>()))>::value>> //
+    : std::true_type
+{
+};
+
+/**
  * @brief SFINAE struct for detecting a valid "RawWrite" method in a Writer type.
  *
  * @tparam T Type to check.
@@ -145,62 +213,6 @@ struct HasSeek<T, U,                                                            
 {
 };
 
-/**
- * @brief SFINAE struct for detecting a valid "GetBuffer" method in a BufferedReader type.
- *
- * @tparam T Type to check.
- */
-template <typename, typename _ = void>
-struct HasGetBuffer : std::false_type
-{
-};
-
-template <typename T>
-struct HasGetBuffer<T,                                                                                    //
-                    std::enable_if_t<                                                                     //
-                        std::is_same<LexIO::ConstSpanT, decltype(std::declval<T>().GetBuffer())>::value>> //
-    : std::true_type
-{
-};
-
-/**
- * @brief SFINAE struct for detecting a valid "FillBuffer" method in a BufferedReader type.
- *
- * @tparam T Type to check.
- */
-template <typename, typename _ = void>
-struct HasFillBuffer : std::false_type
-{
-};
-
-template <typename T>
-struct HasFillBuffer<
-    T,                                                                                                           //
-    std::enable_if_t<                                                                                            //
-        std::is_same<LexIO::ConstSpanT, decltype(std::declval<T>().FillBuffer(std::declval<size_t>()))>::value>> //
-    : std::true_type
-{
-};
-
-/**
- * @brief SFINAE struct for detecting a valid "ConsumeBuffer" method in a BufferedReader type.
- *
- * @tparam T Type to check.
- */
-template <typename, typename _ = void>
-struct HasConsumeBuffer : std::false_type
-{
-};
-
-template <typename T>
-struct HasConsumeBuffer<
-    T,                                                                                                 //
-    std::enable_if_t<                                                                                  //
-        std::is_same<void, decltype(std::declval<T>().ConsumeBuffer(std::declval<size_t>()))>::value>> //
-    : std::true_type
-{
-};
-
 } // namespace Detail
 
 /**
@@ -225,7 +237,8 @@ struct IsReader : std::integral_constant<bool, IsReaderV<T>>
  */
 template <typename T>
 LEXIO_INLINE_VAR constexpr bool IsBufferedReaderV =
-    Detail::HasGetBuffer<T>::value && Detail::HasFillBuffer<T>::value && Detail::HasConsumeBuffer<T>::value;
+    Detail::HasRawRead<T>::value && Detail::HasGetBufferSize<T>::value && Detail::HasFillBuffer<T>::value &&
+    Detail::HasConsumeBuffer<T>::value;
 
 /**
  * @brief If the template parameter is a valid BufferedReader, provides a
@@ -274,6 +287,13 @@ struct IsSeekable : std::integral_constant<bool, IsSeekableV<T>>
 {
 };
 
+//******************************************************************************
+//
+// The following functions are used to call basic stream functionality that
+// all streams that adhere to a given trait must provide.
+//
+//******************************************************************************
+
 /**
  * @brief Read data from the current offset, inserting it into the passed
  *        buffer and advancing the offset.
@@ -293,15 +313,17 @@ inline size_t RawRead(READER &reader, SpanT outBytes)
 }
 
 /**
- * @brief Return a view of the internal buffer used by the reader.
+ * @brief Returns the size of the internal buffer.  This tells you how much
+ *        data the buffer is currently capable of holding, regardless of
+ *        how much data is actually buffered.
  *
- * @param bufReader BufferedReader to operate on.
- * @return Span view of the internal buffer.
+ * @param bufReader BufferedReader to examine.
+ * @return Size of internal buffer.
  */
 template <typename BUFFERED_READER>
-inline LexIO::ConstSpanT GetBuffer(BUFFERED_READER &bufReader) noexcept
+inline size_t GetBufferSize(BUFFERED_READER &bufReader) noexcept
 {
-    return bufReader.GetBuffer();
+    return bufReader.GetBufferSize();
 }
 
 /**
@@ -318,14 +340,14 @@ inline LexIO::ConstSpanT GetBuffer(BUFFERED_READER &bufReader) noexcept
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename BUFFERED_READER>
-inline LexIO::ConstSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
+inline ConstSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
 {
     return bufReader.FillBuffer(size);
 }
 
 /**
  * @brief Signal to the reader that the given number of bytes have been
- *        "consumed" and should no longer be returned by
+ *        "consumed" and should no longer be returned by FillBuffer.
  *
  * @param bufReader BufferedReader to operate on.
  * @param size Amount of data to consume in bytes.  Must be less than or
@@ -411,6 +433,26 @@ inline size_t Seek(SEEKABLE &seekable, const WhenceEnd whence)
     return seekable.Seek(whence);
 }
 
+//******************************************************************************
+//
+// The following functions are default implementations of common stream
+// functionality that builds off of the basic functions.  It is expected that
+// these functions can be specialized if need be.
+//
+//******************************************************************************
+
+/**
+ * @brief Get the current contents of the buffer.
+ *
+ * @param bufReader BufferedReader to operate on.
+ * @return Span view of the internal buffer.
+ */
+template <typename BUFFERED_READER>
+inline ConstSpanT GetBuffer(BUFFERED_READER &bufReader)
+{
+    return FillBuffer(bufReader, 0);
+}
+
 /**
  * @brief Return the current offset position.
  *
@@ -422,7 +464,7 @@ inline size_t Seek(SEEKABLE &seekable, const WhenceEnd whence)
 template <typename SEEKABLE>
 inline size_t Tell(SEEKABLE &seekable)
 {
-    return seekable.Seek(WhenceCurrent(0));
+    return Seek(seekable, WhenceCurrent(0));
 }
 
 /**
@@ -436,9 +478,9 @@ inline size_t Tell(SEEKABLE &seekable)
 template <typename SEEKABLE>
 inline size_t Length(SEEKABLE &seekable)
 {
-    const size_t old = seekable.Seek(WhenceCurrent(0));
-    const size_t len = seekable.Seek(WhenceEnd(0));
-    seekable.Seek(WhenceStart(size_t(old)));
+    const size_t old = Seek(seekable, WhenceCurrent(0));
+    const size_t len = Seek(seekable, WhenceEnd(0));
+    Seek(seekable, WhenceStart(size_t(old)));
     return len;
 }
 

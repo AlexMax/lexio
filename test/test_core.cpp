@@ -34,9 +34,9 @@ static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReade
 
 //------------------------------------------------------------------------------
 
-struct GoodBufferedReader
+struct GoodBufferedReader : public GoodReader
 {
-    LexIO::ConstSpanT GetBuffer() const { return LexIO::ConstSpanT(); }
+    size_t GetBufferSize() const { return 0; }
     LexIO::ConstSpanT FillBuffer(const size_t size)
     {
         (void)size;

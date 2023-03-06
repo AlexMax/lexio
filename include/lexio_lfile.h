@@ -73,13 +73,31 @@ class LFileWin32
   public:
     LFileWin32(const LFileWin32 &other) = delete;
     LFileWin32 &operator=(const LFileWin32 &other) = delete;
-    LFileWin32(LFileWin32 &&other) noexcept = default;
-    LFileWin32 &operator=(LFileWin32 &&other) noexcept = delete;
+
+    LFileWin32(LFileWin32 &&other) noexcept
+    {
+        m_fileHandle = other.m_fileHandle;
+        other.m_fileHandle = INVALID_HANDLE_VALUE;
+    }
+
+    LFileWin32 &operator=(LFileWin32 &&other) noexcept
+    {
+        m_fileHandle = other.m_fileHandle;
+        other.m_fileHandle = INVALID_HANDLE_VALUE;
+        return *this;
+    }
 
     /**
      * @brief Destructor closes file handle with no error handling.
      */
-    ~LFileWin32() { CloseHandle(m_fileHandle); }
+    ~LFileWin32()
+    {
+        if (m_fileHandle != INVALID_HANDLE_VALUE)
+        {
+            CloseHandle(m_fileHandle);
+        }
+        m_fileHandle = INVALID_HANDLE_VALUE;
+    }
 
     /**
      * @brief Open a file for reading.
@@ -126,17 +144,22 @@ class LFileWin32
      */
     void Close()
     {
-        const BOOL ok = CloseHandle(m_fileHandle);
-        if (ok == FALSE)
+        if (m_fileHandle != INVALID_HANDLE_VALUE)
         {
-            throw Win32Error("Could not close file.", GetLastError());
+            const BOOL ok = CloseHandle(m_fileHandle);
+            if (ok == FALSE)
+            {
+                throw Win32Error("Could not close file.", GetLastError());
+            }
+            m_fileHandle = INVALID_HANDLE_VALUE;
         }
     }
 
     size_t RawRead(SpanT buffer)
     {
+        DWORD bytesToRead = static_cast<DWORD>(buffer.size());
         DWORD bytesRead = 0;
-        const BOOL ok = ReadFile(m_fileHandle, buffer.data(), buffer.size(), &bytesRead, NULL);
+        const BOOL ok = ReadFile(m_fileHandle, buffer.data(), bytesToRead, &bytesRead, NULL);
         if (ok == FALSE)
         {
             throw Win32Error("Could not read file.", GetLastError());
@@ -146,8 +169,9 @@ class LFileWin32
 
     size_t RawWrite(ConstSpanT buffer)
     {
+        DWORD bytesToRead = static_cast<DWORD>(buffer.size());
         DWORD bytesRead = 0;
-        const BOOL ok = WriteFile(m_fileHandle, buffer.data(), buffer.size(), &bytesRead, NULL);
+        const BOOL ok = WriteFile(m_fileHandle, buffer.data(), bytesToRead, &bytesRead, NULL);
         if (ok == FALSE)
         {
             throw Win32Error("Could not write file.", GetLastError());
