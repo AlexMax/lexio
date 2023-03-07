@@ -39,4 +39,5 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config Debug --parallel
     - name: Run Tests
-      run: ${{github.workspace}}/build/Debug/test.exe
+      shell: pwsh
+      run: ${{github.workspace}}/ci/run_test.ps1
