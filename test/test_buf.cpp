@@ -32,7 +32,7 @@ TEST_CASE("Test StdReadAll on a standard StdBufReader", "[buf]")
     auto buffer = LFileBufReader::FromReader(std::move(file));
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::StdReadAll(buffer, data);
+    const size_t bytes = LexIO::ReadAll(buffer, std::back_inserter(data));
     REQUIRE((bytes == 45 || bytes == 47)); // Newlines are different sizes.
     REQUIRE((data.size() == 45 || data.size() == 47));
     REQUIRE(*(data.end() - 1) == '\n');
@@ -44,7 +44,7 @@ TEST_CASE("Test StdReadAll on a small StdBufReader", "[buf]")
     auto buffer = LFileBufReader::FromReader(std::move(file), 4);
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::StdReadAll(buffer, data);
+    const size_t bytes = LexIO::ReadAll(buffer, std::back_inserter(data));
     REQUIRE(data[4] == 'q'); // Check the buffer boundary.
     REQUIRE(data[8] == 'k');
     REQUIRE((bytes == 45 || bytes == 47)); // Newlines are different sizes.

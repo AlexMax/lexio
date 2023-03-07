@@ -454,6 +454,35 @@ inline ConstSpanT GetBuffer(BUFFERED_READER &bufReader)
 }
 
 /**
+ * @brief Read the entire contents of the stream using the buffer.
+ * 
+ * @param bufReader BufferedReader to operate on.
+ * @param it Insert iterator to write result into.
+ * @return Total number of bytes written.
+ */
+template <typename BUFFERED_READER, typename INSERT_ITER>
+size_t ReadAll(BUFFERED_READER &bufReader, INSERT_ITER it)
+{
+    size_t size = 0;
+    for (;;)
+    {
+        LexIO::ConstSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
+        if (buf.size() == 0)
+        {
+            // Read all data there was to read.
+            return size;
+        }
+
+        // Copy the buffered data into the vector.
+        std::copy(buf.begin(), buf.end(), it);
+
+        // Consume what we've read.
+        ConsumeBuffer(bufReader, buf.size());
+        size += buf.size();
+    }
+}
+
+/**
  * @brief Return the current offset position.
  *
  * @param seekable Seekable to operate on.

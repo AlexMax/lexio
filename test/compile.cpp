@@ -22,6 +22,7 @@
 
 #include "lexio.h"
 
+#include <iterator>
 #include <stdio.h>
 
 using LFileBufReader = LexIO::StdBufReader<LexIO::LFile>;
@@ -32,7 +33,7 @@ int main()
     auto buffer = LFileBufReader::FromReader(std::move(file));
 
     std::vector<uint8_t> data;
-    LexIO::StdReadAll(buffer, data);
+    LexIO::ReadAll(buffer, std::back_inserter(data));
     data.push_back(0x00);
 
     printf("%s\n", reinterpret_cast<const char*>(data.data()));

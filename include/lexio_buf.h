@@ -112,32 +112,4 @@ class StdBufReader
     }
 };
 
-//******************************************************************************
-//
-// Functions that operate on BufferedReaders that depend on STL types.
-//
-//******************************************************************************
-
-template <typename BUFFERED_READER>
-size_t StdReadAll(BUFFERED_READER &bufReader, std::vector<uint8_t> &outBuffer)
-{
-    for (;;)
-    {
-        LexIO::ConstSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
-        if (buf.size() == 0)
-        {
-            // Read all data there was to read.
-            return outBuffer.size();
-        }
-
-        // Copy the buffered data into the vector.
-        const size_t offset = outBuffer.size();
-        outBuffer.resize(outBuffer.size() + buf.size());
-        std::copy(buf.begin(), buf.end(), outBuffer.begin() + static_cast<ptrdiff_t>(offset));
-
-        // Consume what we've read.
-        ConsumeBuffer(bufReader, buf.size());
-    }
-}
-
 } // namespace LexIO
