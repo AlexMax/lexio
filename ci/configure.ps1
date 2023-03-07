@@ -2,8 +2,6 @@ $GENERATOR="${Env:GENERATOR}"
 $CXX_STANDARD="${Env:CXX_STANDARD}"
 $LEXIO_TEST_NONSTD="${Env:LEXIO_TEST_NONSTD}"
 
-Remove-Item -Recurse -Force "${PSScriptRoot}/../build"
-
 if (-Not $GENERATOR) {
     $GENERATOR="Ninja Multi-Config"
 }
@@ -14,6 +12,10 @@ if (-Not $CXX_STANDARD) {
 
 if (-Not $LEXIO_TEST_NONSTD) {
     $LEXIO_TEST_NONSTD="OFF"
+}
+
+if(Test-Path "${PSScriptRoot}/../build") {
+    Remove-Item -Recurse -Force "${PSScriptRoot}/../build"
 }
 
 Push-Location .
