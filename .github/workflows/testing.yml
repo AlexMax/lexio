@@ -35,9 +35,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Configure
-      run: cmake -B ${{github.workspace}}/build -G "${{env.GENERATOR}}" -DCMAKE_CXX_STANDARD=${{env.CXX_STANDARD}}
+      shell: pwsh
+      run: ${{github.workspace}}/ci/configure.ps1
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config Debug --parallel
+      shell: pwsh
+      run: ${{github.workspace}}/ci/build.ps1
     - name: Run Tests
       shell: pwsh
       run: ${{github.workspace}}/ci/run_test.ps1
