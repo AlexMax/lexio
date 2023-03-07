@@ -51,12 +51,18 @@ if(CLANG_TIDY_EXE)
     set_target_properties(test PROPERTIES CXX_CLANG_TIDY ${CLANG_TIDY_EXE})
 endif()
 
+set(LEXIO_EXTRA_FLAGS "")
+check_cxx_compiler_flag(-Wmost W_MOST) # clang
+if(W_MOST)
+    list(APPEND LEXIO_EXTRA_FLAGS "-Wmost")
+endif()
+
 if(MSVC)
-    target_compile_options(test PUBLIC /W4)
-    target_compile_options(compile PUBLIC /W4)
+    target_compile_options(test PUBLIC ${LEXIO_EXTRA_FLAGS} /W4)
+    target_compile_options(compile PUBLIC ${LEXIO_EXTRA_FLAGS} /W4)
 else()
-    target_compile_options(test PUBLIC -Wall -Wextra -Wno-unknown-pragmas)
-    target_compile_options(compile PUBLIC -Wall -Wextra -Wno-unknown-pragmas)
+    target_compile_options(test PUBLIC ${LEXIO_EXTRA_FLAGS} -Wall -Wextra -Wno-unknown-pragmas)
+    target_compile_options(compile PUBLIC ${LEXIO_EXTRA_FLAGS} -Wall -Wextra -Wno-unknown-pragmas)
 endif()
 
 find_package(Sanitizers)

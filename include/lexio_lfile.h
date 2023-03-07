@@ -279,13 +279,30 @@ class LFilePOSIX
   public:
     LFilePOSIX(const LFilePOSIX &other) = delete;
     LFilePOSIX &operator=(const LFilePOSIX &other) = delete;
-    LFilePOSIX(LFilePOSIX &&other) noexcept = default;
-    LFilePOSIX &operator=(LFilePOSIX &&other) noexcept = delete;
+
+    LFilePOSIX(LFilePOSIX &&other) noexcept : m_fd(other.m_fd)
+    {
+        other.m_fd = -1;
+    }
+
+    LFilePOSIX &operator=(LFilePOSIX &&other) noexcept
+    {
+        m_fd = other.m_fd;
+        other.m_fd = -1;
+        return *this;
+    }
 
     /**
      * @brief Destructor closes file handle with no error handling.
      */
-    ~LFilePOSIX() { close(m_fd); }
+    ~LFilePOSIX()
+    {
+        if (m_fd != -1)
+        {
+            close(m_fd);
+        }
+        m_fd = -1;
+    }
 
     /**
      * @brief Open a file for reading.
@@ -312,10 +329,14 @@ class LFilePOSIX
      */
     void Close()
     {
-        const int ok = close(m_fd);
-        if (ok == -1)
+        if (m_fd != -1)
         {
-            throw POSIXError("Could not close file.", errno);
+            const int ok = close(m_fd);
+            if (ok == -1)
+            {
+                throw POSIXError("Could not close file.", errno);
+            }
+            m_fd = -1;
         }
     }
 

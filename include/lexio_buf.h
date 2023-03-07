@@ -95,7 +95,7 @@ class StdBufReader
 
         // We don't have enough data buffered, read to make up the difference
         // and set the new end index appropriately.
-        SpanT target(m_buffer.begin() + m_start, m_buffer.begin() + size);
+        SpanT target(m_buffer.begin() + m_start, m_buffer.begin() + static_cast<ptrdiff_t>(size));
         const size_t actualSize = m_reader.RawRead(target);
         m_end = m_start + actualSize;
         return ConstSpanT(m_buffer.begin() + m_start, m_buffer.begin() + m_end);
@@ -133,7 +133,7 @@ size_t StdReadAll(BUFFERED_READER &bufReader, std::vector<uint8_t> &outBuffer)
         // Copy the buffered data into the vector.
         const size_t offset = outBuffer.size();
         outBuffer.resize(outBuffer.size() + buf.size());
-        std::copy(buf.begin(), buf.end(), outBuffer.begin() + offset);
+        std::copy(buf.begin(), buf.end(), outBuffer.begin() + static_cast<ptrdiff_t>(offset));
 
         // Consume what we've read.
         ConsumeBuffer(bufReader, buf.size());
