@@ -6,8 +6,8 @@ if (-Not $BUILD_TYPE) {
 
 Write-Output "CMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
-Push-Location "${PSScriptRoot}/../build"
+Push-Location "${PSScriptRoot}\..\build"
 
-& "./${BUILD_TYPE}/test.exe"
+& ".\${BUILD_TYPE}\test.exe"
 
 Pop-Location

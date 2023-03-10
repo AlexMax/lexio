@@ -14,8 +14,8 @@ if (-Not $LEXIO_TEST_NONSTD) {
     $LEXIO_TEST_NONSTD="OFF"
 }
 
-if(Test-Path "${PSScriptRoot}/../build") {
-    Remove-Item -Recurse -Force "${PSScriptRoot}/../build"
+if(Test-Path "${PSScriptRoot}\..\build") {
+    Remove-Item -Recurse -Force "${PSScriptRoot}\..\build"
 }
 
 Push-Location .
@@ -27,8 +27,8 @@ $VSPATH = & "${VSWHERE}" -latest -property installationPath
 
 # Configure
 cmake `
-    -S "${PSScriptRoot}/.." `
-    -B "${PSScriptRoot}/../build" `
+    -S "${PSScriptRoot}\.." `
+    -B "${PSScriptRoot}\..\build" `
     -G "${GENERATOR}" `
     -D "CMAKE_CXX_STANDARD=${CXX_STANDARD}" `
     -D "LEXIO_TEST_NONSTD=${LEXIO_TEST_NONSTD}" `
