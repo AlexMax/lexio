@@ -35,10 +35,9 @@
 #include <cstdint>
 #include <stdexcept>
 
-#if !defined(LEXIO_SPAN_TYPE) && !defined(LEXIO_CONST_SPAN_TYPE)
+#if !defined(LEXIO_SPAN)
 #include <span>
-#define LEXIO_SPAN_TYPE std ::span<uint8_t>
-#define LEXIO_CONST_SPAN_TYPE std::span<const uint8_t>
+#define LEXIO_SPAN(T) std::span<T>
 #endif
 
 #ifdef __cpp_inline_variables
@@ -50,8 +49,8 @@
 namespace LexIO
 {
 
-using SpanT = LEXIO_SPAN_TYPE;
-using ConstSpanT = LEXIO_CONST_SPAN_TYPE;
+using ByteSpanT = LEXIO_SPAN(uint8_t);
+using ConstByteSpanT = LEXIO_SPAN(const uint8_t);
 
 /**
  * @brief Parameter for Seek() that seeks from the start of the stream.
@@ -96,7 +95,7 @@ struct HasRawRead : std::false_type
 template <typename T>
 struct HasRawRead<T,                                                                                            //
                   std::enable_if_t<                                                                             //
-                      std::is_same<size_t, decltype(std::declval<T>().RawRead(std::declval<SpanT>()))>::value>> //
+                      std::is_same<size_t, decltype(std::declval<T>().RawRead(std::declval<ByteSpanT>()))>::value>> //
     : std::true_type
 {
 };
@@ -133,7 +132,7 @@ template <typename T>
 struct HasFillBuffer<
     T,                                                                                                    //
     std::enable_if_t<                                                                                     //
-        std::is_same<ConstSpanT, decltype(std::declval<T>().FillBuffer(std::declval<size_t>()))>::value>> //
+        std::is_same<ConstByteSpanT, decltype(std::declval<T>().FillBuffer(std::declval<size_t>()))>::value>> //
     : std::true_type
 {
 };
@@ -171,7 +170,7 @@ template <typename T>
 struct HasRawWrite<
     T,                                                                                                  //
     std::enable_if_t<                                                                                   //
-        std::is_same<size_t, decltype(std::declval<T>().RawWrite(std::declval<ConstSpanT>()))>::value>> //
+        std::is_same<size_t, decltype(std::declval<T>().RawWrite(std::declval<ConstByteSpanT>()))>::value>> //
     : std::true_type
 {
 };
@@ -307,7 +306,7 @@ struct IsSeekable : std::integral_constant<bool, IsSeekableV<T>>
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename READER>
-inline size_t RawRead(READER &reader, SpanT outBytes)
+inline size_t RawRead(READER &reader, ByteSpanT outBytes)
 {
     return reader.RawRead(outBytes);
 }
@@ -340,7 +339,7 @@ inline size_t GetBufferSize(BUFFERED_READER &bufReader) noexcept
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename BUFFERED_READER>
-inline ConstSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
+inline ConstByteSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
 {
     return bufReader.FillBuffer(size);
 }
@@ -372,7 +371,7 @@ inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename WRITER>
-inline size_t RawWrite(WRITER &writer, ConstSpanT bytes)
+inline size_t RawWrite(WRITER &writer, ConstByteSpanT bytes)
 {
     return writer.RawWrite(bytes);
 }
@@ -448,7 +447,7 @@ inline size_t Seek(SEEKABLE &seekable, const WhenceEnd whence)
  * @return Span view of the internal buffer.
  */
 template <typename BUFFERED_READER>
-inline ConstSpanT GetBuffer(BUFFERED_READER &bufReader)
+inline ConstByteSpanT GetBuffer(BUFFERED_READER &bufReader)
 {
     return FillBuffer(bufReader, 0);
 }
@@ -466,7 +465,7 @@ size_t ReadAll(BUFFERED_READER &bufReader, INSERT_ITER it)
     size_t size = 0;
     for (;;)
     {
-        LexIO::ConstSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
+        LexIO::ConstByteSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
         if (buf.size() == 0)
         {
             // Read all data there was to read.

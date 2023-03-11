@@ -8,11 +8,12 @@ Requirements
 ------------
 You need a C++14 compatible compiler and an implementation of std::span.
 
-You can use spans other than std::span with this library.  Define `LEXIO_SPAN_TYPE` and `LEXIO_CONST_SPAN_TYPE` to the type names the library should use before including `lexio.h`.
+You can use spans other than `std::span` with this library.  Define `LEXIO_SPAN` as a macro that names a span type of the passed parameter before including `lexio.h`.
 
 ```cpp
-#define LEXIO_SPAN_TYPE nonstd ::span<uint8_t>
-#define LEXIO_CONST_SPAN_TYPE nonstd::span<const uint8_t>
+#include "nonstd/span.hpp"
+
+#define LEXIO_SPAN(T) nonstd::span<T>
 
 #include "lexio.h"
 ```

@@ -155,7 +155,7 @@ class LFileWin32
         }
     }
 
-    size_t RawRead(SpanT buffer)
+    size_t RawRead(ByteSpanT buffer)
     {
         DWORD bytesToRead = static_cast<DWORD>(buffer.size());
         DWORD bytesRead = 0;
@@ -167,7 +167,7 @@ class LFileWin32
         return bytesRead;
     }
 
-    size_t RawWrite(ConstSpanT buffer)
+    size_t RawWrite(ConstByteSpanT buffer)
     {
         DWORD bytesToRead = static_cast<DWORD>(buffer.size());
         DWORD bytesRead = 0;
@@ -340,7 +340,7 @@ class LFilePOSIX
         }
     }
 
-    size_t RawRead(SpanT buffer)
+    size_t RawRead(ByteSpanT buffer)
     {
         const ssize_t bytesRead = read(m_fd, buffer.data(), buffer.size());
         if (bytesRead == -1)
@@ -350,7 +350,7 @@ class LFilePOSIX
         return static_cast<size_t>(bytesRead);
     }
 
-    size_t RawWrite(ConstSpanT buffer)
+    size_t RawWrite(ConstByteSpanT buffer)
     {
         const ssize_t bytesRead = write(m_fd, buffer.data(), buffer.size());
         if (bytesRead == -1)

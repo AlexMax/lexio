@@ -58,7 +58,7 @@ class StdBufferBase
     StdBufferBase(const T &buffer) : m_buffer(buffer) {}
     StdBufferBase(T &&buffer) : m_buffer(buffer) {}
 
-    size_t RawRead(SpanT buffer)
+    size_t RawRead(ByteSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_offset + buffer.size());
@@ -70,7 +70,7 @@ class StdBufferBase
 
     void Flush() {}
 
-    size_t RawWrite(ConstSpanT buffer)
+    size_t RawWrite(ConstByteSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_buffer.size());
@@ -157,7 +157,7 @@ class StdBuffer : public StdBufferBase<T>
         std::copy(list.begin(), list.end(), this->Buffer().begin());
     }
 
-    size_t RawWrite(ConstSpanT buffer)
+    size_t RawWrite(ConstByteSpanT buffer)
     {
         // Writes off the end of the burffer grow the buffer to fit.
         const size_t wantedOffset = this->Offset() + buffer.size();
@@ -171,6 +171,6 @@ class StdBuffer : public StdBufferBase<T>
 /**
  * @brief A span buffer using the current span type.
  */
-using SpanBuffer = StdBuffer<SpanT>;
+using SpanBuffer = StdBuffer<ByteSpanT>;
 
 } // namespace LexIO

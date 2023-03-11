@@ -22,7 +22,7 @@
 
 struct GoodReader
 {
-    size_t RawRead(LexIO::SpanT buffer)
+    size_t RawRead(LexIO::ByteSpanT buffer)
     {
         (void)buffer;
         return 0;
@@ -37,10 +37,10 @@ static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReade
 struct GoodBufferedReader : public GoodReader
 {
     size_t GetBufferSize() const { return 0; }
-    LexIO::ConstSpanT FillBuffer(const size_t size)
+    LexIO::ConstByteSpanT FillBuffer(const size_t size)
     {
         (void)size;
-        return LexIO::ConstSpanT();
+        return LexIO::ConstByteSpanT();
     }
     void ConsumeBuffer(const size_t size) { (void)size; }
 };
@@ -53,7 +53,7 @@ static_assert(LexIO::IsBufferedReaderV<GoodBufferedReader>, "GoodBufferedReader 
 
 struct GoodWriter
 {
-    size_t RawWrite(LexIO::ConstSpanT buffer)
+    size_t RawWrite(LexIO::ConstByteSpanT buffer)
     {
         (void)buffer;
         return 0;
@@ -110,7 +110,7 @@ static_assert(!LexIO::IsReaderV<BadReaderBadParam>, "BadReaderBadParam incorrect
 
 struct BadReaderBadReturn
 {
-    void RawRead(LexIO::SpanT buffer) { (void)buffer; }
+    void RawRead(LexIO::ByteSpanT buffer) { (void)buffer; }
 };
 
 static_assert(!LexIO::IsReaderV<BadReaderBadReturn>, "BadReaderBadReturn incorrectly fulfills IsReaderV");

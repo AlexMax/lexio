@@ -56,9 +56,9 @@ class StdBufReader
         return StdBufReader{std::move(reader), startSize};
     }
 
-    size_t RawRead(SpanT buffer)
+    size_t RawRead(ByteSpanT buffer)
     {
-        ConstSpanT peek = FillBuffer(buffer.size());
+        ConstByteSpanT peek = FillBuffer(buffer.size());
         std::copy(peek.begin(), peek.end(), buffer.begin());
         ConsumeBuffer(peek.size());
         return peek.size();
@@ -66,13 +66,13 @@ class StdBufReader
 
     size_t GetBufferSize() noexcept { return m_buffer.size(); }
 
-    ConstSpanT FillBuffer(const size_t size)
+    ConstByteSpanT FillBuffer(const size_t size)
     {
         size_t wantedEnd = m_start + size;
         if (wantedEnd < m_end)
         {
             // We have enough data in the buffer, return the entire buffer.
-            return ConstSpanT(&m_buffer[m_start], &m_buffer[m_end]);
+            return ConstByteSpanT(&m_buffer[m_start], &m_buffer[m_end]);
         }
         else if (m_buffer.empty())
         {
@@ -95,10 +95,10 @@ class StdBufReader
 
         // We don't have enough data buffered, read to make up the difference
         // and set the new end index appropriately.
-        SpanT target(m_buffer.begin() + m_start, m_buffer.begin() + static_cast<ptrdiff_t>(size));
+        ByteSpanT target(m_buffer.begin() + m_start, m_buffer.begin() + static_cast<ptrdiff_t>(size));
         const size_t actualSize = m_reader.RawRead(target);
         m_end = m_start + actualSize;
-        return ConstSpanT(m_buffer.begin() + m_start, m_buffer.begin() + m_end);
+        return ConstByteSpanT(m_buffer.begin() + m_start, m_buffer.begin() + m_end);
     }
 
     void ConsumeBuffer(const size_t size)
