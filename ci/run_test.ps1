@@ -6,8 +6,13 @@ if (-Not $BUILD_TYPE) {
 
 Write-Output "CMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
-Push-Location "${PSScriptRoot}/../build"
+# Find Visual Studio and set up compile environment, so we can run with ASan
+$VSWHERE = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+$VSPATH = & "${VSWHERE}" -latest -property installationPath
+& "${VSPATH}\Common7\Tools\Launch-VsDevShell.ps1"
 
-& "./${BUILD_TYPE}/test.exe"
+Push-Location "${PSScriptRoot}\..\build"
+
+& ".\${BUILD_TYPE}\test.exe"
 
 Pop-Location

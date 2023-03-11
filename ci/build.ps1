@@ -14,6 +14,6 @@ $VSPATH = & "${VSWHERE}" -latest -property installationPath
 & "${VSPATH}\Common7\Tools\Launch-VsDevShell.ps1"
 
 # Build
-cmake --build "${PSScriptRoot}/../build" --config "${BUILD_TYPE}"
+cmake --build "${PSScriptRoot}\..\build" --config "${BUILD_TYPE}"
 
 Pop-Location
