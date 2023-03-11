@@ -33,7 +33,7 @@ int main()
     auto buffer = LFileBufReader::FromReader(std::move(file));
 
     std::vector<uint8_t> data;
-    LexIO::ReadAll(buffer, std::back_inserter(data));
+    LexIO::ReadAll(std::back_inserter(data), buffer);
     data.push_back(0x00);
 
     printf("%s\n", reinterpret_cast<const char*>(data.data()));

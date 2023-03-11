@@ -26,27 +26,39 @@ using LFileBufReader = LexIO::StdBufReader<LexIO::LFile>;
 
 static_assert(LexIO::IsBufferedReaderV<LFileBufReader>, "LFileBufReader does not fulfill IsBufferedReaderV");
 
-TEST_CASE("Test StdReadAll on a standard StdBufReader", "[buf]")
+TEST_CASE("Test ReadAll on a standard StdBufReader", "[buf]")
 {
     auto file = LexIO::LOpen("../test/test_file.txt", LexIO::LOpenMode::read);
     auto buffer = LFileBufReader::FromReader(std::move(file));
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::ReadAll(buffer, std::back_inserter(data));
+    const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
     REQUIRE((bytes == 45 || bytes == 47)); // Newlines are different sizes.
     REQUIRE((data.size() == 45 || data.size() == 47));
     REQUIRE(*(data.end() - 1) == '\n');
 }
 
-TEST_CASE("Test StdReadAll on a small StdBufReader", "[buf]")
+TEST_CASE("Test ReadAll on a small StdBufReader", "[buf]")
 {
     auto file = LexIO::LOpen("../test/test_file.txt", LexIO::LOpenMode::read);
     auto buffer = LFileBufReader::FromReader(std::move(file), 4);
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::ReadAll(buffer, std::back_inserter(data));
+    const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
     REQUIRE(data[4] == 'q'); // Check the buffer boundary.
     REQUIRE(data[8] == 'k');
     REQUIRE((bytes == 45 || bytes == 47)); // Newlines are different sizes.
     REQUIRE((data.size() == 45 || data.size() == 47));
+}
+
+TEST_CASE("Test ReadUntil on a StdBufReader", "[buf]")
+{
+    auto file = LexIO::LOpen("../test/test_file.txt", LexIO::LOpenMode::read);
+    auto buffer = LFileBufReader::FromReader(std::move(file));
+
+    std::vector<uint8_t> data;
+    const size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
+    REQUIRE((bytes == 20 || bytes == 21)); // Newlines are different sizes.
+    REQUIRE((data.size() == 20 || data.size() == 21));
+    REQUIRE(*(data.end() - 1) == '\n');
 }

@@ -93,8 +93,8 @@ struct HasRawRead : std::false_type
 };
 
 template <typename T>
-struct HasRawRead<T,                                                                                            //
-                  std::enable_if_t<                                                                             //
+struct HasRawRead<T,                                                                                                //
+                  std::enable_if_t<                                                                                 //
                       std::is_same<size_t, decltype(std::declval<T>().RawRead(std::declval<ByteSpanT>()))>::value>> //
     : std::true_type
 {
@@ -130,8 +130,8 @@ struct HasFillBuffer : std::false_type
 
 template <typename T>
 struct HasFillBuffer<
-    T,                                                                                                    //
-    std::enable_if_t<                                                                                     //
+    T,                                                                                                        //
+    std::enable_if_t<                                                                                         //
         std::is_same<ConstByteSpanT, decltype(std::declval<T>().FillBuffer(std::declval<size_t>()))>::value>> //
     : std::true_type
 {
@@ -168,8 +168,8 @@ struct HasRawWrite : std::false_type
 
 template <typename T>
 struct HasRawWrite<
-    T,                                                                                                  //
-    std::enable_if_t<                                                                                   //
+    T,                                                                                                      //
+    std::enable_if_t<                                                                                       //
         std::is_same<size_t, decltype(std::declval<T>().RawWrite(std::declval<ConstByteSpanT>()))>::value>> //
     : std::true_type
 {
@@ -454,18 +454,18 @@ inline ConstByteSpanT GetBuffer(BUFFERED_READER &bufReader)
 
 /**
  * @brief Read the entire contents of the stream using the buffer.
- * 
+ *
+ * @param outIt Output iterator to write result into.
  * @param bufReader BufferedReader to operate on.
- * @param it Insert iterator to write result into.
- * @return Total number of bytes written.
+ * @return Total number of bytes read.
  */
-template <typename BUFFERED_READER, typename INSERT_ITER>
-size_t ReadAll(BUFFERED_READER &bufReader, INSERT_ITER it)
+template <typename OUT_ITER, typename BUFFERED_READER>
+size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
 {
     size_t size = 0;
     for (;;)
     {
-        LexIO::ConstByteSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
+        ConstByteSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
         if (buf.size() == 0)
         {
             // Read all data there was to read.
@@ -473,11 +473,54 @@ size_t ReadAll(BUFFERED_READER &bufReader, INSERT_ITER it)
         }
 
         // Copy the buffered data into the vector.
-        std::copy(buf.begin(), buf.end(), it);
+        std::copy(buf.begin(), buf.end(), outIt);
 
         // Consume what we've read.
         ConsumeBuffer(bufReader, buf.size());
         size += buf.size();
+    }
+}
+
+/**
+ * @brief Read the entire contents of the stream until we hit a terminating byte
+ *        or until EOF is hit.  The output will contain the terminator as the
+ *        last character, if seen.
+ *
+ * @param outIt Output iterator to write result into.
+ * @param bufReader BufferedReader to operate on.
+ * @param term Byte to stop at.
+ * @return Total number of bytes read.
+ */
+template <typename OUT_ITER, typename BUFFERED_READER>
+size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
+{
+    size_t size = 0;
+    for (;;)
+    {
+        ConstByteSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
+        if (buf.size() == 0)
+        {
+            // Read all data there was to read.
+            return size;
+        }
+
+        // Copy the buffered data into the vector until we hit the passed byte.
+        auto it = buf.begin();
+        while (it != buf.end())
+        {
+            if (*it == term)
+            {
+                // Found the terminator, append it and stop.
+                *outIt++ = *it++;
+                break;
+            }
+            *outIt++ = *it++;
+        }
+
+        // Consume what we've read.
+        const size_t count = static_cast<size_t>(it - buf.begin());
+        ConsumeBuffer(bufReader, count);
+        size += count;
     }
 }
 
