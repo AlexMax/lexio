@@ -24,18 +24,8 @@ I tend to run into situations where I need to read and write various data types 
 
 The base interfaces are heavily inspired by Rust's std::io traits, as they seem like a reasonable and flexible set of primitives to build on top of.
 
-Design
-------
-Here is the way LexIO reasons about streams.
+How To Use
+----------
+Reading and writing in LexIO involves using stream classes that have certain methods with specific signatures defined.  There is no subclassing or overriding virtual methods in the stream class, any class can be used so long as it provides the correct methods.  LexIO comes with several type traits to ensure that the method implementations you write adhere to the methods, as well as several classes that cover many common use cases.
 
-- A stream should implement the bare minimum interface to read or write an arbitrary number of bytes, and nothing else.
-    - This is to make writing your own stream wrappers easy.
-    - Seekable buffers have more features for peeking at the underlying data.
-- Reading and writing anything other than a span of bytes should be done in free functions that take the stream as a parameter.
-    - With this design, you can easily write your own reader and writer functiosn for your own data types without having to stick the implementation in the stream class.
-- Reading and writing functions should be uniquely named and not overloaded based on type.
-    - This allows you to have multiple conventions for reading and writing a particular data type, such as writing integers as fixed-length integers versus as varints.
-    - C++'s rules for overloading are too clever by half; better to be explicit than accidentally call the wrong overload.
-- Reaching EOF is not an error, you just read less data than you expected.
-- Actual errors are handled through exceptions.
-    - Exceptions do have flaws, but I have found they are the best option for dealing with gnarly parsing code.
+Once you have a stream class, LexIO then gives you free functions that take the stream as a parameter and use those methods to read or write data.  The core library includes implementations of many common operations, such as reading an entire buffer or returning the current position in a seekable stream, but other functions are included for reading and writing many common data types, such as fixed-length integers, strings, and varints.
