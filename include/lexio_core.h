@@ -35,12 +35,50 @@
 #include <cstdint>
 #include <stdexcept>
 
+// Feature detection - since we support C++14 use cppreference to see when
+// features were added to the compiler.
+
+#if defined(__clang__)
+#define LEXIO_CLANG_MAJOR (__clang_major__)
+#define LEXIO_CLANG_MINOR (__clang_minor__)
+#define LEXIO_GNUC (0)
+#define LEXIO_MSC_VER (0)
+#define LEXIO_CPLUSPLUS (__cplusplus)
+#elif defined(__GNUC__) || defined(__GNUG__)
+#define LEXIO_CLANG_MAJOR (0)
+#define LEXIO_CLANG_MINOR (0)
+#define LEXIO_GNUC (__GNUC__)
+#define LEXIO_MSC_VER (0)
+#define LEXIO_CPLUSPLUS (__cplusplus)
+#elif defined(_MSC_VER)
+#define LEXIO_CLANG_MAJOR (0)
+#define LEXIO_CLANG_MINOR (0)
+#define LEXIO_GNUC (0)
+#define LEXIO_MSC_VER (_MSC_VER)
+#define LEXIO_CPLUSPLUS (_MSVC_LANG)
+#endif
+
+#if (LEXIO_CPLUSPLUS < 201402L)
+#error "LexIO requires support for at least C++14"
+#endif
+
+// Inline variables were added in GCC 7, Clang 3.9, VS 2017 15.5
+
+#if !defined(LEXIO_HAS_INLINE_VARS)
+#if (LEXIO_CPLUSPLUS >= 201703L) &&                                                                                    \
+    (LEXIO_GCC >= 7 || (LEXIO_CLANG_MAJOR >= 3 && LEXIO_CLANG_MINOR >= 9) || LEXIO_MSC_VER >= 1912)
+#define LEXIO_HAS_INLINE_VARS 1
+#else
+#define LEXIO_HAS_INLINE_VARS 0
+#endif
+#endif
+
 #if !defined(LEXIO_SPAN)
 #include <span>
 #define LEXIO_SPAN(T) std::span<T>
 #endif
 
-#ifdef __cpp_inline_variables
+#if (LEXIO_HAS_INLINE_VARS == 1)
 #define LEXIO_INLINE_VAR inline
 #else
 #define LEXIO_INLINE_VAR
