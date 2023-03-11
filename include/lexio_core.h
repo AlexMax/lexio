@@ -297,16 +297,16 @@ struct IsSeekable : std::integral_constant<bool, IsSeekableV<T>>
  * @brief Read data from the current offset, inserting it into the passed
  *        buffer and advancing the offset.
  *
- * @param reader Reader to operate on.
  * @param outBytes A span to read data into, the length of which is the number
  *                 of bytes to read.
+ * @param reader Reader to operate on.
  * @return Actual number of bytes read.  Must be between 0 and the requested
  *         length.  0 can mean EOF or empty buffer.
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename READER>
-inline size_t RawRead(READER &reader, ByteSpanT outBytes)
+inline size_t Read(ByteSpanT outBytes, READER &reader)
 {
     return reader.RawRead(outBytes);
 }
@@ -371,7 +371,7 @@ inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename WRITER>
-inline size_t RawWrite(WRITER &writer, ConstByteSpanT bytes)
+inline size_t Write(WRITER &writer, ConstByteSpanT bytes)
 {
     return writer.RawWrite(bytes);
 }

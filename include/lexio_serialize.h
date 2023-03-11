@@ -31,7 +31,7 @@ template <typename READER>
 inline uint8_t ReadU8(READER &reader)
 {
     uint8_t buf[sizeof(uint8_t)] = {0};
-    const size_t count = RawRead(reader, buf);
+    const size_t count = Read(buf, reader);
     if (count != sizeof(uint8_t))
     {
         throw std::runtime_error("could not read 1 byte");
@@ -43,7 +43,7 @@ template <typename WRITER>
 inline void WriteU8(WRITER &writer, const uint8_t value)
 {
     const uint8_t buf[sizeof(uint8_t)] = {value};
-    const size_t count = RawWrite(writer, buf);
+    const size_t count = Write(writer, buf);
     if (count != sizeof(uint8_t))
     {
         throw std::runtime_error("could not write 1 byte");
@@ -70,7 +70,7 @@ template <typename READER>
 inline uint16_t ReadU16LE(READER &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = RawRead(reader, buf);
+    const size_t count = Read(buf, reader);
     if (count != sizeof(uint16_t))
     {
         throw std::runtime_error("could not read 2 bytes");
@@ -85,7 +85,7 @@ inline void WriteU16LE(WRITER &writer, const uint16_t value)
         static_cast<uint8_t>(value & 0xff),
         static_cast<uint8_t>((value & 0xff00) >> 8),
     };
-    const size_t count = RawWrite(writer, buf);
+    const size_t count = Write(writer, buf);
     if (count != sizeof(uint16_t))
     {
         throw std::runtime_error("could not write 2 bytes");
@@ -112,7 +112,7 @@ template <typename READER>
 inline uint32_t ReadU32LE(READER &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = RawRead(reader, buf);
+    const size_t count = Read(buf, reader);
     if (count != sizeof(uint32_t))
     {
         throw std::runtime_error("could not read 4 bytes");
@@ -129,7 +129,7 @@ inline void WriteU32LE(WRITER &writer, const uint32_t value)
         static_cast<uint8_t>((value & 0xff0000) >> 16),
         static_cast<uint8_t>((value & 0xff000000) >> 24),
     };
-    const size_t count = RawWrite(writer, buf);
+    const size_t count = Write(writer, buf);
     if (count != sizeof(uint32_t))
     {
         throw std::runtime_error("could not write 4 bytes");
@@ -156,7 +156,7 @@ template <typename READER>
 inline uint64_t ReadU64LE(READER &buffer)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = RawRead(buffer, buf);
+    const size_t count = Read(buf, buffer);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not read 8 bytes");
@@ -180,7 +180,7 @@ inline void WriteU64LE(WRITER &buffer, const uint64_t value)
         static_cast<uint8_t>((value & 0xff000000000000) >> 48),
         static_cast<uint8_t>((value & 0xff00000000000000) >> 56),
     };
-    const size_t count = RawWrite(buffer, buf);
+    const size_t count = Write(buffer, buf);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not write 8 bytes");
