@@ -26,6 +26,32 @@ using LFileBufReader = LexIO::StdBufReader<LexIO::LFile>;
 
 static_assert(LexIO::IsBufferedReaderV<LFileBufReader>, "LFileBufReader does not fulfill IsBufferedReaderV");
 
+TEST_CASE("Test Read(span<char>) on a StdBufReader", "[buf]")
+{
+    auto file = LexIO::LOpen("../test/test_file.txt", LexIO::LOpenMode::read);
+    auto buffer = LFileBufReader::FromReader(std::move(file));
+
+    std::string data;
+    data.resize(9);
+    const size_t bytes = LexIO::Read({data.begin(), data.end()}, buffer);
+    REQUIRE(bytes == 9);
+    REQUIRE(data == "The quick");
+}
+
+TEST_CASE("Test Read(void, size) on a StdBufReader", "[buf]")
+{
+    auto file = LexIO::LOpen("../test/test_file.txt", LexIO::LOpenMode::read);
+    auto buffer = LFileBufReader::FromReader(std::move(file));
+
+    void *data = calloc(10, 1);
+    const size_t bytes = LexIO::Read(data, 9, buffer);
+    char *dataChar = static_cast<char *>(data);
+    REQUIRE(bytes == 9);
+    REQUIRE(strlen(dataChar) == 9);
+    REQUIRE(!strcmp(dataChar, "The quick"));
+    free(data);
+}
+
 TEST_CASE("Test ReadAll on a standard StdBufReader", "[buf]")
 {
     auto file = LexIO::LOpen("../test/test_file.txt", LexIO::LOpenMode::read);
