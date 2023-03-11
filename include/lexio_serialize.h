@@ -42,7 +42,7 @@ inline uint8_t ReadU8(READER &reader)
 template <typename WRITER>
 inline void WriteU8(WRITER &writer, const uint8_t value)
 {
-    uint8_t buf[sizeof(uint8_t)] = {value};
+    const uint8_t buf[sizeof(uint8_t)] = {value};
     const size_t count = RawWrite(writer, buf);
     if (count != sizeof(uint8_t))
     {
@@ -81,7 +81,7 @@ inline uint16_t ReadU16LE(READER &reader)
 template <typename WRITER>
 inline void WriteU16LE(WRITER &writer, const uint16_t value)
 {
-    uint8_t buf[sizeof(uint16_t)] = {
+    const uint8_t buf[sizeof(uint16_t)] = {
         static_cast<uint8_t>(value & 0xff),
         static_cast<uint8_t>((value & 0xff00) >> 8),
     };
@@ -123,7 +123,7 @@ inline uint32_t ReadU32LE(READER &reader)
 template <typename WRITER>
 inline void WriteU32LE(WRITER &writer, const uint32_t value)
 {
-    uint8_t buf[sizeof(uint32_t)] = {
+    const uint8_t buf[sizeof(uint32_t)] = {
         static_cast<uint8_t>(value & 0xff),
         static_cast<uint8_t>((value & 0xff00) >> 8),
         static_cast<uint8_t>((value & 0xff0000) >> 16),
@@ -170,7 +170,7 @@ inline uint64_t ReadU64LE(READER &buffer)
 template <typename WRITER>
 inline void WriteU64LE(WRITER &buffer, const uint64_t value)
 {
-    uint8_t buf[sizeof(uint64_t)] = {
+    const uint8_t buf[sizeof(uint64_t)] = {
         static_cast<uint8_t>(value & 0xff),
         static_cast<uint8_t>((value & 0xff00) >> 8),
         static_cast<uint8_t>((value & 0xff0000) >> 16),
