@@ -14,11 +14,9 @@
 //  limitations under the License.
 //
 
-#include "test_nonstd.h"
+#include "./test.h"
 
-#include "lexio.h"
-
-//------------------------------------------------------------------------------
+//******************************************************************************
 
 struct GoodReader
 {
@@ -32,7 +30,7 @@ struct GoodReader
 static_assert(LexIO::IsReader<GoodReader>::value, "GoodReader does not fulfill IsReader");
 static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReaderV");
 
-//------------------------------------------------------------------------------
+//******************************************************************************
 
 struct GoodBufferedReader : public GoodReader
 {
@@ -49,7 +47,7 @@ static_assert(LexIO::IsBufferedReader<GoodBufferedReader>::value,
               "GoodBufferedReader does not fulfill IsBufferedReader");
 static_assert(LexIO::IsBufferedReaderV<GoodBufferedReader>, "GoodBufferedReader does not fulfill IsBufferedReaderV");
 
-//------------------------------------------------------------------------------
+//******************************************************************************
 
 struct GoodWriter
 {
@@ -64,7 +62,7 @@ struct GoodWriter
 static_assert(LexIO::IsWriter<GoodWriter>::value, "GoodWriter does not fulfill IsWriter");
 static_assert(LexIO::IsWriterV<GoodWriter>, "GoodWriter does not fulfill IsWriterV");
 
-//------------------------------------------------------------------------------
+//******************************************************************************
 
 struct GoodSeekable
 {
@@ -88,7 +86,7 @@ struct GoodSeekable
 static_assert(LexIO::IsSeekable<GoodSeekable>::value, "GoodSeekable does not fulfill IsSeekable");
 static_assert(LexIO::IsSeekableV<GoodSeekable>, "GoodSeekable does not fulfill IsSeekableV");
 
-//------------------------------------------------------------------------------
+//******************************************************************************
 
 struct BadReaderMissingClass
 {
@@ -114,3 +112,118 @@ struct BadReaderBadReturn
 };
 
 static_assert(!LexIO::IsReaderV<BadReaderBadReturn>, "BadReaderBadReturn incorrectly fulfills IsReaderV");
+
+//******************************************************************************
+
+using ArrayBuffer = LexIO::StaticStdBuffer<std::array<uint8_t, 1024>>;
+
+static ArrayBuffer GetBuffer()
+{
+    const uint8_t text[] = "The quick brown fox\njumps over the lazy dog.\n";
+    LexIO::ConstByteSpanT textSpan(text);
+
+    ArrayBuffer rvo;
+    rvo.RawWrite(textSpan);
+    rvo.Seek(LexIO::WhenceStart(0));
+    return rvo;
+}
+
+//******************************************************************************
+
+TEST_CASE("Test Read(span<char>)", "[core]")
+{
+    ArrayBuffer buffer = GetBuffer();
+
+    std::string data;
+    data.resize(9);
+    const size_t bytes = LexIO::Read({data.begin(), data.end()}, buffer);
+    REQUIRE(bytes == 9);
+    REQUIRE(data == "The quick");
+}
+
+TEST_CASE("Test Read(void, size)", "[core]")
+{
+    ArrayBuffer buffer = GetBuffer();
+
+    void *data = calloc(10, 1);
+    const size_t bytes = LexIO::Read(data, 9, buffer);
+    char *dataChar = static_cast<char *>(data);
+    REQUIRE(bytes == 9);
+    REQUIRE(strlen(dataChar) == 9);
+    REQUIRE(!strcmp(dataChar, "The quick"));
+    free(data);
+}
+
+TEST_CASE("Test Write(span<char>)", "[core]")
+{
+    ArrayBuffer buffer;
+    std::string data{"The quick"};
+    std::array<uint8_t, 10> check;
+    memset(check.data(), 0x00, check.size());
+
+    size_t bytes = LexIO::Write(buffer, {data.begin(), data.end()});
+    REQUIRE(bytes == 9);
+
+    LexIO::Seek(buffer, LexIO::WhenceStart{0});
+    bytes = LexIO::Read(check, buffer);
+    REQUIRE(bytes == 10);
+
+    char *checkChar = reinterpret_cast<char *>(check.data());
+    REQUIRE(strcmp(checkChar, data.c_str()) == 0);
+}
+
+TEST_CASE("Test Write(void, size)", "[core]")
+{
+    ArrayBuffer buffer;
+    std::string data{"The quick"};
+    void *dataVoid = data.data();
+    std::array<uint8_t, 10> check;
+    memset(check.data(), 0x00, check.size());
+
+    size_t bytes = LexIO::Write(buffer, dataVoid, data.length());
+    REQUIRE(bytes == 9);
+
+    LexIO::Seek(buffer, LexIO::WhenceStart{0});
+    bytes = LexIO::Read(check, buffer);
+    REQUIRE(bytes == 10);
+
+    char *checkChar = reinterpret_cast<char *>(check.data());
+    REQUIRE(strcmp(checkChar, data.c_str()) == 0);
+}
+
+TEST_CASE("Test ReadAll", "[core]")
+{
+    ArrayBuffer basic = GetBuffer();
+    auto buffer = LexIO::StdBufReader<ArrayBuffer>::FromReader(std::move(basic));
+
+    std::vector<uint8_t> data;
+    const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
+    REQUIRE((bytes == 45 || bytes == 47)); // Newlines are different sizes.
+    REQUIRE((data.size() == 45 || data.size() == 47));
+    REQUIRE(*(data.end() - 1) == '\n');
+}
+
+TEST_CASE("Test ReadAll with a small buffer", "[core]")
+{
+    ArrayBuffer basic = GetBuffer();
+    auto buffer = LexIO::StdBufReader<ArrayBuffer>::FromReader(std::move(basic));
+
+    std::vector<uint8_t> data;
+    const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
+    REQUIRE(data[4] == 'q'); // Check the buffer boundary.
+    REQUIRE(data[8] == 'k');
+    REQUIRE((bytes == 45 || bytes == 47)); // Newlines are different sizes.
+    REQUIRE((data.size() == 45 || data.size() == 47));
+}
+
+TEST_CASE("Test ReadUntil", "[core]")
+{
+    ArrayBuffer basic = GetBuffer();
+    auto buffer = LexIO::StdBufReader<ArrayBuffer>::FromReader(std::move(basic));
+
+    std::vector<uint8_t> data;
+    const size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
+    REQUIRE((bytes == 20 || bytes == 21)); // Newlines are different sizes.
+    REQUIRE((data.size() == 20 || data.size() == 21));
+    REQUIRE(*(data.end() - 1) == '\n');
+}

@@ -14,11 +14,7 @@
 //  limitations under the License.
 //
 
-#include "test_nonstd.h"
-
-#include "lexio.h"
-
-#include <catch2/catch_all.hpp>
+#include "./test.h"
 
 //------------------------------------------------------------------------------
 

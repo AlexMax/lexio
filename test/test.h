@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "lexio_core.h"
+#include "./test_nonstd.h"
 
-#include "lexio_lfile.h"
-#include "lexio_serialize.h"
-#include "lexio_std.h"
+#include "lexio.h"
+
+#include <catch2/catch_all.hpp>

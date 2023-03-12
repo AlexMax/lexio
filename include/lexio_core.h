@@ -598,6 +598,20 @@ size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
     }
 }
 
+template <typename WRITER>
+inline size_t Write(WRITER &writer, LEXIO_SPAN(char) chars)
+{
+    ConstByteSpanT outBytes{reinterpret_cast<const uint8_t *>(chars.data()), chars.size()};
+    return Write(writer, outBytes);
+}
+
+template <typename WRITER>
+inline size_t Write(WRITER &writer, const void *data, const size_t size)
+{
+    ConstByteSpanT outBytes{reinterpret_cast<const uint8_t *>(data), size};
+    return Write(writer, outBytes);
+}
+
 /**
  * @brief Return the current offset position.
  *
