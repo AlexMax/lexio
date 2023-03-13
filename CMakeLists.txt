@@ -20,12 +20,12 @@ FetchContent_Declare(Catch2
 FetchContent_MakeAvailable(Catch2)
 
 set(LEXIO_HEADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_core.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_lfile.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_nostd.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_serialize.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio_std.h")
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lfile.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/nostd.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/std.h")
 
 # Main LexIO header-only library
 add_library(lexio INTERFACE)

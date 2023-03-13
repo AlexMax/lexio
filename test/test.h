@@ -18,6 +18,6 @@
 
 #include "./test_nonstd.h"
 
-#include "lexio.h"
+#include "lexio/lexio.h"
 
 #include <catch2/catch_all.hpp>

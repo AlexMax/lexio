@@ -20,7 +20,7 @@
 
 #include "test_nonstd.h"
 
-#include "lexio.h"
+#include "lexio/lexio.h"
 
 #include <iterator>
 #include <stdio.h>

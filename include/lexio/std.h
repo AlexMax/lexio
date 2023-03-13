@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "lexio_core.h"
+#include "./core.h"
 
 #include <iterator>
 #include <vector> // Used by StdBufReader

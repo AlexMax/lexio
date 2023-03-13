@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include "lexio_core.h"
+#include "./core.h"
 
-#include "lexio_lfile.h"
-#include "lexio_serialize.h"
-#include "lexio_std.h"
+#include "./lfile.h"
+#include "./nostd.h"
+#include "./serialize.h"
+#include "./std.h"

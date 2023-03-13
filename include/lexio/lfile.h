@@ -18,7 +18,9 @@
 // Stream abstraction that wraps basic file input and output.
 //
 
-#include "lexio_core.h"
+#pragma once
+
+#include "./core.h"
 
 namespace LexIO
 {
