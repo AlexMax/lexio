@@ -15,37 +15,36 @@
 //
 
 //
-// Sample buffer abstraction that wraps STL-like types.
+// Stream abstraction that wraps STL-like types.
 //
 
 #pragma once
 
 #include "./core.h"
 
-#include <iterator>
 #include <vector> // Used by StdBufReader
 
 namespace LexIO
 {
 
 /**
- * @brief A seekable reader/writer that uses a backing type exposing STL
- *        conventions.
+ * @brief A seekable reader/writer that wraps a type that conforms to STL
+ *        container methods.
  *
  * @details This class is very inconvenient to construct, prefer one of
- *          the other StdBuffer types.
+ *          the other Container types.
  *
  * @tparam T Type to wrap.
  */
 template <typename T>
-class StdBufferBase
+class ContainerBase
 {
   private:
-    T m_buffer;
+    T m_container;
     size_t m_offset = 0;
 
   protected:
-    T &Buffer() { return m_buffer; }
+    T &Container() { return m_container; }
     size_t &Offset() { return m_offset; }
 
     void OffsetCheck(const ptrdiff_t offset)
@@ -57,16 +56,21 @@ class StdBufferBase
     }
 
   public:
-    StdBufferBase() = delete;
-    StdBufferBase(const T &buffer) : m_buffer(buffer) {}
-    StdBufferBase(T &&buffer) : m_buffer(buffer) {}
+    ContainerBase() = delete;
+    ContainerBase(const T &buffer) : m_container(buffer) {}
+    ContainerBase(T &&buffer) : m_container(buffer) {}
+
+    /**
+     * @brief A read-only reference of the wrapped container.
+     */
+    const T &Container() const { return m_container; }
 
     virtual size_t RawRead(ByteSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
-        const size_t destOffset = std::min(wantedOffset, m_buffer.size());
+        const size_t destOffset = std::min(wantedOffset, m_container.size());
         const size_t actualLength = destOffset - m_offset;
-        std::copy(m_buffer.begin() + m_offset, m_buffer.begin() + m_offset + actualLength, buffer.begin());
+        std::copy(m_container.begin() + m_offset, m_container.begin() + m_offset + actualLength, buffer.begin());
         m_offset += actualLength;
         return actualLength;
     }
@@ -76,9 +80,9 @@ class StdBufferBase
     virtual size_t RawWrite(ConstByteSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
-        const size_t destOffset = std::min(wantedOffset, m_buffer.size());
+        const size_t destOffset = std::min(wantedOffset, m_container.size());
         const size_t actualLength = destOffset - m_offset;
-        std::copy(buffer.begin(), buffer.begin() + actualLength, m_buffer.begin() + m_offset);
+        std::copy(buffer.begin(), buffer.begin() + actualLength, m_container.begin() + m_offset);
         m_offset += actualLength;
         return actualLength;
     }
@@ -100,7 +104,7 @@ class StdBufferBase
 
     virtual size_t Seek(const WhenceEnd whence)
     {
-        const ptrdiff_t offset = static_cast<ptrdiff_t>(m_buffer.size()) - whence.offset;
+        const ptrdiff_t offset = static_cast<ptrdiff_t>(m_container.size()) - whence.offset;
         OffsetCheck(offset);
         m_offset = static_cast<size_t>(offset);
         return m_offset;
@@ -108,164 +112,70 @@ class StdBufferBase
 };
 
 /**
- * @brief StdBuffer wrapping a type whose size is permanent after construction.
+ * @brief Wraps a container that has a compile-time known size.
+ * 
+ * @detail Useful for types like std::array.
  */
 template <typename T>
-class FixedStdBuffer : public StdBufferBase<T>
+class ContainerFixed : public ContainerBase<T>
 {
   public:
-    explicit FixedStdBuffer(const size_t size) : StdBufferBase<T>(T()) { this->Buffer().resize(size); }
+    explicit ContainerFixed() : ContainerBase<T>(T()) {}
 };
 
 /**
- * @brief StdBuffer wrapping a type of default-constructed size.
- *
- * @detail Useful for types where size is known at compile-time, like std::array.
+ * @brief Wraps a dynamic container that does not grow if we write off the
+ *        end.
+ * 
+ * @detail Useful for types like std::vector if you don't want them to grow.
  */
 template <typename T>
-class StaticStdBuffer : public StdBufferBase<T>
+class ContainerStatic : public ContainerBase<T>
 {
   public:
-    explicit StaticStdBuffer() : StdBufferBase<T>(T()) {}
+    explicit ContainerStatic(const size_t size) : ContainerBase<T>(T()) { this->Container().resize(size); }
 };
 
 /**
- * @brief The standard StdBuffer, where writing off the end of the buffer
- *        resizes the underlying type.
+ * @brief Wraps a dynamic container that grows if we write off the end.
+ * 
+ * @detail Useful for types like std::vector if you want them to grow.
  */
 template <typename T>
-class StdBuffer : public StdBufferBase<T>
+class ContainerDynamic : public ContainerBase<T>
 {
   public:
     /**
-     * @brief Constructs an empty StdBuffer.
+     * @brief Constructs an empty ContainerDynamic.
      */
-    StdBuffer() : StdBufferBase<T>(T()) {}
+    ContainerDynamic() : ContainerBase<T>(T()) {}
 
     /**
-     * @brief Constructs a StdBuffer with a pre-allocated size.
+     * @brief Constructs a ContainerDynamic with a pre-allocated size.
      *
      * @param size Size of underlying type.
      */
-    explicit StdBuffer(const size_t size) : StdBufferBase<T>(T()) { this->Buffer().resize(size); }
+    explicit ContainerDynamic(const size_t size) : ContainerBase<T>(T()) { this->Container().resize(size); }
 
     /**
-     * @brief Construct a StdBuffer with data already written into the buffer.
+     * @brief Construct a ContainerDynamic with data already written into the buffer.
      *
      * @param list Initializer list of data.
      */
-    StdBuffer(std::initializer_list<uint8_t> list) : StdBufferBase<T>(T())
+    ContainerDynamic(std::initializer_list<uint8_t> list) : ContainerBase<T>(T())
     {
-        this->Buffer().resize(list.size());
-        std::copy(list.begin(), list.end(), this->Buffer().begin());
+        this->Container().resize(list.size());
+        std::copy(list.begin(), list.end(), this->Container().begin());
     }
 
     size_t RawWrite(ConstByteSpanT buffer) override
     {
         // Writes off the end of the burffer grow the buffer to fit.
         const size_t wantedOffset = this->Offset() + buffer.size();
-        this->Buffer().resize(std::max(wantedOffset, this->Buffer().size()));
-        std::copy(buffer.begin(), buffer.end(), this->Buffer().begin() + this->Offset());
+        this->Container().resize(std::max(wantedOffset, this->Container().size()));
+        std::copy(buffer.begin(), buffer.end(), this->Container().begin() + this->Offset());
         this->Offset() += buffer.size();
         return buffer.size();
-    }
-};
-
-/**
- * @brief A buffer using a std::vector.
- *
- * @detail StdBufReader depends on std::vector, so we provide a type for a
- *         vector buffer.
- *
- * @tparam ALLOC Allocator used by vector.
- */
-template <typename ALLOC = std::allocator<uint8_t>>
-using VectorBuffer = LexIO::StdBuffer<std::vector<uint8_t, ALLOC>>;
-
-/**
- * @brief A class that wraps a Reader type and gives it basic BufferedReader
- *        support.
- *
- * @detail Assumes buffer abstraction has STL methods.
- */
-template <typename READER>
-class StdBufReader
-{
-    READER m_reader;               // Underlying READER class.
-    std::vector<uint8_t> m_buffer; // Buffer used for reading.
-    size_t m_start = 0;            // Starting offset of buffered data.
-    size_t m_end = 0;              // Ending offset of buffered data.
-
-    StdBufReader(READER &&reader, const size_t startSize) : m_reader(std::move(reader)) { m_buffer.resize(startSize); }
-
-  public:
-    static constexpr size_t DEFAULT_BUFFER_SIZE = 8192;
-
-    /**
-     * @brief Construct a BufReader from the passed reading-capable type.
-     *
-     * @param reader Reader to wrap - moves into and takes ownership.
-     * @param startSize Starting allocation size for the buffer.
-     * @return A StdBufReader that wraps READER.
-     */
-    static StdBufReader FromReader(READER &&reader, const size_t startSize = DEFAULT_BUFFER_SIZE)
-    {
-        return StdBufReader{std::move(reader), startSize};
-    }
-
-    size_t RawRead(ByteSpanT buffer)
-    {
-        ConstByteSpanT peek = FillBuffer(buffer.size());
-        std::copy(peek.begin(), peek.end(), buffer.begin());
-        ConsumeBuffer(peek.size());
-        return peek.size();
-    }
-
-    size_t GetBufferSize() noexcept { return m_buffer.size(); }
-
-    ConstByteSpanT FillBuffer(const size_t size)
-    {
-        size_t wantedEnd = m_start + size;
-        if (wantedEnd < m_end)
-        {
-            // We have enough data in the buffer, return the entire buffer.
-            return ConstByteSpanT(&m_buffer[m_start], &m_buffer[m_end]);
-        }
-        else if (m_buffer.empty())
-        {
-            // Buffer is empty, resize it to fit.
-            m_buffer.resize(size);
-        }
-        else if (wantedEnd >= m_buffer.size())
-        {
-            // Move unconsumed data to the start of the buffer and set new
-            // start index to match.
-            std::copy(m_buffer.begin() + m_start, m_buffer.begin() + m_end, m_buffer.begin());
-            m_start = 0;
-            if (size >= m_buffer.size())
-            {
-                // Not enough room in the data structure to fit incoming data,
-                // so we grow it to fit.
-                m_buffer.resize(size);
-            }
-        }
-
-        // We don't have enough data buffered, read to make up the difference
-        // and set the new end index appropriately.
-        ByteSpanT target(m_buffer.begin() + m_start, m_buffer.begin() + static_cast<ptrdiff_t>(size));
-        const size_t actualSize = m_reader.RawRead(target);
-        m_end = m_start + actualSize;
-        return ConstByteSpanT(m_buffer.begin() + m_start, m_buffer.begin() + m_end);
-    }
-
-    void ConsumeBuffer(const size_t size)
-    {
-        const size_t wantedStart = m_start + size;
-        if (wantedStart > m_end)
-        {
-            throw std::runtime_error("Tried to consume more data than buffered.");
-        }
-        m_start = wantedStart;
     }
 };
 

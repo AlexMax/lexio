@@ -14,13 +14,25 @@
 //  limitations under the License.
 //
 
+//
+// Stream that uses std::array under the hood.
+//
+
 #pragma once
 
 #include "./core.h"
 
-#include "./array.h"
-#include "./bufreader.h"
 #include "./container.h"
-#include "./file.h"
-#include "./serialize.h"
-#include "./vector.h"
+
+#include <array>
+
+namespace LexIO
+{
+
+/**
+ * @brief A stream backed by a std::array.
+ */
+template <size_t N>
+using ArrayStream = LexIO::ContainerFixed<std::array<uint8_t, N>>;
+
+} // namespace LexIO

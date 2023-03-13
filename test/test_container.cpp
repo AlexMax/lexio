@@ -20,8 +20,6 @@
 
 //------------------------------------------------------------------------------
 
-using VectorBuffer = LexIO::StdBuffer<std::vector<uint8_t>>;
-
 template <typename T>
 void CommonTest(T &buf)
 {
@@ -67,28 +65,29 @@ void CommonTest(T &buf)
 
 constexpr size_t TEST_SIZE = 15;
 
-TEST_CASE("Test StdBuffer with std::vector", "[std]")
+TEST_CASE("Test ContainerFixed with std::array", "[std]")
 {
-    VectorBuffer buf;
+    using ContainerFixed = LexIO::ContainerFixed<std::array<uint8_t, TEST_SIZE>>;
+    ContainerFixed buf;
+    CommonTest(buf);
+    REQUIRE_THROWS(LexIO::WriteU8(buf, 0));
+    REQUIRE(LexIO::Tell(buf) == TEST_SIZE);
+}
+
+TEST_CASE("Test ContainerStatic with pre-allocated size", "[std]")
+{
+    using ContainerStatic = LexIO::ContainerStatic<std::vector<uint8_t>>;
+    ContainerStatic buf(TEST_SIZE);
+    CommonTest(buf);
+    REQUIRE_THROWS(LexIO::WriteU8(buf, 0));
+    REQUIRE(LexIO::Tell(buf) == TEST_SIZE);
+}
+
+TEST_CASE("Test ContainerDynamic with std::vector", "[std]")
+{
+    using ContainerDynamic = LexIO::ContainerDynamic<std::vector<uint8_t>>;
+    ContainerDynamic buf;
     CommonTest(buf);
     REQUIRE_NOTHROW(LexIO::WriteU8(buf, 0));
     REQUIRE(LexIO::Tell(buf) == TEST_SIZE + 1);
-}
-
-TEST_CASE("Test StaticStdBuffer with std::array", "[std]")
-{
-    using ArrayBuffer = LexIO::StaticStdBuffer<std::array<uint8_t, TEST_SIZE>>;
-    ArrayBuffer buf;
-    CommonTest(buf);
-    REQUIRE_THROWS(LexIO::WriteU8(buf, 0));
-    REQUIRE(LexIO::Tell(buf) == TEST_SIZE);
-}
-
-TEST_CASE("Test FixedStdBuffer with pre-allocated size", "[std]")
-{
-    using FixedVectorBuffer = LexIO::FixedStdBuffer<std::vector<uint8_t>>;
-    FixedVectorBuffer buf(TEST_SIZE);
-    CommonTest(buf);
-    REQUIRE_THROWS(LexIO::WriteU8(buf, 0));
-    REQUIRE(LexIO::Tell(buf) == TEST_SIZE);
 }

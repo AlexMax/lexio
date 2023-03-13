@@ -117,20 +117,18 @@ static_assert(!LexIO::IsReaderV<BadReaderBadReturn>, "BadReaderBadReturn incorre
 
 //******************************************************************************
 
-using VectorBuffer = LexIO::StdBuffer<std::vector<uint8_t>>;
-
 template <typename T, std::size_t N>
 constexpr std::size_t CountOf(T const (&)[N]) noexcept
 {
     return N;
 }
 
-static VectorBuffer GetBuffer()
+static LexIO::VectorStream GetBuffer()
 {
     const uint8_t text[] = "The quick brown fox\njumps over the lazy dog.\n";
     LexIO::ConstByteSpanT textSpan{&text[0], CountOf(text) - 1};
 
-    VectorBuffer rvo;
+    LexIO::VectorStream rvo;
     rvo.RawWrite(textSpan);
     rvo.Seek(LexIO::WhenceStart(0));
     return rvo;
@@ -140,7 +138,7 @@ static VectorBuffer GetBuffer()
 
 TEST_CASE("Test Read(span<char>)", "[core]")
 {
-    VectorBuffer buffer = GetBuffer();
+    LexIO::VectorStream buffer = GetBuffer();
 
     std::string data;
     data.resize(9);
@@ -151,7 +149,7 @@ TEST_CASE("Test Read(span<char>)", "[core]")
 
 TEST_CASE("Test Read(void, size)", "[core]")
 {
-    VectorBuffer buffer = GetBuffer();
+    LexIO::VectorStream buffer = GetBuffer();
 
     void *data = calloc(10, 1);
     const size_t bytes = LexIO::Read(data, 9, buffer);
@@ -164,7 +162,7 @@ TEST_CASE("Test Read(void, size)", "[core]")
 
 TEST_CASE("Test Write(span<char>)", "[core]")
 {
-    VectorBuffer buffer;
+    LexIO::VectorStream buffer;
     std::string data{"The quick"};
     std::array<uint8_t, 10> check;
     memset(check.data(), 0x00, check.size());
@@ -182,7 +180,7 @@ TEST_CASE("Test Write(span<char>)", "[core]")
 
 TEST_CASE("Test Write(void, size)", "[core]")
 {
-    VectorBuffer buffer;
+    LexIO::VectorStream buffer;
     std::string data{"The quick"};
     void *dataVoid = data.data();
     std::array<uint8_t, 10> check;
@@ -201,8 +199,8 @@ TEST_CASE("Test Write(void, size)", "[core]")
 
 TEST_CASE("Test ReadAll", "[core]")
 {
-    VectorBuffer basic = GetBuffer();
-    auto buffer = LexIO::StdBufReader<VectorBuffer>::FromReader(std::move(basic));
+    LexIO::VectorStream basic = GetBuffer();
+    auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
@@ -213,8 +211,8 @@ TEST_CASE("Test ReadAll", "[core]")
 
 TEST_CASE("Test ReadAll with a small buffer", "[core]")
 {
-    VectorBuffer basic = GetBuffer();
-    auto buffer = LexIO::StdBufReader<VectorBuffer>::FromReader(std::move(basic));
+    LexIO::VectorStream basic = GetBuffer();
+    auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
@@ -226,8 +224,8 @@ TEST_CASE("Test ReadAll with a small buffer", "[core]")
 
 TEST_CASE("Test ReadUntil", "[core]")
 {
-    VectorBuffer basic = GetBuffer();
-    auto buffer = LexIO::StdBufReader<VectorBuffer>::FromReader(std::move(basic));
+    LexIO::VectorStream basic = GetBuffer();
+    auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');

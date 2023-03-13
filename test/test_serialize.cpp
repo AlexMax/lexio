@@ -20,17 +20,15 @@
 
 //------------------------------------------------------------------------------
 
-using VectorBuffer = LexIO::StdBuffer<std::vector<uint8_t>>;
-
 TEST_CASE("Read UInt8", "[serialize]")
 {
-    VectorBuffer buffer = {0x88};
+    LexIO::VectorStream buffer = {0x88};
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
 TEST_CASE("Write UInt8", "[serialize]")
 {
-    VectorBuffer buffer;
+    LexIO::VectorStream buffer;
     LexIO::WriteU8(buffer, 0x88);
 
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
@@ -39,13 +37,13 @@ TEST_CASE("Write UInt8", "[serialize]")
 
 TEST_CASE("Read U16LE", "[serialize]")
 {
-    VectorBuffer buffer({0x88, 0x99});
+    LexIO::VectorStream buffer({0x88, 0x99});
     REQUIRE(LexIO::ReadU16LE(buffer) == 0x9988);
 }
 
 TEST_CASE("Write UInt16LE", "[serialize]")
 {
-    VectorBuffer buffer;
+    LexIO::VectorStream buffer;
     LexIO::WriteU16LE(buffer, 0x9988);
 
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
@@ -55,13 +53,13 @@ TEST_CASE("Write UInt16LE", "[serialize]")
 
 TEST_CASE("Read 16LE", "[serialize]")
 {
-    VectorBuffer buffer({0x88, 0x99});
+    LexIO::VectorStream buffer({0x88, 0x99});
     REQUIRE(LexIO::Read16LE(buffer) == -26232);
 }
 
 TEST_CASE("Write Int16LE", "[serialize]")
 {
-    VectorBuffer buffer;
+    LexIO::VectorStream buffer;
     LexIO::Write16LE(buffer, -26232);
 
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
@@ -71,13 +69,13 @@ TEST_CASE("Write Int16LE", "[serialize]")
 
 TEST_CASE("Read UInt32LE", "[serialize]")
 {
-    VectorBuffer buffer({0x88, 0x99, 0xaa, 0xbb});
+    LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb});
     REQUIRE(LexIO::ReadU32LE(buffer) == 0xbbaa9988);
 }
 
 TEST_CASE("Write UInt32LE", "[serialize]")
 {
-    VectorBuffer buffer;
+    LexIO::VectorStream buffer;
     LexIO::WriteU32LE(buffer, 0xbbaa9988);
 
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
@@ -89,13 +87,13 @@ TEST_CASE("Write UInt32LE", "[serialize]")
 
 TEST_CASE("Read Int32LE", "[serialize]")
 {
-    VectorBuffer buffer({0x88, 0x99, 0xaa, 0xbb});
+    LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb});
     REQUIRE(LexIO::Read32LE(buffer) == -1146447480);
 }
 
 TEST_CASE("Write Int32LE", "[serialize]")
 {
-    VectorBuffer buffer;
+    LexIO::VectorStream buffer;
     LexIO::Write32LE(buffer, -1146447480);
 
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
@@ -107,13 +105,13 @@ TEST_CASE("Write Int32LE", "[serialize]")
 
 TEST_CASE("Read UInt64LE", "[serialize]")
 {
-    VectorBuffer buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
+    LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
     REQUIRE(LexIO::ReadU64LE(buffer) == 0xffeeddccbbaa9988);
 }
 
 TEST_CASE("Write UInt64LE", "[serialize]")
 {
-    VectorBuffer buffer;
+    LexIO::VectorStream buffer;
     LexIO::WriteU64LE(buffer, 0xffeeddccbbaa9988);
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
 
@@ -129,13 +127,13 @@ TEST_CASE("Write UInt64LE", "[serialize]")
 
 TEST_CASE("Read Int64LE", "[serialize]")
 {
-    VectorBuffer buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
+    LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
     REQUIRE(LexIO::Read64LE(buffer) == -4822678189205112);
 }
 
 TEST_CASE("Write Int64LE", "[serialize]")
 {
-    VectorBuffer buffer;
+    LexIO::VectorStream buffer;
     LexIO::Write64LE(buffer, -4822678189205112);
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
 

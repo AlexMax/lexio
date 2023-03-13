@@ -23,7 +23,7 @@
 #include <cstdio>
 #include <iterator>
 
-using FileBufReader = LexIO::StdBufReader<LexIO::File>;
+using FileBufReader = LexIO::VectorBufReader<LexIO::File>;
 
 int main()
 {
