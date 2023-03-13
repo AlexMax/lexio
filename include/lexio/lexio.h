@@ -18,7 +18,7 @@
 
 #include "./core.h"
 
-#include "./lfile.h"
-#include "./nostd.h"
+#include "./bufreader.h"
+#include "./container.h"
+#include "./file.h"
 #include "./serialize.h"
-#include "./std.h"

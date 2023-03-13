@@ -22,10 +22,10 @@ FetchContent_MakeAvailable(Catch2)
 set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lfile.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/nostd.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/std.h")
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bufreader.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/container.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/file.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.h")
 
 # Main LexIO header-only library
 add_library(lexio INTERFACE)
@@ -36,16 +36,16 @@ add_custom_target(lexio_headers SOURCES ${LEXIO_HEADERS})
 add_executable(test
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_core.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_lfile.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_container.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_file.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_serialize.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_std.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test.h"
     ${LEXIO_HEADERS})
 
 # Quick compile check.
 add_executable(compile
     "${CMAKE_CURRENT_SOURCE_DIR}/test/compile.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.h") 
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test.h") 
 
 if(LEXIO_TEST_NONSTD)
     target_compile_definitions(test PUBLIC LEXIO_TEST_NONSTD)

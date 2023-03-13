@@ -25,7 +25,7 @@
 namespace LexIO
 {
 
-enum class LOpenMode
+enum class OpenMode
 {
     // Read only, file must exist.
     read,
@@ -66,23 +66,23 @@ class Win32Error : public std::runtime_error
     DWORD GetError() const noexcept { return m_error; }
 };
 
-class LFileWin32
+class FileWin32
 {
     HANDLE m_fileHandle = INVALID_HANDLE_VALUE;
 
-    LFileWin32(const HANDLE fileHandle) : m_fileHandle(fileHandle) {}
+    FileWin32(const HANDLE fileHandle) : m_fileHandle(fileHandle) {}
 
   public:
-    LFileWin32(const LFileWin32 &other) = delete;
-    LFileWin32 &operator=(const LFileWin32 &other) = delete;
+    FileWin32(const FileWin32 &other) = delete;
+    FileWin32 &operator=(const FileWin32 &other) = delete;
 
-    LFileWin32(LFileWin32 &&other) noexcept
+    FileWin32(FileWin32 &&other) noexcept
     {
         m_fileHandle = other.m_fileHandle;
         other.m_fileHandle = INVALID_HANDLE_VALUE;
     }
 
-    LFileWin32 &operator=(LFileWin32 &&other) noexcept
+    FileWin32 &operator=(FileWin32 &&other) noexcept
     {
         m_fileHandle = other.m_fileHandle;
         other.m_fileHandle = INVALID_HANDLE_VALUE;
@@ -92,7 +92,7 @@ class LFileWin32
     /**
      * @brief Destructor closes file handle with no error handling.
      */
-    ~LFileWin32()
+    ~FileWin32()
     {
         if (m_fileHandle != INVALID_HANDLE_VALUE)
         {
@@ -108,11 +108,11 @@ class LFileWin32
      * @param desiredAccess Desired access to pass to CreateFileW call.
      * @param shareMode Share mode to pass to CreateFileW call.
      * @param creationDisposition Creation disposition to pass to CreateFileW call.
-     * @return A constructed LFileWin32 object.
+     * @return A constructed FileWin32 object.
      * @throws Win32Error if error was encountered.
      */
-    static LFileWin32 Open(const char *path, const DWORD desiredAccess, const DWORD shareMode,
-                           const DWORD creationDisposition)
+    static FileWin32 Open(const char *path, const DWORD desiredAccess, const DWORD shareMode,
+                          const DWORD creationDisposition)
     {
         // Request buffer size.
         const int wanted = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
@@ -138,7 +138,7 @@ class LFileWin32
             throw Win32Error("Could not open file.", GetLastError());
         }
 
-        return LFileWin32(fileHandle);
+        return FileWin32(fileHandle);
     }
 
     /**
@@ -227,28 +227,28 @@ class LFileWin32
     }
 };
 
-static_assert(IsReaderV<LFileWin32>, "LFileWin32 is not a Reader");
-static_assert(IsWriterV<LFileWin32>, "LFileWin32 is not a Writer");
-static_assert(IsSeekableV<LFileWin32>, "LFileWin32 is not a Seekable");
+static_assert(IsReaderV<FileWin32>, "FileWin32 is not a Reader");
+static_assert(IsWriterV<FileWin32>, "FileWin32 is not a Writer");
+static_assert(IsSeekableV<FileWin32>, "FileWin32 is not a Seekable");
 
-using LFile = LFileWin32;
+using File = FileWin32;
 
-inline LFile LOpen(const char *path, const LOpenMode mode)
+inline File Open(const char *path, const OpenMode mode)
 {
     switch (mode)
     {
-    case LOpenMode::read:
-        return LFile::Open(path, GENERIC_READ, 0, OPEN_EXISTING);
-    case LOpenMode::write:
-        return LFile::Open(path, GENERIC_WRITE, 0, CREATE_ALWAYS);
-    case LOpenMode::append:
-        return LFile::Open(path, GENERIC_WRITE, 0, OPEN_ALWAYS);
-    case LOpenMode::readPlus:
-        return LFile::Open(path, GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
-    case LOpenMode::writePlus:
-        return LFile::Open(path, GENERIC_READ | GENERIC_WRITE, 0, CREATE_ALWAYS);
-    case LOpenMode::appendPlus:
-        return LFile::Open(path, GENERIC_READ | GENERIC_WRITE, 0, OPEN_ALWAYS);
+    case OpenMode::read:
+        return File::Open(path, GENERIC_READ, 0, OPEN_EXISTING);
+    case OpenMode::write:
+        return File::Open(path, GENERIC_WRITE, 0, CREATE_ALWAYS);
+    case OpenMode::append:
+        return File::Open(path, GENERIC_WRITE, 0, OPEN_ALWAYS);
+    case OpenMode::readPlus:
+        return File::Open(path, GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
+    case OpenMode::writePlus:
+        return File::Open(path, GENERIC_READ | GENERIC_WRITE, 0, CREATE_ALWAYS);
+    case OpenMode::appendPlus:
+        return File::Open(path, GENERIC_READ | GENERIC_WRITE, 0, OPEN_ALWAYS);
     default:
         throw std::runtime_error("Unknown open mode type.");
     }
@@ -273,21 +273,18 @@ class POSIXError : public std::runtime_error
     int GetError() const noexcept { return m_error; }
 };
 
-class LFilePOSIX
+class FilePOSIX
 {
     int m_fd = -1;
-    LFilePOSIX(const int fd) : m_fd(fd) {}
+    FilePOSIX(const int fd) : m_fd(fd) {}
 
   public:
-    LFilePOSIX(const LFilePOSIX &other) = delete;
-    LFilePOSIX &operator=(const LFilePOSIX &other) = delete;
+    FilePOSIX(const FilePOSIX &other) = delete;
+    FilePOSIX &operator=(const FilePOSIX &other) = delete;
 
-    LFilePOSIX(LFilePOSIX &&other) noexcept : m_fd(other.m_fd)
-    {
-        other.m_fd = -1;
-    }
+    FilePOSIX(FilePOSIX &&other) noexcept : m_fd(other.m_fd) { other.m_fd = -1; }
 
-    LFilePOSIX &operator=(LFilePOSIX &&other) noexcept
+    FilePOSIX &operator=(FilePOSIX &&other) noexcept
     {
         m_fd = other.m_fd;
         other.m_fd = -1;
@@ -297,7 +294,7 @@ class LFilePOSIX
     /**
      * @brief Destructor closes file handle with no error handling.
      */
-    ~LFilePOSIX()
+    ~FilePOSIX()
     {
         if (m_fd != -1)
         {
@@ -312,10 +309,10 @@ class LFilePOSIX
      * @param path Path to filename, assumed to be a null-terminated string.
      * @param flags flags to pass to open(2) call.
      * @param mode mode to pass to open(2) call.
-     * @return A constructed LFilePOSIX object.
+     * @return A constructed FilePOSIX object.
      * @throws POSIXError if error was encountered.
      */
-    static LFilePOSIX Open(const char *path, const int flags, mode_t mode)
+    static FilePOSIX Open(const char *path, const int flags, mode_t mode)
     {
         const int fd = open(path, flags, mode);
         if (fd == -1)
@@ -323,7 +320,7 @@ class LFilePOSIX
             throw POSIXError("Could not open file.", errno);
         }
 
-        return LFilePOSIX(fd);
+        return FilePOSIX(fd);
     }
 
     /**
@@ -402,28 +399,28 @@ class LFilePOSIX
     }
 };
 
-static_assert(IsReaderV<LFilePOSIX>, "LFilePOSIX is not a Reader");
-static_assert(IsWriterV<LFilePOSIX>, "LFilePOSIX is not a Writer");
-static_assert(IsSeekableV<LFilePOSIX>, "LFilePOSIX is not a Seekable");
+static_assert(IsReaderV<FilePOSIX>, "FilePOSIX is not a Reader");
+static_assert(IsWriterV<FilePOSIX>, "FilePOSIX is not a Writer");
+static_assert(IsSeekableV<FilePOSIX>, "FilePOSIX is not a Seekable");
 
-using LFile = LFilePOSIX;
+using File = FilePOSIX;
 
-inline LFile LOpen(const char *path, const LOpenMode mode)
+inline File Open(const char *path, const OpenMode mode)
 {
     switch (mode)
     {
-    case LOpenMode::read:
-        return LFile::Open(path, O_RDONLY, 0666);
-    case LOpenMode::write:
-        return LFile::Open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-    case LOpenMode::append:
-        return LFile::Open(path, O_WRONLY | O_CREAT, 0666);
-    case LOpenMode::readPlus:
-        return LFile::Open(path, O_RDWR, 0666);
-    case LOpenMode::writePlus:
-        return LFile::Open(path, O_RDWR | O_CREAT | O_TRUNC, 0666);
-    case LOpenMode::appendPlus:
-        return LFile::Open(path, O_RDWR | O_CREAT, 0666);
+    case OpenMode::read:
+        return File::Open(path, O_RDONLY, 0666);
+    case OpenMode::write:
+        return File::Open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    case OpenMode::append:
+        return File::Open(path, O_WRONLY | O_CREAT, 0666);
+    case OpenMode::readPlus:
+        return File::Open(path, O_RDWR, 0666);
+    case OpenMode::writePlus:
+        return File::Open(path, O_RDWR | O_CREAT | O_TRUNC, 0666);
+    case OpenMode::appendPlus:
+        return File::Open(path, O_RDWR | O_CREAT, 0666);
     default:
         throw std::runtime_error("Unknown open mode type.");
     }

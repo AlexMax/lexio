@@ -16,13 +16,15 @@
 
 #include "./test.h"
 
+#include <catch2/catch_all.hpp>
+
 //------------------------------------------------------------------------------
 
-TEST_CASE("Test file opened in read mode", "[lfile]")
+TEST_CASE("Test file opened in read mode", "[file]")
 {
     constexpr const char *firstLine = "The quick brown fox";
 
-    auto file = LexIO::LOpen("../test/test_file.txt", LexIO::LOpenMode::read);
+    auto file = LexIO::Open("../test/test_file.txt", LexIO::OpenMode::read);
 
     // Test reading.
     uint8_t readBuffer[32];

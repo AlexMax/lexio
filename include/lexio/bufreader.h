@@ -49,8 +49,17 @@ class CBuffer final : public Buffer
         o.m_ptr = nullptr;
         o.m_size = 0;
     }
-    CBuffer &operator=(const CBuffer &o) { *this = CBuffer(o); }
-    CBuffer &operator=(CBuffer &&o) noexcept { *this = std::move(o); }
+    CBuffer &operator=(const CBuffer &o)
+    {
+        *this = CBuffer(o);
+        return *this;
+    }
+    CBuffer &operator=(CBuffer &&o) noexcept
+    {
+        o.m_ptr = nullptr;
+        o.m_size = 0;
+        return *this;
+    }
     ~CBuffer() { std::free(m_ptr); }
 
     uint8_t *Data() { return m_ptr; }

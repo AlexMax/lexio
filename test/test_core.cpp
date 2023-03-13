@@ -16,6 +16,8 @@
 
 #include "./test.h"
 
+#include <catch2/catch_all.hpp>
+
 //******************************************************************************
 
 struct GoodReader
