@@ -115,14 +115,20 @@ static_assert(!LexIO::IsReaderV<BadReaderBadReturn>, "BadReaderBadReturn incorre
 
 //******************************************************************************
 
-using ArrayBuffer = LexIO::StaticStdBuffer<std::array<uint8_t, 1024>>;
+using VectorBuffer = LexIO::StdBuffer<std::vector<uint8_t>>;
 
-static ArrayBuffer GetBuffer()
+template <typename T, std::size_t N>
+constexpr std::size_t CountOf(T const (&)[N]) noexcept
+{
+    return N;
+}
+
+static VectorBuffer GetBuffer()
 {
     const uint8_t text[] = "The quick brown fox\njumps over the lazy dog.\n";
-    LexIO::ConstByteSpanT textSpan(text);
+    LexIO::ConstByteSpanT textSpan{&text[0], CountOf(text) - 1};
 
-    ArrayBuffer rvo;
+    VectorBuffer rvo;
     rvo.RawWrite(textSpan);
     rvo.Seek(LexIO::WhenceStart(0));
     return rvo;
@@ -132,7 +138,7 @@ static ArrayBuffer GetBuffer()
 
 TEST_CASE("Test Read(span<char>)", "[core]")
 {
-    ArrayBuffer buffer = GetBuffer();
+    VectorBuffer buffer = GetBuffer();
 
     std::string data;
     data.resize(9);
@@ -143,7 +149,7 @@ TEST_CASE("Test Read(span<char>)", "[core]")
 
 TEST_CASE("Test Read(void, size)", "[core]")
 {
-    ArrayBuffer buffer = GetBuffer();
+    VectorBuffer buffer = GetBuffer();
 
     void *data = calloc(10, 1);
     const size_t bytes = LexIO::Read(data, 9, buffer);
@@ -156,7 +162,7 @@ TEST_CASE("Test Read(void, size)", "[core]")
 
 TEST_CASE("Test Write(span<char>)", "[core]")
 {
-    ArrayBuffer buffer;
+    VectorBuffer buffer;
     std::string data{"The quick"};
     std::array<uint8_t, 10> check;
     memset(check.data(), 0x00, check.size());
@@ -166,7 +172,7 @@ TEST_CASE("Test Write(span<char>)", "[core]")
 
     LexIO::Seek(buffer, LexIO::WhenceStart{0});
     bytes = LexIO::Read(check, buffer);
-    REQUIRE(bytes == 10);
+    REQUIRE(bytes == 9);
 
     char *checkChar = reinterpret_cast<char *>(check.data());
     REQUIRE(strcmp(checkChar, data.c_str()) == 0);
@@ -174,7 +180,7 @@ TEST_CASE("Test Write(span<char>)", "[core]")
 
 TEST_CASE("Test Write(void, size)", "[core]")
 {
-    ArrayBuffer buffer;
+    VectorBuffer buffer;
     std::string data{"The quick"};
     void *dataVoid = data.data();
     std::array<uint8_t, 10> check;
@@ -185,7 +191,7 @@ TEST_CASE("Test Write(void, size)", "[core]")
 
     LexIO::Seek(buffer, LexIO::WhenceStart{0});
     bytes = LexIO::Read(check, buffer);
-    REQUIRE(bytes == 10);
+    REQUIRE(bytes == 9);
 
     char *checkChar = reinterpret_cast<char *>(check.data());
     REQUIRE(strcmp(checkChar, data.c_str()) == 0);
@@ -193,37 +199,37 @@ TEST_CASE("Test Write(void, size)", "[core]")
 
 TEST_CASE("Test ReadAll", "[core]")
 {
-    ArrayBuffer basic = GetBuffer();
-    auto buffer = LexIO::StdBufReader<ArrayBuffer>::FromReader(std::move(basic));
+    VectorBuffer basic = GetBuffer();
+    auto buffer = LexIO::StdBufReader<VectorBuffer>::FromReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
-    REQUIRE((bytes == 45 || bytes == 47)); // Newlines are different sizes.
-    REQUIRE((data.size() == 45 || data.size() == 47));
+    REQUIRE(bytes == 45);
+    REQUIRE(data.size() == 45);
     REQUIRE(*(data.end() - 1) == '\n');
 }
 
 TEST_CASE("Test ReadAll with a small buffer", "[core]")
 {
-    ArrayBuffer basic = GetBuffer();
-    auto buffer = LexIO::StdBufReader<ArrayBuffer>::FromReader(std::move(basic));
+    VectorBuffer basic = GetBuffer();
+    auto buffer = LexIO::StdBufReader<VectorBuffer>::FromReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
     REQUIRE(data[4] == 'q'); // Check the buffer boundary.
     REQUIRE(data[8] == 'k');
-    REQUIRE((bytes == 45 || bytes == 47)); // Newlines are different sizes.
-    REQUIRE((data.size() == 45 || data.size() == 47));
+    REQUIRE(bytes == 45);
+    REQUIRE(data.size() == 45);
 }
 
 TEST_CASE("Test ReadUntil", "[core]")
 {
-    ArrayBuffer basic = GetBuffer();
-    auto buffer = LexIO::StdBufReader<ArrayBuffer>::FromReader(std::move(basic));
+    VectorBuffer basic = GetBuffer();
+    auto buffer = LexIO::StdBufReader<VectorBuffer>::FromReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
-    REQUIRE((bytes == 20 || bytes == 21)); // Newlines are different sizes.
-    REQUIRE((data.size() == 20 || data.size() == 21));
+    REQUIRE(bytes == 20);
+    REQUIRE(data.size() == 20);
     REQUIRE(*(data.end() - 1) == '\n');
 }

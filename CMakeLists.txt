@@ -39,7 +39,7 @@ add_executable(test
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_lfile.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_serialize.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_std.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.h")
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_nonstd.h"
     ${LEXIO_HEADERS})
 
 # Quick compile check.

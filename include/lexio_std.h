@@ -22,6 +22,7 @@
 
 #include "lexio_core.h"
 
+#include <iterator>
 #include <vector> // Used by StdBufReader
 
 namespace LexIO
@@ -60,19 +61,19 @@ class StdBufferBase
     StdBufferBase(const T &buffer) : m_buffer(buffer) {}
     StdBufferBase(T &&buffer) : m_buffer(buffer) {}
 
-    size_t RawRead(ByteSpanT buffer)
+    virtual size_t RawRead(ByteSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
-        const size_t destOffset = std::min(wantedOffset, m_offset + buffer.size());
+        const size_t destOffset = std::min(wantedOffset, m_buffer.size());
         const size_t actualLength = destOffset - m_offset;
         std::copy(m_buffer.begin() + m_offset, m_buffer.begin() + m_offset + actualLength, buffer.begin());
         m_offset += actualLength;
         return actualLength;
     }
 
-    void Flush() {}
+    virtual void Flush() {}
 
-    size_t RawWrite(ConstByteSpanT buffer)
+    virtual size_t RawWrite(ConstByteSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_buffer.size());
@@ -82,14 +83,14 @@ class StdBufferBase
         return actualLength;
     }
 
-    size_t Seek(const WhenceStart whence)
+    virtual size_t Seek(const WhenceStart whence)
     {
         OffsetCheck(whence.offset);
         m_offset = static_cast<size_t>(whence.offset);
         return m_offset;
     }
 
-    size_t Seek(const WhenceCurrent whence)
+    virtual size_t Seek(const WhenceCurrent whence)
     {
         const ptrdiff_t offset = static_cast<ptrdiff_t>(m_offset) + whence.offset;
         OffsetCheck(offset);
@@ -97,7 +98,7 @@ class StdBufferBase
         return m_offset;
     }
 
-    size_t Seek(const WhenceEnd whence)
+    virtual size_t Seek(const WhenceEnd whence)
     {
         const ptrdiff_t offset = static_cast<ptrdiff_t>(m_buffer.size()) - whence.offset;
         OffsetCheck(offset);
@@ -159,7 +160,7 @@ class StdBuffer : public StdBufferBase<T>
         std::copy(list.begin(), list.end(), this->Buffer().begin());
     }
 
-    size_t RawWrite(ConstByteSpanT buffer)
+    size_t RawWrite(ConstByteSpanT buffer) override
     {
         // Writes off the end of the burffer grow the buffer to fit.
         const size_t wantedOffset = this->Offset() + buffer.size();
