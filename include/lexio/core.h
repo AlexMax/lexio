@@ -158,19 +158,31 @@ struct Nonesuch
 template <template <class...> class Op, class... Args>
 using IsDetected = typename Detector<Nonesuch, void, Op, Args...>::value_t;
 
+/**
+ * @brief This type exists if the passed T conforms to Reader.
+ */
 template <typename T>
 using ReaderType = decltype(std::declval<size_t &>() = std::declval<T>().RawRead(std::declval<ByteSpanT>()));
 
+/**
+ * @brief This type exists if the passed T conforms to BufferedReader.
+ */
 template <typename T>
 using BufferedReaderType =
     decltype(std::declval<size_t &>() = std::declval<T>().GetBufferSize(),
              std::declval<ConstByteSpanT &>() = std::declval<T>().FillBuffer(std::declval<size_t>()),
              std::declval<T>().ConsumeBuffer(std::declval<size_t>()));
 
+/**
+ * @brief This type exists if the passed T conforms to Writer.
+ */
 template <typename T>
 using WriterType = decltype(std::declval<size_t &>() = std::declval<T>().RawWrite(std::declval<ConstByteSpanT>()),
                             std::declval<T>().Flush());
 
+/**
+ * @brief This type exists if the passed T conforms to Seekable.
+ */
 template <typename T>
 using SeekableType = decltype(std::declval<size_t &>() = std::declval<T>().Seek(std::declval<WhenceStart>()),
                               std::declval<size_t &>() = std::declval<T>().Seek(std::declval<WhenceCurrent>()),
