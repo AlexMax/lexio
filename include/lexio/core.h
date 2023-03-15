@@ -121,142 +121,62 @@ namespace Detail
 {
 
 /**
- * @brief SFINAE struct for detecting a valid "RawRead" method in a Reader type.
- *
- * @tparam T Type to check.
+ * @see https://en.cppreference.com/w/cpp/experimental/is_detected
  */
-template <typename, typename _ = void>
-struct HasRawRead : std::false_type
+template <class Default, class AlwaysVoid, template <class...> class Op, class... Args>
+struct Detector
 {
+    using value_t = std::false_type;
+    using type = Default;
 };
 
-template <typename T>
-struct HasRawRead<T,                                                                                                //
-                  std::enable_if_t<                                                                                 //
-                      std::is_same<size_t, decltype(std::declval<T>().RawRead(std::declval<ByteSpanT>()))>::value>> //
-    : std::true_type
+template <class Default, template <class...> class Op, class... Args>
+struct Detector<Default, std::void_t<Op<Args...>>, Op, Args...>
 {
+    using value_t = std::true_type;
+    using type = Op<Args...>;
 };
 
 /**
- * @brief SFINAE struct for detecting a valid "GetBufferSize" method in a BufferedReader type.
+ * @brief Indicates detection failure from IsDetected.
  *
- * @tparam T Type to check.
+ * @see https://en.cppreference.com/w/cpp/experimental/nonesuch
  */
-template <typename, typename _ = void>
-struct HasGetBufferSize : std::false_type
+struct Nonesuch
 {
-};
-
-template <typename T>
-struct HasGetBufferSize<T,                                                                             //
-                        std::enable_if_t<                                                              //
-                            std::is_same<size_t, decltype(std::declval<T>().GetBufferSize())>::value>> //
-    : std::true_type
-{
+    ~Nonesuch() = delete;
+    Nonesuch(Nonesuch const &) = delete;
+    void operator=(Nonesuch const &) = delete;
 };
 
 /**
- * @brief SFINAE struct for detecting a valid "FillBuffer" method in a BufferedReader type.
+ * @brief Check to see if the template Op<Args...> exists and aliases
+ *        std::true_type if so, otherwise it alises std::false_type.
  *
- * @tparam T Type to check.
+ * @see https://en.cppreference.com/w/cpp/experimental/is_detected
  */
-template <typename, typename _ = void>
-struct HasFillBuffer : std::false_type
-{
-};
+template <template <class...> class Op, class... Args>
+using IsDetected = typename Detector<Nonesuch, void, Op, Args...>::value_t;
 
 template <typename T>
-struct HasFillBuffer<
-    T,                                                                                                        //
-    std::enable_if_t<                                                                                         //
-        std::is_same<ConstByteSpanT, decltype(std::declval<T>().FillBuffer(std::declval<size_t>()))>::value>> //
-    : std::true_type
-{
-};
-
-/**
- * @brief SFINAE struct for detecting a valid "ConsumeBuffer" method in a BufferedReader type.
- *
- * @tparam T Type to check.
- */
-template <typename, typename _ = void>
-struct HasConsumeBuffer : std::false_type
-{
-};
+using ReaderType = decltype(std::declval<size_t &>() = std::declval<T>().RawRead(std::declval<ByteSpanT>()));
 
 template <typename T>
-struct HasConsumeBuffer<
-    T,                                                                                                 //
-    std::enable_if_t<                                                                                  //
-        std::is_same<void, decltype(std::declval<T>().ConsumeBuffer(std::declval<size_t>()))>::value>> //
-    : std::true_type
-{
-};
-
-/**
- * @brief SFINAE struct for detecting a valid "RawWrite" method in a Writer type.
- *
- * @tparam T Type to check.
- */
-template <typename T, typename _ = void>
-struct HasRawWrite : std::false_type
-{
-};
+using BufferedReaderType =
+    decltype(std::declval<size_t &>() = std::declval<T>().GetBufferSize(),
+             std::declval<ConstByteSpanT &>() = std::declval<T>().FillBuffer(std::declval<size_t>()),
+             std::declval<T>().ConsumeBuffer(std::declval<size_t>()));
 
 template <typename T>
-struct HasRawWrite<
-    T,                                                                                                      //
-    std::enable_if_t<                                                                                       //
-        std::is_same<size_t, decltype(std::declval<T>().RawWrite(std::declval<ConstByteSpanT>()))>::value>> //
-    : std::true_type
-{
-};
-
-/**
- * @brief SFINAE struct for detecting a valid "Flush" method in a Writer type.
- *
- * @tparam T Type to check.
- */
-template <typename, typename _ = void>
-struct HasFlush : std::false_type
-{
-};
+using WriterType = decltype(std::declval<size_t &>() = std::declval<T>().RawWrite(std::declval<ConstByteSpanT>()),
+                            std::declval<T>().Flush());
 
 template <typename T>
-struct HasFlush<T,                                                                   //
-                std::enable_if_t<                                                    //
-                    std::is_same<void, decltype(std::declval<T>().Flush())>::value>> //
-    : std::true_type
-{
-};
-
-/**
- * @brief SFINAE struct for detecting a valid "Seek" method in a Writer type.
- *
- * @tparam T Type to check.
- * @tparam U "Whence" overload to check with.
- */
-template <typename T, typename U, typename _ = void>
-struct HasSeek : std::false_type
-{
-};
-
-template <typename T, typename U>
-struct HasSeek<T, U,                                                                                  //
-               std::enable_if_t<                                                                      //
-                   std::is_same<size_t, decltype(std::declval<T>().Seek(std::declval<U>()))>::value>> //
-    : std::true_type
-{
-};
+using SeekableType = decltype(std::declval<size_t &>() = std::declval<T>().Seek(std::declval<WhenceStart>()),
+                              std::declval<size_t &>() = std::declval<T>().Seek(std::declval<WhenceCurrent>()),
+                              std::declval<size_t &>() = std::declval<T>().Seek(std::declval<WhenceEnd>()));
 
 } // namespace Detail
-
-/**
- * @brief Helper variable for IsReader trait.
- */
-template <typename T>
-LEXIO_INLINE_VAR constexpr bool IsReaderV = Detail::HasRawRead<T>::value;
 
 /**
  * @brief If the template parameter is a valid Reader, provides a member
@@ -265,17 +185,13 @@ LEXIO_INLINE_VAR constexpr bool IsReaderV = Detail::HasRawRead<T>::value;
  * @tparam T Type to check.
  */
 template <typename T>
-struct IsReader : std::integral_constant<bool, IsReaderV<T>>
-{
-};
+using IsReader = Detail::IsDetected<Detail::ReaderType, T>;
 
 /**
- * @brief Helper variable for IsBufferedReader trait.
+ * @brief Helper variable for IsReader trait.
  */
 template <typename T>
-LEXIO_INLINE_VAR constexpr bool IsBufferedReaderV =
-    Detail::HasRawRead<T>::value && Detail::HasGetBufferSize<T>::value && Detail::HasFillBuffer<T>::value &&
-    Detail::HasConsumeBuffer<T>::value;
+LEXIO_INLINE_VAR constexpr bool IsReaderV = IsReader<T>::value;
 
 /**
  * @brief If the template parameter is a valid BufferedReader, provides a
@@ -284,15 +200,13 @@ LEXIO_INLINE_VAR constexpr bool IsBufferedReaderV =
  * @tparam T Type to check.
  */
 template <typename T>
-struct IsBufferedReader : std::integral_constant<bool, IsBufferedReaderV<T>>
-{
-};
+using IsBufferedReader = Detail::IsDetected<Detail::BufferedReaderType, T>;
 
 /**
- * @brief Helper variable for IsWriter trait.
+ * @brief Helper variable for IsBufferedReader trait.
  */
 template <typename T>
-LEXIO_INLINE_VAR constexpr bool IsWriterV = Detail::HasRawWrite<T>::value && Detail::HasFlush<T>::value;
+LEXIO_INLINE_VAR constexpr bool IsBufferedReaderV = IsBufferedReader<T>::value;
 
 /**
  * @brief If the template parameter is a valid Writer, provides a member
@@ -301,17 +215,13 @@ LEXIO_INLINE_VAR constexpr bool IsWriterV = Detail::HasRawWrite<T>::value && Det
  * @tparam T Type to check.
  */
 template <typename T>
-struct IsWriter : std::integral_constant<bool, IsWriterV<T>>
-{
-};
+using IsWriter = Detail::IsDetected<Detail::WriterType, T>;
 
 /**
- * @brief Helper variable for IsSeekable trait.
+ * @brief Helper variable for IsWriter trait.
  */
 template <typename T>
-LEXIO_INLINE_VAR constexpr bool IsSeekableV =
-    Detail::HasSeek<T, WhenceStart>::value && Detail::HasSeek<T, WhenceCurrent>::value &&
-    Detail::HasSeek<T, WhenceEnd>::value;
+LEXIO_INLINE_VAR constexpr bool IsWriterV = IsWriter<T>::value;
 
 /**
  * @brief If the template parameter is a valid SeekableReader, provides a
@@ -320,9 +230,13 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV =
  * @tparam T Type to check.
  */
 template <typename T>
-struct IsSeekable : std::integral_constant<bool, IsSeekableV<T>>
-{
-};
+using IsSeekable = Detail::IsDetected<Detail::SeekableType, T>;
+
+/**
+ * @brief Helper variable for IsSeekable trait.
+ */
+template <typename T>
+LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
 
 //******************************************************************************
 //
