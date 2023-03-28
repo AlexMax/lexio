@@ -182,7 +182,7 @@ TEST_CASE("Test Write(void, size)", "[core]")
 {
     LexIO::VectorStream buffer;
     std::string data{"The quick"};
-    void *dataVoid = data.data();
+    void *dataVoid = static_cast<void *>(data.data());
     std::array<uint8_t, 10> check;
     memset(check.data(), 0x00, check.size());
 
