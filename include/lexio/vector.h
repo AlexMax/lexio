@@ -43,14 +43,14 @@ using VectorStream = LexIO::ContainerDynamic<std::vector<uint8_t>>;
 template <typename READER>
 class VectorBufReader
 {
-    READER m_reader;                  // Underlying READER class.
-    std::vector<uint8_t> m_container; // Buffer used for reading.
-    size_t m_start = 0;               // Starting offset of buffered data.
-    size_t m_end = 0;                 // Ending offset of buffered data.
+    READER m_reader;               // Underlying READER class.
+    std::vector<uint8_t> m_buffer; // Buffer used for reading.
+    size_t m_start = 0;            // Starting offset of buffered data.
+    size_t m_end = 0;              // Ending offset of buffered data.
 
     VectorBufReader(READER &&reader, const size_t startSize) : m_reader(std::move(reader))
     {
-        m_container.resize(startSize);
+        m_buffer.resize(startSize);
     }
 
   public:
@@ -76,7 +76,7 @@ class VectorBufReader
         return peek.size();
     }
 
-    size_t GetBufferSize() noexcept { return m_container.size(); }
+    size_t GetBufferSize() noexcept { return m_buffer.size(); }
 
     ConstByteSpanT FillBuffer(const size_t size)
     {
@@ -84,33 +84,33 @@ class VectorBufReader
         if (wantedEnd < m_end)
         {
             // We have enough data in the buffer, return the entire buffer.
-            return ConstByteSpanT(&m_container[m_start], &m_container[m_end]);
+            return ConstByteSpanT(&m_buffer[m_start], &m_buffer[m_end]);
         }
-        else if (m_container.empty())
+        else if (m_buffer.empty())
         {
             // Buffer is empty, resize it to fit.
-            m_container.resize(size);
+            m_buffer.resize(size);
         }
-        else if (wantedEnd >= m_container.size())
+        else if (wantedEnd >= m_buffer.size())
         {
             // Move unconsumed data to the start of the buffer and set new
             // start index to match.
-            std::copy(m_container.begin() + m_start, m_container.begin() + m_end, m_container.begin());
+            std::copy(m_buffer.begin() + m_start, m_buffer.begin() + m_end, m_buffer.begin());
             m_start = 0;
-            if (size >= m_container.size())
+            if (size >= m_buffer.size())
             {
                 // Not enough room in the data structure to fit incoming data,
                 // so we grow it to fit.
-                m_container.resize(size);
+                m_buffer.resize(size);
             }
         }
 
         // We don't have enough data buffered, read to make up the difference
         // and set the new end index appropriately.
-        ByteSpanT target(m_container.begin() + m_start, m_container.begin() + static_cast<ptrdiff_t>(size));
+        ByteSpanT target(m_buffer.begin() + m_start, m_buffer.begin() + static_cast<ptrdiff_t>(size));
         const size_t actualSize = m_reader.RawRead(target);
         m_end = m_start + actualSize;
-        return ConstByteSpanT(m_container.begin() + m_start, m_container.begin() + m_end);
+        return ConstByteSpanT(m_buffer.begin() + m_start, m_buffer.begin() + m_end);
     }
 
     void ConsumeBuffer(const size_t size)

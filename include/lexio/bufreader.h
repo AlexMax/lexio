@@ -89,7 +89,7 @@ class BufReader
     size_t m_start = 0; // Starting offset of buffered data.
     size_t m_end = 0;   // Ending offset of buffered data.
 
-    BufReader(READER &&reader, const size_t startSize) : m_reader(std::move(reader)) {}
+    BufReader(READER &&reader, const size_t startSize) : m_reader(std::move(reader)) { m_buffer.Resize(startSize); }
 
   public:
     static constexpr size_t DEFAULT_BUFFER_SIZE = 8192;

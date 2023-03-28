@@ -1,2 +1,2 @@
-Checks: checks=-*,bugprone*,clang-analyzer-cplusplus*,cppcoreguidelines*,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-pro-type-vararg
+Checks: checks=-*,bugprone*,clang-analyzer-cplusplus*
 HeaderFilterRegex: lexio/include/lexio.*\.h$
