@@ -54,9 +54,8 @@ if(LEXIO_TEST_NONSTD)
     target_compile_definitions(compile PUBLIC LEXIO_TEST_NONSTD)
 endif()
 
- # FIXME: clang-tidy seems to have issues parsing cl-style arguments, even
- #        while using the cl driver mode.
-if(NOT MSVC)
+# Only use clang-tidy with Clang.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     find_program(CLANG_TIDY_EXE clang-tidy)
     if(CLANG_TIDY_EXE)
         set_target_properties(test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
