@@ -85,6 +85,8 @@ target_include_directories(compile PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(test PUBLIC Catch2::Catch2WithMain)
 
+target_precompile_headers(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/test.h")
+
 if(NOT LEXIO_TEST_NONSTD)
     set(LEXIO_TEST_NONSTD OFF)
 endif()
