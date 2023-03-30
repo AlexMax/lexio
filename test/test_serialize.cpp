@@ -258,3 +258,28 @@ TEST_CASE("Write64BE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
+
+TEST_CASE("ReadUVarint64", "[serialize]")
+{
+    LexIO::VectorStream buffer({0x88, 0xb3, 0xaa, 0xdd, 0xcb, 0xb9, 0xb7, 0xf7, 0xff, 0x01});
+    REQUIRE(LexIO::ReadUVarint64(buffer) == 0xffeeddccbbaa9988);
+}
+
+TEST_CASE("WriteUVarint64", "[serialize]")
+{
+    LexIO::VectorStream buffer;
+    LexIO::WriteUVarint64(buffer, 0xffeeddccbbaa9988);
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xb3);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xcb);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xb9);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xb7);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xf7);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x01);
+    REQUIRE_THROWS(LexIO::ReadU8(buffer));
+}

@@ -31,13 +31,13 @@ namespace Detail
 template <typename T>
 inline constexpr T FromByte(const uint8_t ch, const int sh)
 {
-    return T(ch) << (sh * 8);
+    return T(ch) << sh;
 }
 
 template <typename T>
-inline constexpr uint8_t ToByte(const T val, const int sh)
+inline constexpr uint8_t ToByte(const T val, const int sh, const T mask = 0xff)
 {
-    return static_cast<uint8_t>((val & (T(0xff) << (sh * 8))) >> sh * 8);
+    return static_cast<uint8_t>((val & (mask << sh)) >> sh);
 }
 
 } // namespace Detail
@@ -92,7 +92,7 @@ inline uint16_t ReadU16LE(READER &reader)
     {
         throw std::runtime_error("could not read 2 bytes");
     }
-    return Detail::FromByte<uint16_t>(buf[0], 0) | Detail::FromByte<uint16_t>(buf[1], 1);
+    return Detail::FromByte<uint16_t>(buf[0], 0) | Detail::FromByte<uint16_t>(buf[1], 8);
 }
 
 template <typename WRITER>
@@ -100,7 +100,7 @@ inline void WriteU16LE(WRITER &writer, const uint16_t value)
 {
     const uint8_t buf[sizeof(uint16_t)] = {
         Detail::ToByte(value, 0),
-        Detail::ToByte(value, 1),
+        Detail::ToByte(value, 8),
     };
     const size_t count = Write(writer, buf);
     if (count != sizeof(uint16_t))
@@ -118,14 +118,14 @@ inline uint16_t ReadU16BE(READER &reader)
     {
         throw std::runtime_error("could not read 2 bytes");
     }
-    return Detail::FromByte<uint16_t>(buf[0], 1) | Detail::FromByte<uint16_t>(buf[1], 0);
+    return Detail::FromByte<uint16_t>(buf[0], 8) | Detail::FromByte<uint16_t>(buf[1], 0);
 }
 
 template <typename WRITER>
 inline void WriteU16BE(WRITER &writer, const uint16_t value)
 {
     const uint8_t buf[sizeof(uint16_t)] = {
-        Detail::ToByte(value, 1),
+        Detail::ToByte(value, 8),
         Detail::ToByte(value, 0),
     };
     const size_t count = Write(writer, buf);
@@ -172,8 +172,8 @@ inline uint32_t ReadU32LE(READER &reader)
     {
         throw std::runtime_error("could not read 4 bytes");
     }
-    return Detail::FromByte<uint32_t>(buf[0], 0) | Detail::FromByte<uint32_t>(buf[1], 1) |
-           Detail::FromByte<uint32_t>(buf[2], 2) | Detail::FromByte<uint32_t>(buf[3], 3);
+    return Detail::FromByte<uint32_t>(buf[0], 0) | Detail::FromByte<uint32_t>(buf[1], 8) |
+           Detail::FromByte<uint32_t>(buf[2], 16) | Detail::FromByte<uint32_t>(buf[3], 24);
 }
 
 template <typename WRITER>
@@ -181,9 +181,9 @@ inline void WriteU32LE(WRITER &writer, const uint32_t value)
 {
     const uint8_t buf[sizeof(uint32_t)] = {
         Detail::ToByte(value, 0),
-        Detail::ToByte(value, 1),
-        Detail::ToByte(value, 2),
-        Detail::ToByte(value, 3),
+        Detail::ToByte(value, 8),
+        Detail::ToByte(value, 16),
+        Detail::ToByte(value, 24),
     };
     const size_t count = Write(writer, buf);
     if (count != sizeof(uint32_t))
@@ -201,17 +201,17 @@ inline uint32_t ReadU32BE(READER &reader)
     {
         throw std::runtime_error("could not read 4 bytes");
     }
-    return Detail::FromByte<uint32_t>(buf[0], 3) | Detail::FromByte<uint32_t>(buf[1], 2) |
-           Detail::FromByte<uint32_t>(buf[2], 1) | Detail::FromByte<uint32_t>(buf[3], 0);
+    return Detail::FromByte<uint32_t>(buf[0], 24) | Detail::FromByte<uint32_t>(buf[1], 16) |
+           Detail::FromByte<uint32_t>(buf[2], 8) | Detail::FromByte<uint32_t>(buf[3], 0);
 }
 
 template <typename WRITER>
 inline void WriteU32BE(WRITER &writer, const uint32_t value)
 {
     const uint8_t buf[sizeof(uint32_t)] = {
-        Detail::ToByte(value, 3),
-        Detail::ToByte(value, 2),
-        Detail::ToByte(value, 1),
+        Detail::ToByte(value, 24),
+        Detail::ToByte(value, 16),
+        Detail::ToByte(value, 8),
         Detail::ToByte(value, 0),
     };
     const size_t count = Write(writer, buf);
@@ -258,18 +258,18 @@ inline uint64_t ReadU64LE(READER &buffer)
     {
         throw std::runtime_error("could not read 8 bytes");
     }
-    return Detail::FromByte<uint64_t>(buf[0], 0) | Detail::FromByte<uint64_t>(buf[1], 1) |
-           Detail::FromByte<uint64_t>(buf[2], 2) | Detail::FromByte<uint64_t>(buf[3], 3) |
-           Detail::FromByte<uint64_t>(buf[4], 4) | Detail::FromByte<uint64_t>(buf[5], 5) |
-           Detail::FromByte<uint64_t>(buf[6], 6) | Detail::FromByte<uint64_t>(buf[7], 7);
+    return Detail::FromByte<uint64_t>(buf[0], 0) | Detail::FromByte<uint64_t>(buf[1], 8) |
+           Detail::FromByte<uint64_t>(buf[2], 16) | Detail::FromByte<uint64_t>(buf[3], 24) |
+           Detail::FromByte<uint64_t>(buf[4], 32) | Detail::FromByte<uint64_t>(buf[5], 40) |
+           Detail::FromByte<uint64_t>(buf[6], 48) | Detail::FromByte<uint64_t>(buf[7], 56);
 }
 
 template <typename WRITER>
 inline void WriteU64LE(WRITER &buffer, const uint64_t value)
 {
     const uint8_t buf[sizeof(uint64_t)] = {
-        Detail::ToByte(value, 0), Detail::ToByte(value, 1), Detail::ToByte(value, 2), Detail::ToByte(value, 3),
-        Detail::ToByte(value, 4), Detail::ToByte(value, 5), Detail::ToByte(value, 6), Detail::ToByte(value, 7),
+        Detail::ToByte(value, 0),  Detail::ToByte(value, 8),  Detail::ToByte(value, 16), Detail::ToByte(value, 24),
+        Detail::ToByte(value, 32), Detail::ToByte(value, 40), Detail::ToByte(value, 48), Detail::ToByte(value, 56),
     };
     const size_t count = Write(buffer, buf);
     if (count != sizeof(uint64_t))
@@ -287,18 +287,18 @@ inline uint64_t ReadU64BE(READER &buffer)
     {
         throw std::runtime_error("could not read 8 bytes");
     }
-    return Detail::FromByte<uint64_t>(buf[0], 7) | Detail::FromByte<uint64_t>(buf[1], 6) |
-           Detail::FromByte<uint64_t>(buf[2], 5) | Detail::FromByte<uint64_t>(buf[3], 4) |
-           Detail::FromByte<uint64_t>(buf[4], 3) | Detail::FromByte<uint64_t>(buf[5], 2) |
-           Detail::FromByte<uint64_t>(buf[6], 1) | Detail::FromByte<uint64_t>(buf[7], 0);
+    return Detail::FromByte<uint64_t>(buf[0], 56) | Detail::FromByte<uint64_t>(buf[1], 48) |
+           Detail::FromByte<uint64_t>(buf[2], 40) | Detail::FromByte<uint64_t>(buf[3], 32) |
+           Detail::FromByte<uint64_t>(buf[4], 24) | Detail::FromByte<uint64_t>(buf[5], 16) |
+           Detail::FromByte<uint64_t>(buf[6], 8) | Detail::FromByte<uint64_t>(buf[7], 0);
 }
 
 template <typename WRITER>
 inline void WriteU64BE(WRITER &buffer, const uint64_t value)
 {
     const uint8_t buf[sizeof(uint64_t)] = {
-        Detail::ToByte(value, 7), Detail::ToByte(value, 6), Detail::ToByte(value, 5), Detail::ToByte(value, 4),
-        Detail::ToByte(value, 3), Detail::ToByte(value, 2), Detail::ToByte(value, 1), Detail::ToByte(value, 0),
+        Detail::ToByte(value, 56), Detail::ToByte(value, 48), Detail::ToByte(value, 40), Detail::ToByte(value, 32),
+        Detail::ToByte(value, 24), Detail::ToByte(value, 16), Detail::ToByte(value, 8),  Detail::ToByte(value, 0),
     };
     const size_t count = Write(buffer, buf);
     if (count != sizeof(uint64_t))
@@ -331,6 +331,54 @@ template <typename WRITER>
 inline void Write64BE(WRITER &buffer, const int64_t value)
 {
     WriteU64BE(buffer, static_cast<uint64_t>(value));
+}
+
+//******************************************************************************
+
+/**
+ * @brief Read a protobuf-style Varint.
+ * 
+ * @detail This variable-length integer encoding uses the least significant
+ *         7 bits of each byte for the numeric payload, and the msb is a
+ *         continuation flag.
+ * 
+ * @param reader Reader to operate on.
+ * @return 
+ */
+template <typename READER>
+inline uint64_t ReadUVarint64(READER &reader)
+{
+    constexpr int MAX_BYTES = 10;
+    uint64_t rvo = 0;
+
+    for (int count = 0;; count++)
+    {
+        if (count == MAX_BYTES)
+        {
+            throw std::runtime_error("too many bytes for 64-bit integer");
+        }
+        const uint8_t b = ReadU8(reader);
+        rvo |= static_cast<uint64_t>(b & 0x7F) << (7 * count);
+
+        if ((b & 0x80) == 0)
+        {
+            break;
+        }
+    }
+
+    return rvo;
+}
+
+template <typename WRITER>
+inline void WriteUVarint64(WRITER &writer, const uint64_t value)
+{
+    uint64_t v = value;
+    while (v >= 0x80)
+    {
+        WriteU8(writer, static_cast<uint8_t>(v | 0x80));
+        v >>= 7;
+    }
+    WriteU8(writer, static_cast<uint8_t>(v));
 }
 
 //******************************************************************************
