@@ -40,3 +40,13 @@ jobs:
     - name: Run Tests
       shell: pwsh
       run: ${{github.workspace}}/ci/run_test.ps1
+  macOS:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure
+      run: bash ${{github.workspace}}/ci/configure.sh
+    - name: Build
+      run: bash ${{github.workspace}}/ci/build.sh
+    - name: Run Tests
+      run: bash ${{github.workspace}}/ci/run_test.sh
