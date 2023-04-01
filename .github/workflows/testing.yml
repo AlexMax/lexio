@@ -43,7 +43,9 @@ jobs:
   macOS:
     runs-on: macos-latest
     env:
+      CXX_STANDARD: 14
       GENERATOR: Xcode
+      LEXIO_TEST_NONSTD: "ON"
     steps:
     - uses: actions/checkout@v3
     - name: Configure
