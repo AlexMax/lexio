@@ -18,7 +18,8 @@
 // Stream abstraction that wraps STL-like types.
 //
 
-#pragma once
+#ifndef LEXIO_CONTAINER_H
+#define LEXIO_CONTAINER_H
 
 #include "./core.h"
 
@@ -113,7 +114,7 @@ class ContainerBase
 
 /**
  * @brief Wraps a container that has a compile-time known size.
- * 
+ *
  * @detail Useful for types like std::array.
  */
 template <typename T>
@@ -126,7 +127,7 @@ class ContainerFixed : public ContainerBase<T>
 /**
  * @brief Wraps a dynamic container that does not grow if we write off the
  *        end.
- * 
+ *
  * @detail Useful for types like std::vector if you don't want them to grow.
  */
 template <typename T>
@@ -138,7 +139,7 @@ class ContainerStatic : public ContainerBase<T>
 
 /**
  * @brief Wraps a dynamic container that grows if we write off the end.
- * 
+ *
  * @detail Useful for types like std::vector if you want them to grow.
  */
 template <typename T>
@@ -180,3 +181,5 @@ class ContainerDynamic : public ContainerBase<T>
 };
 
 } // namespace LexIO
+
+#endif

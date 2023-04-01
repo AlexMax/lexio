@@ -14,7 +14,8 @@
 //  limitations under the License.
 //
 
-#pragma once
+#ifndef LEXIO_LEXIO_H
+#define LEXIO_LEXIO_H
 
 #include "./core.h"
 
@@ -24,3 +25,5 @@
 #include "./file.h"
 #include "./serialize.h"
 #include "./vector.h"
+
+#endif

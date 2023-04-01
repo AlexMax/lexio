@@ -18,7 +18,8 @@
 // Serialization functions.
 //
 
-#pragma once
+#ifndef LEXIO_SERIALIZE_H
+#define LEXIO_SERIALIZE_H
 
 #include "./core.h"
 
@@ -453,3 +454,5 @@ inline void WriteSVarint64(WRITER &writer, const int64_t value)
 //******************************************************************************
 
 } // namespace LexIO
+
+#endif

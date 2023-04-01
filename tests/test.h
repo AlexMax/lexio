@@ -14,7 +14,8 @@
 //  limitations under the License.
 //
 
-#pragma once
+#ifndef LEXIO_TEST_H
+#define LEXIO_TEST_H
 
 #include <cstring>
 #include <iterator>
@@ -25,3 +26,5 @@
 #endif
 
 #include "lexio/lexio.h"
+
+#endif

@@ -18,7 +18,8 @@
 // Stream abstraction that wraps basic file input and output.
 //
 
-#pragma once
+#ifndef LEXIO_FILE_H
+#define LEXIO_FILE_H
 
 #include "./core.h"
 
@@ -427,5 +428,7 @@ inline File Open(const char *path, const OpenMode mode)
 }
 
 } // namespace LexIO
+
+#endif
 
 #endif

@@ -18,7 +18,8 @@
 // Stream that uses std::array under the hood.
 //
 
-#pragma once
+#ifndef LEXIO_ARRAY_H
+#define LEXIO_ARRAY_H
 
 #include "./core.h"
 
@@ -36,3 +37,5 @@ template <size_t N>
 using ArrayStream = LexIO::ContainerFixed<std::array<uint8_t, N>>;
 
 } // namespace LexIO
+
+#endif

@@ -30,7 +30,8 @@
 //
 //******************************************************************************
 
-#pragma once
+#ifndef LEXIO_CORE_H
+#define LEXIO_CORE_H
 
 #include <cstdint>
 #include <stdexcept>
@@ -576,3 +577,5 @@ inline size_t Length(SEEKABLE &seekable)
 }
 
 } // namespace LexIO
+
+#endif
