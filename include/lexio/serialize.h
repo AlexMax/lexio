@@ -250,10 +250,10 @@ inline void Write32BE(WRITER &writer, const int32_t value)
 //******************************************************************************
 
 template <typename READER>
-inline uint64_t ReadU64LE(READER &buffer)
+inline uint64_t ReadU64LE(READER &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, buffer);
+    const size_t count = Read(buf, reader);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not read 8 bytes");
@@ -265,13 +265,13 @@ inline uint64_t ReadU64LE(READER &buffer)
 }
 
 template <typename WRITER>
-inline void WriteU64LE(WRITER &buffer, const uint64_t value)
+inline void WriteU64LE(WRITER &writer, const uint64_t value)
 {
     const uint8_t buf[sizeof(uint64_t)] = {
         Detail::ToByte(value, 0),  Detail::ToByte(value, 8),  Detail::ToByte(value, 16), Detail::ToByte(value, 24),
         Detail::ToByte(value, 32), Detail::ToByte(value, 40), Detail::ToByte(value, 48), Detail::ToByte(value, 56),
     };
-    const size_t count = Write(buffer, buf);
+    const size_t count = Write(writer, buf);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not write 8 bytes");
@@ -279,10 +279,10 @@ inline void WriteU64LE(WRITER &buffer, const uint64_t value)
 }
 
 template <typename READER>
-inline uint64_t ReadU64BE(READER &buffer)
+inline uint64_t ReadU64BE(READER &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, buffer);
+    const size_t count = Read(buf, reader);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not read 8 bytes");
@@ -294,13 +294,13 @@ inline uint64_t ReadU64BE(READER &buffer)
 }
 
 template <typename WRITER>
-inline void WriteU64BE(WRITER &buffer, const uint64_t value)
+inline void WriteU64BE(WRITER &writer, const uint64_t value)
 {
     const uint8_t buf[sizeof(uint64_t)] = {
         Detail::ToByte(value, 56), Detail::ToByte(value, 48), Detail::ToByte(value, 40), Detail::ToByte(value, 32),
         Detail::ToByte(value, 24), Detail::ToByte(value, 16), Detail::ToByte(value, 8),  Detail::ToByte(value, 0),
     };
-    const size_t count = Write(buffer, buf);
+    const size_t count = Write(writer, buf);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not write 8 bytes");
@@ -310,27 +310,27 @@ inline void WriteU64BE(WRITER &buffer, const uint64_t value)
 //******************************************************************************
 
 template <typename READER>
-inline int64_t Read64LE(READER &buffer)
+inline int64_t Read64LE(READER &reader)
 {
-    return static_cast<int64_t>(ReadU64LE(buffer));
+    return static_cast<int64_t>(ReadU64LE(reader));
 }
 
 template <typename WRITER>
-inline void Write64LE(WRITER &buffer, const int64_t value)
+inline void Write64LE(WRITER &writer, const int64_t value)
 {
-    WriteU64LE(buffer, static_cast<uint64_t>(value));
+    WriteU64LE(writer, static_cast<uint64_t>(value));
 }
 
 template <typename READER>
-inline int64_t Read64BE(READER &buffer)
+inline int64_t Read64BE(READER &reader)
 {
-    return static_cast<int64_t>(ReadU64BE(buffer));
+    return static_cast<int64_t>(ReadU64BE(reader));
 }
 
 template <typename WRITER>
-inline void Write64BE(WRITER &buffer, const int64_t value)
+inline void Write64BE(WRITER &writer, const int64_t value)
 {
-    WriteU64BE(buffer, static_cast<uint64_t>(value));
+    WriteU64BE(writer, static_cast<uint64_t>(value));
 }
 
 //******************************************************************************
