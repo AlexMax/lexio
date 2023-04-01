@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD "20" CACHE STRING "C++ Standard to use")
 set(LEXIO_TEST_NONSTD "OFF" CACHE BOOL "Test using nonstd::span")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 project(lexio LANGUAGES CXX)
 
@@ -24,9 +24,8 @@ set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/vector.h")
 
 # Main LexIO header-only library
-add_library(lexio INTERFACE)
+add_library(lexio INTERFACE ${LEXIO_HEADERS})
 target_include_directories(lexio INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include/")
-add_custom_target(lexio_headers SOURCES ${LEXIO_HEADERS})
 
 add_subdirectory(tests)
 
