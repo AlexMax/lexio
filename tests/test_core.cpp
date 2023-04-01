@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-#include <iterator>
-
 #include "./test.h"
 #include "doctest.h"
 

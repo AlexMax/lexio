@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <cstring>
+#include <iterator>
+
 #if defined(LEXIO_TEST_NONSTD)
 #include "nonstd/span.hpp"
 #define LEXIO_SPAN(T) nonstd::span<T>
