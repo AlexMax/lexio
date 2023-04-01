@@ -337,13 +337,14 @@ inline void Write64BE(WRITER &buffer, const int64_t value)
 
 /**
  * @brief Read a protobuf-style Varint.
- * 
+ *
  * @detail This variable-length integer encoding uses the least significant
  *         7 bits of each byte for the numeric payload, and the msb is a
  *         continuation flag.
- * 
+ *
  * @param reader Reader to operate on.
- * @return 
+ * @return An unsigned 64-bit integer from the Reader.
+ * @throws std::runtime_error if there are too many varint bytes for a 64-bit integer.
  */
 template <typename READER>
 inline uint64_t ReadUVarint64(READER &reader)
@@ -369,6 +370,16 @@ inline uint64_t ReadUVarint64(READER &reader)
     return rvo;
 }
 
+/**
+ * @brief Write a protobuf-style Varint.
+ *
+ * @detail This variable-length integer encoding uses the least significant
+ *         7 bits of each byte for the numeric payload, and the msb is a
+ *         continuation flag.
+ *
+ * @param writer Writer to operate on.
+ * @param value An unsigned 64-bit integer to write to the Writer.
+ */
 template <typename WRITER>
 inline void WriteUVarint64(WRITER &writer, const uint64_t value)
 {
@@ -379,6 +390,64 @@ inline void WriteUVarint64(WRITER &writer, const uint64_t value)
         v >>= 7;
     }
     WriteU8(writer, static_cast<uint8_t>(v));
+}
+
+/**
+ * @brief Read a signed integer encoded as a protobuf-style Varint.
+ *
+ * @detail This function decodes negative numbers as large positive numbers.
+ *
+ * @param reader Reader to operate on.
+ * @return An signed 64-bit integer from the Reader.
+ */
+template <typename READER>
+inline int64_t ReadVarint64(READER &reader)
+{
+    return static_cast<int64_t>(ReadUVarint64(reader));
+}
+
+/**
+ * @brief Write a signed integer encoded as a protobuf-style Varint.
+ *
+ * @detail This function encodes negative numbers as large positive numbers.
+ *
+ * @param writer Writer to operate on.
+ * @param value An unsigned 64-bit integer to write to the Writer.
+ */
+template <typename WRITER>
+inline void WriteVarint64(WRITER &writer, const int64_t value)
+{
+    WriteUVarint64(writer, static_cast<uint64_t>(value));
+}
+
+/**
+ * @brief Read a signed integer zig-zag encoded as a protobuf-style Varint.
+ *
+ * @detail This function decodes the Varint using zig-zag encoding.
+ *
+ * @param reader Reader to operate on.
+ * @return An signed 64-bit integer from the Reader.
+ */
+template <typename READER>
+inline int64_t ReadSVarint64(READER &reader)
+{
+    const uint64_t var = ReadUVarint64(reader);
+    return static_cast<int64_t>((var >> 1) ^ (~(var & 1) + 1));
+}
+
+/**
+ * @brief Write a signed integer zig-zag encoded as a protobuf-style Varint.
+ *
+ * @detail This function encodes the Varint using zig-zag encoding.
+ *
+ * @param writer Writer to operate on.
+ * @param value An unsigned 64-bit integer to write to the Writer.
+ */
+template <typename WRITER>
+inline void WriteSVarint64(WRITER &writer, const int64_t value)
+{
+    const uint64_t var = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
+    WriteUVarint64(writer, var);
 }
 
 //******************************************************************************
