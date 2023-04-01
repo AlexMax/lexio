@@ -11,7 +11,7 @@ $VSWHERE = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.e
 $VSPATH = & "${VSWHERE}" -latest -property installationPath
 & "${VSPATH}\Common7\Tools\Launch-VsDevShell.ps1"
 
-Push-Location "${PSScriptRoot}\..\build"
+Push-Location "${PSScriptRoot}\..\build\tests"
 
 & ".\${BUILD_TYPE}\test.exe"
 
