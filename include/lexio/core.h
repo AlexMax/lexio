@@ -121,6 +121,12 @@ namespace Detail
 {
 
 /**
+ * @see https://en.cppreference.com/w/cpp/types/void_t
+ */
+template <class...>
+using VoidT = void;
+
+/**
  * @see https://en.cppreference.com/w/cpp/experimental/is_detected
  */
 template <class Default, class AlwaysVoid, template <class...> class Op, class... Args>
@@ -131,7 +137,7 @@ struct Detector
 };
 
 template <class Default, template <class...> class Op, class... Args>
-struct Detector<Default, std::void_t<Op<Args...>>, Op, Args...>
+struct Detector<Default, VoidT<Op<Args...>>, Op, Args...>
 {
     using value_t = std::true_type;
     using type = Op<Args...>;
