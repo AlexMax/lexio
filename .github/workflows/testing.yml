@@ -42,6 +42,8 @@ jobs:
       run: ${{github.workspace}}/ci/run_test.ps1
   macOS:
     runs-on: macos-latest
+    env:
+      GENERATOR: Xcode
     steps:
     - uses: actions/checkout@v3
     - name: Configure
