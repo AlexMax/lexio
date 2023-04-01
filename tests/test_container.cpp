@@ -15,10 +15,11 @@
 //
 
 #include "./test.h"
+#include "doctest.h"
 
-#include <catch2/catch_all.hpp>
+//******************************************************************************
 
-//------------------------------------------------------------------------------
+TEST_SUITE_BEGIN("container");
 
 template <typename T>
 void CommonTest(T &buf)
@@ -65,7 +66,7 @@ void CommonTest(T &buf)
 
 constexpr size_t TEST_SIZE = 15;
 
-TEST_CASE("Test ContainerFixed with std::array", "[std]")
+TEST_CASE("Test ContainerFixed with std::array")
 {
     using ContainerFixed = LexIO::ContainerFixed<std::array<uint8_t, TEST_SIZE>>;
     ContainerFixed buf;
@@ -74,7 +75,7 @@ TEST_CASE("Test ContainerFixed with std::array", "[std]")
     REQUIRE(LexIO::Tell(buf) == TEST_SIZE);
 }
 
-TEST_CASE("Test ContainerStatic with pre-allocated size", "[std]")
+TEST_CASE("Test ContainerStatic with pre-allocated size")
 {
     using ContainerStatic = LexIO::ContainerStatic<std::vector<uint8_t>>;
     ContainerStatic buf(TEST_SIZE);
@@ -83,7 +84,7 @@ TEST_CASE("Test ContainerStatic with pre-allocated size", "[std]")
     REQUIRE(LexIO::Tell(buf) == TEST_SIZE);
 }
 
-TEST_CASE("Test ContainerDynamic with std::vector", "[std]")
+TEST_CASE("Test ContainerDynamic with std::vector")
 {
     using ContainerDynamic = LexIO::ContainerDynamic<std::vector<uint8_t>>;
     ContainerDynamic buf;
@@ -91,3 +92,5 @@ TEST_CASE("Test ContainerDynamic with std::vector", "[std]")
     REQUIRE_NOTHROW(LexIO::WriteU8(buf, 0));
     REQUIRE(LexIO::Tell(buf) == TEST_SIZE + 1);
 }
+
+TEST_SUITE_END();

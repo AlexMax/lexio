@@ -14,26 +14,7 @@
 //  limitations under the License.
 //
 
-//
-//  This is a test TU that does not include Catch2, used to test compile speed.
-//
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "./test.h"
-
-#include <cstdio>
-#include <iterator>
-
-using FileBufReader = LexIO::VectorBufReader<LexIO::File>;
-
-int main()
-{
-    auto file = LexIO::Open("../test/test_file.txt", LexIO::OpenMode::read);
-    auto buffer = FileBufReader::FromReader(std::move(file));
-
-    std::vector<uint8_t> data;
-    LexIO::ReadAll(std::back_inserter(data), buffer);
-    data.push_back(0x00);
-
-    printf("%s\n", reinterpret_cast<const char *>(data.data()));
-    return 0;
-}
+#include "doctest.h"

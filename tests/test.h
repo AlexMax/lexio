@@ -17,11 +17,8 @@
 #pragma once
 
 #if defined(LEXIO_TEST_NONSTD)
-
 #include "nonstd/span.hpp"
-
 #define LEXIO_SPAN(T) nonstd::span<T>
-
 #endif
 
 #include "lexio/lexio.h"

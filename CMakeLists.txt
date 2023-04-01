@@ -13,12 +13,6 @@ set(USE_FOLDERS ON)
 
 project(lexio LANGUAGES CXX)
 
-include(FetchContent)
-FetchContent_Declare(Catch2
-    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v3.3.1)
-FetchContent_MakeAvailable(Catch2)
-
 set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.h"
@@ -34,61 +28,7 @@ add_library(lexio INTERFACE)
 target_include_directories(lexio INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 add_custom_target(lexio_headers SOURCES ${LEXIO_HEADERS})
 
-# Test suite.
-add_executable(test
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_core.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_container.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_file.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_serialize.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test.h"
-    ${LEXIO_HEADERS})
-
-# Quick compile check.
-add_executable(compile
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/compile.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test.h") 
-
-if(LEXIO_TEST_NONSTD)
-    target_compile_definitions(test PUBLIC LEXIO_TEST_NONSTD)
-    target_compile_definitions(compile PUBLIC LEXIO_TEST_NONSTD)
-endif()
-
-# Only use clang-tidy with Clang.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    find_program(CLANG_TIDY_EXE clang-tidy)
-    if(CLANG_TIDY_EXE)
-        set_target_properties(test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
-    endif()
-endif()
-
-set(LEXIO_EXTRA_FLAGS "")
-check_cxx_compiler_flag(-Wmost W_MOST) # clang
-if(W_MOST)
-    list(APPEND LEXIO_EXTRA_FLAGS "-Wmost")
-endif()
-
-if(MSVC)
-    target_compile_options(test PUBLIC ${LEXIO_EXTRA_FLAGS} /W4 /D_DISABLE_VECTOR_ANNOTATION)
-    target_compile_options(compile PUBLIC ${LEXIO_EXTRA_FLAGS} /W4)
-else()
-    target_compile_options(test PUBLIC ${LEXIO_EXTRA_FLAGS} -Wall -Wextra -Wno-unknown-pragmas)
-    target_compile_options(compile PUBLIC ${LEXIO_EXTRA_FLAGS} -Wall -Wextra -Wno-unknown-pragmas)
-endif()
-
-find_package(Sanitizers)
-add_sanitizers(test)
-
-target_include_directories(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_include_directories(compile PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-
-target_link_libraries(test PUBLIC Catch2::Catch2WithMain)
-
-target_precompile_headers(test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/test.h")
-
-if(NOT LEXIO_TEST_NONSTD)
-    set(LEXIO_TEST_NONSTD OFF)
-endif()
+add_subdirectory(tests)
 
 message(STATUS "CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
 if(CMAKE_BUILD_TYPE)

@@ -15,18 +15,19 @@
 //
 
 #include "./test.h"
+#include "doctest.h"
 
-#include <catch2/catch_all.hpp>
+//******************************************************************************
 
-//------------------------------------------------------------------------------
+TEST_SUITE_BEGIN("file");
 
-TEST_CASE("ReadU8", "[serialize]")
+TEST_CASE("ReadU8")
 {
     LexIO::VectorStream buffer = {0x88};
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
-TEST_CASE("WriteU8", "[serialize]")
+TEST_CASE("WriteU8")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteU8(buffer, 0x88);
@@ -35,13 +36,13 @@ TEST_CASE("WriteU8", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
-TEST_CASE("ReadU16LE", "[serialize]")
+TEST_CASE("ReadU16LE")
 {
     LexIO::VectorStream buffer({0x88, 0x99});
     REQUIRE(LexIO::ReadU16LE(buffer) == 0x9988);
 }
 
-TEST_CASE("WriteU16LE", "[serialize]")
+TEST_CASE("WriteU16LE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteU16LE(buffer, 0x9988);
@@ -51,13 +52,13 @@ TEST_CASE("WriteU16LE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
 }
 
-TEST_CASE("ReadU16BE", "[serialize]")
+TEST_CASE("ReadU16BE")
 {
     LexIO::VectorStream buffer({0x88, 0x99});
     REQUIRE(LexIO::ReadU16BE(buffer) == 0x8899);
 }
 
-TEST_CASE("WriteU16BE", "[serialize]")
+TEST_CASE("WriteU16BE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteU16BE(buffer, 0x9988);
@@ -67,13 +68,13 @@ TEST_CASE("WriteU16BE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
-TEST_CASE("Read16LE", "[serialize]")
+TEST_CASE("Read16LE")
 {
     LexIO::VectorStream buffer({0x88, 0x99});
     REQUIRE(LexIO::Read16LE(buffer) == -26232);
 }
 
-TEST_CASE("Write16LE", "[serialize]")
+TEST_CASE("Write16LE")
 {
     LexIO::VectorStream buffer;
     LexIO::Write16LE(buffer, -26232);
@@ -83,13 +84,13 @@ TEST_CASE("Write16LE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
 }
 
-TEST_CASE("Read16BE", "[serialize]")
+TEST_CASE("Read16BE")
 {
     LexIO::VectorStream buffer({0x99, 0x88});
     REQUIRE(LexIO::Read16BE(buffer) == -26232);
 }
 
-TEST_CASE("Write16BE", "[serialize]")
+TEST_CASE("Write16BE")
 {
     LexIO::VectorStream buffer;
     LexIO::Write16BE(buffer, -26232);
@@ -99,13 +100,13 @@ TEST_CASE("Write16BE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
-TEST_CASE("ReadU32LE", "[serialize]")
+TEST_CASE("ReadU32LE")
 {
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb});
     REQUIRE(LexIO::ReadU32LE(buffer) == 0xbbaa9988);
 }
 
-TEST_CASE("WriteU32LE", "[serialize]")
+TEST_CASE("WriteU32LE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteU32LE(buffer, 0xbbaa9988);
@@ -117,13 +118,13 @@ TEST_CASE("WriteU32LE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
 }
 
-TEST_CASE("ReadU32BE", "[serialize]")
+TEST_CASE("ReadU32BE")
 {
     LexIO::VectorStream buffer({0xbb, 0xaa, 0x99, 0x88});
     REQUIRE(LexIO::ReadU32BE(buffer) == 0xbbaa9988);
 }
 
-TEST_CASE("WriteU32BE", "[serialize]")
+TEST_CASE("WriteU32BE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteU32BE(buffer, 0xbbaa9988);
@@ -135,13 +136,13 @@ TEST_CASE("WriteU32BE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
-TEST_CASE("Read32LE", "[serialize]")
+TEST_CASE("Read32LE")
 {
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb});
     REQUIRE(LexIO::Read32LE(buffer) == -1146447480);
 }
 
-TEST_CASE("Write32LE", "[serialize]")
+TEST_CASE("Write32LE")
 {
     LexIO::VectorStream buffer;
     LexIO::Write32LE(buffer, -1146447480);
@@ -153,13 +154,13 @@ TEST_CASE("Write32LE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
 }
 
-TEST_CASE("Read32BE", "[serialize]")
+TEST_CASE("Read32BE")
 {
     LexIO::VectorStream buffer({0xbb, 0xaa, 0x99, 0x88});
     REQUIRE(LexIO::Read32BE(buffer) == -1146447480);
 }
 
-TEST_CASE("Write32BE", "[serialize]")
+TEST_CASE("Write32BE")
 {
     LexIO::VectorStream buffer;
     LexIO::Write32BE(buffer, -1146447480);
@@ -171,13 +172,13 @@ TEST_CASE("Write32BE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
-TEST_CASE("ReadU64LE", "[serialize]")
+TEST_CASE("ReadU64LE")
 {
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
     REQUIRE(LexIO::ReadU64LE(buffer) == 0xffeeddccbbaa9988);
 }
 
-TEST_CASE("WriteU64LE", "[serialize]")
+TEST_CASE("WriteU64LE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteU64LE(buffer, 0xffeeddccbbaa9988);
@@ -193,13 +194,13 @@ TEST_CASE("WriteU64LE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0xff);
 }
 
-TEST_CASE("ReadU64BE", "[serialize]")
+TEST_CASE("ReadU64BE")
 {
     LexIO::VectorStream buffer({0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88});
     REQUIRE(LexIO::ReadU64BE(buffer) == 0xffeeddccbbaa9988);
 }
 
-TEST_CASE("WriteU64BE", "[serialize]")
+TEST_CASE("WriteU64BE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteU64BE(buffer, 0xffeeddccbbaa9988);
@@ -215,13 +216,13 @@ TEST_CASE("WriteU64BE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
-TEST_CASE("Read64LE", "[serialize]")
+TEST_CASE("Read64LE")
 {
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
     REQUIRE(LexIO::Read64LE(buffer) == -4822678189205112);
 }
 
-TEST_CASE("Write64LE", "[serialize]")
+TEST_CASE("Write64LE")
 {
     LexIO::VectorStream buffer;
     LexIO::Write64LE(buffer, -4822678189205112);
@@ -237,13 +238,13 @@ TEST_CASE("Write64LE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0xff);
 }
 
-TEST_CASE("Read64BE", "[serialize]")
+TEST_CASE("Read64BE")
 {
     LexIO::VectorStream buffer({0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88});
     REQUIRE(LexIO::Read64BE(buffer) == -4822678189205112);
 }
 
-TEST_CASE("Write64BE", "[serialize]")
+TEST_CASE("Write64BE")
 {
     LexIO::VectorStream buffer;
     LexIO::Write64BE(buffer, -4822678189205112);
@@ -259,13 +260,13 @@ TEST_CASE("Write64BE", "[serialize]")
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
-TEST_CASE("ReadUVarint64", "[serialize]")
+TEST_CASE("ReadUVarint64")
 {
     LexIO::VectorStream buffer({0x88, 0xb3, 0xaa, 0xdd, 0xcb, 0xb9, 0xb7, 0xf7, 0xff, 0x01});
     REQUIRE(LexIO::ReadUVarint64(buffer) == 0xffeeddccbbaa9988);
 }
 
-TEST_CASE("WriteUVarint64", "[serialize]")
+TEST_CASE("WriteUVarint64")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteUVarint64(buffer, 0xffeeddccbbaa9988);
@@ -284,13 +285,13 @@ TEST_CASE("WriteUVarint64", "[serialize]")
     REQUIRE_THROWS(LexIO::ReadU8(buffer));
 }
 
-TEST_CASE("ReadVarint64", "[serialize]")
+TEST_CASE("ReadVarint64")
 {
     LexIO::VectorStream buffer({0x88, 0xb3, 0xaa, 0xdd, 0xcb, 0xb9, 0xb7, 0xf7, 0xff, 0x01});
     REQUIRE(LexIO::ReadVarint64(buffer) == -4822678189205112);
 }
 
-TEST_CASE("WriteVarint64", "[serialize]")
+TEST_CASE("WriteVarint64")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteVarint64(buffer, -4822678189205112);
@@ -309,13 +310,13 @@ TEST_CASE("WriteVarint64", "[serialize]")
     REQUIRE_THROWS(LexIO::ReadU8(buffer));
 }
 
-TEST_CASE("ReadSVarint64", "[serialize]")
+TEST_CASE("ReadSVarint64")
 {
     LexIO::VectorStream buffer({0xef, 0x99, 0xab, 0xc5, 0xe8, 0x8c, 0x91, 0x11});
     REQUIRE(LexIO::ReadSVarint64(buffer) == -4822678189205112);
 }
 
-TEST_CASE("WriteSVarint64", "[serialize]")
+TEST_CASE("WriteSVarint64")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteSVarint64(buffer, -4822678189205112);
@@ -331,3 +332,5 @@ TEST_CASE("WriteSVarint64", "[serialize]")
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0x11);
     REQUIRE_THROWS(LexIO::ReadU8(buffer));
 }
+
+TEST_SUITE_END();

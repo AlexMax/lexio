@@ -15,16 +15,17 @@
 //
 
 #include "./test.h"
+#include "doctest.h"
 
-#include <catch2/catch_all.hpp>
+//******************************************************************************
 
-//------------------------------------------------------------------------------
+TEST_SUITE_BEGIN("file");
 
-TEST_CASE("Test file opened in read mode", "[file]")
+TEST_CASE("Test file opened in read mode")
 {
     constexpr const char *firstLine = "The quick brown fox";
 
-    auto file = LexIO::Open("../test/test_file.txt", LexIO::OpenMode::read);
+    auto file = LexIO::Open("../../tests/test_file.txt", LexIO::OpenMode::read);
 
     // Test reading.
     uint8_t readBuffer[32];
@@ -47,3 +48,5 @@ TEST_CASE("Test file opened in read mode", "[file]")
     pos = LexIO::Seek(file, LexIO::WhenceEnd(2));
     REQUIRE((pos == 47 || pos == 49)); // File contains two newlines.
 }
+
+TEST_SUITE_END();

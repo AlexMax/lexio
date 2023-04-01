@@ -14,11 +14,14 @@
 //  limitations under the License.
 //
 
-#include "./test.h"
+#include <iterator>
 
-#include <catch2/catch_all.hpp>
+#include "./test.h"
+#include "doctest.h"
 
 //******************************************************************************
+
+TEST_SUITE_BEGIN("utils");
 
 struct GoodReader
 {
@@ -136,7 +139,7 @@ static LexIO::VectorStream GetBuffer()
 
 //******************************************************************************
 
-TEST_CASE("Test Read(span<char>)", "[core]")
+TEST_CASE("Test Read(span<char>)")
 {
     LexIO::VectorStream buffer = GetBuffer();
 
@@ -147,7 +150,7 @@ TEST_CASE("Test Read(span<char>)", "[core]")
     REQUIRE(data == "The quick");
 }
 
-TEST_CASE("Test Read(void, size)", "[core]")
+TEST_CASE("Test Read(void, size)")
 {
     LexIO::VectorStream buffer = GetBuffer();
 
@@ -160,7 +163,7 @@ TEST_CASE("Test Read(void, size)", "[core]")
     free(data);
 }
 
-TEST_CASE("Test Write(span<char>)", "[core]")
+TEST_CASE("Test Write(span<char>)")
 {
     LexIO::VectorStream buffer;
     std::string data{"The quick"};
@@ -178,7 +181,7 @@ TEST_CASE("Test Write(span<char>)", "[core]")
     REQUIRE(strcmp(checkChar, data.c_str()) == 0);
 }
 
-TEST_CASE("Test Write(void, size)", "[core]")
+TEST_CASE("Test Write(void, size)")
 {
     LexIO::VectorStream buffer;
     std::string data{"The quick"};
@@ -197,7 +200,7 @@ TEST_CASE("Test Write(void, size)", "[core]")
     REQUIRE(strcmp(checkChar, data.c_str()) == 0);
 }
 
-TEST_CASE("Test ReadAll", "[core]")
+TEST_CASE("Test ReadAll")
 {
     LexIO::VectorStream basic = GetBuffer();
     auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
@@ -209,7 +212,7 @@ TEST_CASE("Test ReadAll", "[core]")
     REQUIRE(*(data.end() - 1) == '\n');
 }
 
-TEST_CASE("Test ReadAll with a small buffer", "[core]")
+TEST_CASE("Test ReadAll with a small buffer")
 {
     LexIO::VectorStream basic = GetBuffer();
     auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
@@ -222,7 +225,7 @@ TEST_CASE("Test ReadAll with a small buffer", "[core]")
     REQUIRE(data.size() == 45);
 }
 
-TEST_CASE("Test ReadUntil", "[core]")
+TEST_CASE("Test ReadUntil")
 {
     LexIO::VectorStream basic = GetBuffer();
     auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
@@ -233,3 +236,5 @@ TEST_CASE("Test ReadUntil", "[core]")
     REQUIRE(data.size() == 20);
     REQUIRE(*(data.end() - 1) == '\n');
 }
+
+TEST_SUITE_END();
