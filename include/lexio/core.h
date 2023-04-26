@@ -79,6 +79,14 @@
 #define LEXIO_SPAN(T) std::span<T>
 #endif
 
+#if !defined(LEXIO_SPAN_DATA)
+#define LEXIO_SPAN_DATA(sp) (sp).data()
+#endif
+
+#if !defined(LEXIO_SPAN_SIZE)
+#define LEXIO_SPAN_SIZE(sp) (sp).size()
+#endif
+
 #if (LEXIO_HAS_INLINE_VARS == 1)
 #define LEXIO_INLINE_VAR inline
 #else
@@ -423,7 +431,7 @@ inline size_t Seek(SEEKABLE &seekable, const WhenceEnd whence)
 template <typename READER>
 inline size_t Read(LEXIO_SPAN(char) outChars, READER &reader)
 {
-    ByteSpanT outBytes{reinterpret_cast<uint8_t *>(outChars.data()), outChars.size()};
+    ByteSpanT outBytes{reinterpret_cast<uint8_t *>(LEXIO_SPAN_DATA(outChars)), LEXIO_SPAN_SIZE(outChars)};
     const size_t actualSize = Read(outBytes, reader);
     return actualSize;
 }
@@ -473,7 +481,7 @@ size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
     for (;;)
     {
         ConstByteSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
-        if (buf.size() == 0)
+        if (LEXIO_SPAN_SIZE(buf) == 0)
         {
             // Read all data there was to read.
             return size;
@@ -483,8 +491,8 @@ size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
         std::copy(buf.begin(), buf.end(), outIt);
 
         // Consume what we've read.
-        ConsumeBuffer(bufReader, buf.size());
-        size += buf.size();
+        ConsumeBuffer(bufReader, LEXIO_SPAN_SIZE(buf));
+        size += LEXIO_SPAN_SIZE(buf);
     }
 }
 
@@ -505,7 +513,7 @@ size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
     for (;;)
     {
         ConstByteSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
-        if (buf.size() == 0)
+        if (LEXIO_SPAN_SIZE(buf) == 0)
         {
             // Read all data there was to read.
             return size;
@@ -532,9 +540,9 @@ size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
 }
 
 template <typename WRITER>
-inline size_t Write(WRITER &writer, LEXIO_SPAN(char) chars)
+inline size_t Write(WRITER &writer, const LEXIO_SPAN(const char) chars)
 {
-    ConstByteSpanT outBytes{reinterpret_cast<const uint8_t *>(chars.data()), chars.size()};
+    ConstByteSpanT outBytes{reinterpret_cast<const uint8_t *>(LEXIO_SPAN_DATA(chars)), LEXIO_SPAN_SIZE(chars)};
     return Write(writer, outBytes);
 }
 
