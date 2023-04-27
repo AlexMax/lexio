@@ -23,6 +23,8 @@
 
 #include "./core.h"
 
+#include <cstring>
+
 namespace LexIO
 {
 
@@ -49,7 +51,7 @@ template <typename READER>
 inline uint8_t ReadU8(READER &reader)
 {
     uint8_t buf[sizeof(uint8_t)] = {0};
-    const size_t count = Read(buf, reader);
+    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
     if (count != sizeof(uint8_t))
     {
         throw std::runtime_error("could not read 1 byte");
@@ -61,7 +63,7 @@ template <typename WRITER>
 inline void WriteU8(WRITER &writer, const uint8_t value)
 {
     const uint8_t buf[sizeof(uint8_t)] = {value};
-    const size_t count = Write(writer, buf);
+    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
     if (count != sizeof(uint8_t))
     {
         throw std::runtime_error("could not write 1 byte");
@@ -88,7 +90,7 @@ template <typename READER>
 inline uint16_t ReadU16LE(READER &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = Read(buf, reader);
+    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
     if (count != sizeof(uint16_t))
     {
         throw std::runtime_error("could not read 2 bytes");
@@ -103,7 +105,7 @@ inline void WriteU16LE(WRITER &writer, const uint16_t value)
         Detail::ToByte(value, 0),
         Detail::ToByte(value, 8),
     };
-    const size_t count = Write(writer, buf);
+    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
     if (count != sizeof(uint16_t))
     {
         throw std::runtime_error("could not write 2 bytes");
@@ -114,7 +116,7 @@ template <typename READER>
 inline uint16_t ReadU16BE(READER &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = Read(buf, reader);
+    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
     if (count != sizeof(uint16_t))
     {
         throw std::runtime_error("could not read 2 bytes");
@@ -129,7 +131,7 @@ inline void WriteU16BE(WRITER &writer, const uint16_t value)
         Detail::ToByte(value, 8),
         Detail::ToByte(value, 0),
     };
-    const size_t count = Write(writer, buf);
+    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
     if (count != sizeof(uint16_t))
     {
         throw std::runtime_error("could not write 2 bytes");
@@ -168,7 +170,7 @@ template <typename READER>
 inline uint32_t ReadU32LE(READER &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(buf, reader);
+    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
     if (count != sizeof(uint32_t))
     {
         throw std::runtime_error("could not read 4 bytes");
@@ -186,7 +188,7 @@ inline void WriteU32LE(WRITER &writer, const uint32_t value)
         Detail::ToByte(value, 16),
         Detail::ToByte(value, 24),
     };
-    const size_t count = Write(writer, buf);
+    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
     if (count != sizeof(uint32_t))
     {
         throw std::runtime_error("could not write 4 bytes");
@@ -197,7 +199,7 @@ template <typename READER>
 inline uint32_t ReadU32BE(READER &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(buf, reader);
+    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
     if (count != sizeof(uint32_t))
     {
         throw std::runtime_error("could not read 4 bytes");
@@ -215,7 +217,7 @@ inline void WriteU32BE(WRITER &writer, const uint32_t value)
         Detail::ToByte(value, 8),
         Detail::ToByte(value, 0),
     };
-    const size_t count = Write(writer, buf);
+    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
     if (count != sizeof(uint32_t))
     {
         throw std::runtime_error("could not write 4 bytes");
@@ -251,10 +253,46 @@ inline void Write32BE(WRITER &writer, const int32_t value)
 //******************************************************************************
 
 template <typename READER>
+inline float ReadFloatLE(READER &reader)
+{
+    float rvo;
+    uint32_t bits = ReadU32LE(reader);
+    std::memcpy(&rvo, &bits, sizeof(rvo));
+    return rvo;
+}
+
+template <typename WRITER>
+inline void WriteFloatLE(WRITER &writer, const float value)
+{
+    uint32_t out;
+    std::memcpy(&out, &value, sizeof(out));
+    WriteU32LE(writer, out);
+}
+
+template <typename READER>
+inline float ReadFloatBE(READER &reader)
+{
+    float rvo;
+    uint32_t bits = ReadU32BE(reader);
+    std::memcpy(&rvo, &bits, sizeof(rvo));
+    return rvo;
+}
+
+template <typename WRITER>
+inline void WriteFloatBE(WRITER &writer, const float value)
+{
+    uint32_t out;
+    std::memcpy(&out, &value, sizeof(out));
+    WriteU32BE(writer, out);
+}
+
+//******************************************************************************
+
+template <typename READER>
 inline uint64_t ReadU64LE(READER &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, reader);
+    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not read 8 bytes");
@@ -272,7 +310,7 @@ inline void WriteU64LE(WRITER &writer, const uint64_t value)
         Detail::ToByte(value, 0),  Detail::ToByte(value, 8),  Detail::ToByte(value, 16), Detail::ToByte(value, 24),
         Detail::ToByte(value, 32), Detail::ToByte(value, 40), Detail::ToByte(value, 48), Detail::ToByte(value, 56),
     };
-    const size_t count = Write(writer, buf);
+    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not write 8 bytes");
@@ -283,7 +321,7 @@ template <typename READER>
 inline uint64_t ReadU64BE(READER &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, reader);
+    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not read 8 bytes");
@@ -301,7 +339,7 @@ inline void WriteU64BE(WRITER &writer, const uint64_t value)
         Detail::ToByte(value, 56), Detail::ToByte(value, 48), Detail::ToByte(value, 40), Detail::ToByte(value, 32),
         Detail::ToByte(value, 24), Detail::ToByte(value, 16), Detail::ToByte(value, 8),  Detail::ToByte(value, 0),
     };
-    const size_t count = Write(writer, buf);
+    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
     if (count != sizeof(uint64_t))
     {
         throw std::runtime_error("could not write 8 bytes");
@@ -332,6 +370,42 @@ template <typename WRITER>
 inline void Write64BE(WRITER &writer, const int64_t value)
 {
     WriteU64BE(writer, static_cast<uint64_t>(value));
+}
+
+//******************************************************************************
+
+template <typename READER>
+inline double ReadDoubleLE(READER &reader)
+{
+    double rvo;
+    uint64_t bits = ReadU64LE(reader);
+    std::memcpy(&rvo, &bits, sizeof(rvo));
+    return rvo;
+}
+
+template <typename WRITER>
+inline void WriteDoubleLE(WRITER &writer, const double value)
+{
+    uint64_t out;
+    std::memcpy(&out, &value, sizeof(out));
+    WriteU64LE(writer, out);
+}
+
+template <typename READER>
+inline double ReadDoubleBE(READER &reader)
+{
+    double rvo;
+    uint64_t bits = ReadU64BE(reader);
+    std::memcpy(&rvo, &bits, sizeof(rvo));
+    return rvo;
+}
+
+template <typename WRITER>
+inline void WriteDoubleBE(WRITER &writer, const double value)
+{
+    uint64_t out;
+    std::memcpy(&out, &value, sizeof(out));
+    WriteU64BE(writer, out);
 }
 
 //******************************************************************************

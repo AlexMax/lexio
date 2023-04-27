@@ -221,6 +221,13 @@ template <typename T>
 LEXIO_INLINE_VAR constexpr bool IsReaderV = IsReader<T>::value;
 
 /**
+ * @brief Assert that a parameter conforms to Reader.
+ */
+#define LEXIO_ASSERT_READER(param)                                                                                     \
+    static_assert(LexIO::IsReaderV<decltype(param)>, #param " does not conform to a LexIO::Reader");                   \
+    static_assert(true, "")
+
+/**
  * @brief If the template parameter is a valid BufferedReader, provides a
  *        member constant "value" of true.  Otherwise, "value" is false.
  *
@@ -234,6 +241,13 @@ using IsBufferedReader = Detail::IsDetected<Detail::BufferedReaderType, T>;
  */
 template <typename T>
 LEXIO_INLINE_VAR constexpr bool IsBufferedReaderV = IsBufferedReader<T>::value;
+
+/**
+ * @brief Assert that a parameter conforms to BufferedReader.
+ */
+#define LEXIO_ASSERT_BUFFERED_READER(param)                                                                            \
+    static_assert(LexIO::IsBufferedReaderV<decltype(param)>, #param " does not conform to a LexIO::BufferedReader");   \
+    static_assert(true, "")
 
 /**
  * @brief If the template parameter is a valid Writer, provides a member
@@ -251,6 +265,13 @@ template <typename T>
 LEXIO_INLINE_VAR constexpr bool IsWriterV = IsWriter<T>::value;
 
 /**
+ * @brief Assert that a parameter conforms to Writer.
+ */
+#define LEXIO_ASSERT_WRITER(param)                                                                                     \
+    static_assert(LexIO::IsWriterV<decltype(param)>, #param " does not conform to a LexIO::Writer");                   \
+    static_assert(true, "")
+
+/**
  * @brief If the template parameter is a valid SeekableReader, provides a
  *        member constant "value" of true.  Otherwise, "value" is false.
  *
@@ -264,6 +285,13 @@ using IsSeekable = Detail::IsDetected<Detail::SeekableType, T>;
  */
 template <typename T>
 LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
+
+/**
+ * @brief Assert that a parameter conforms to Seekable.
+ */
+#define LEXIO_ASSERT_SEEKABLE(param)                                                                                   \
+    static_assert(LexIO::IsSeekableV<decltype(param)>, #param " does not conform to a LexIO::Seekable");               \
+    static_assert(true, "")
 
 //******************************************************************************
 //

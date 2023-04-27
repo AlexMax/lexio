@@ -172,6 +172,52 @@ TEST_CASE("Write32BE")
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
+TEST_CASE("ReadFloatLE")
+{
+    LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb});
+    const float check = LexIO::ReadFloatLE(buffer);
+
+    int exp;
+    const float x = frexpf(check, &exp);
+    REQUIRE(x == -0.666405201f);
+    REQUIRE(exp == -7);
+}
+
+TEST_CASE("WriteFloatLE")
+{
+    LexIO::VectorStream buffer;
+    LexIO::WriteFloatLE(buffer, ldexpf(-0.666405201f, -7));
+
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
+}
+
+TEST_CASE("ReadFloatBE")
+{
+    LexIO::VectorStream buffer({0xbb, 0xaa, 0x99, 0x88});
+    const float check = LexIO::ReadFloatBE(buffer);
+
+    int exp;
+    const float x = frexpf(check, &exp);
+    REQUIRE(x == -0.666405201f);
+    REQUIRE(exp == -7);
+}
+
+TEST_CASE("WriteFloatBE")
+{
+    LexIO::VectorStream buffer;
+    LexIO::WriteFloatBE(buffer, ldexpf(-0.666405201f, -7));
+
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+}
+
 TEST_CASE("ReadU64LE")
 {
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
@@ -248,6 +294,60 @@ TEST_CASE("Write64BE")
 {
     LexIO::VectorStream buffer;
     LexIO::Write64BE(buffer, -4822678189205112);
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+
+    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xee);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xcc);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+}
+
+TEST_CASE("ReadDoubleLE")
+{
+    LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
+    const double check = LexIO::ReadDoubleLE(buffer);
+
+    int exp;
+    const double x = frexp(check, &exp);
+    REQUIRE(x == -0.96457516339869276);
+    REQUIRE(exp == 1024);
+}
+
+TEST_CASE("WriteDoubleLE")
+{
+    LexIO::VectorStream buffer;
+    LexIO::WriteDoubleLE(buffer, ldexp(-0.96457516339869276, 1024));
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xcc);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xee);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
+}
+
+TEST_CASE("ReadDoubleBE")
+{
+    LexIO::VectorStream buffer({0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88});
+    const double check = LexIO::ReadDoubleBE(buffer);
+
+    int exp;
+    const double x = frexp(check, &exp);
+    REQUIRE(x == -0.96457516339869276);
+    REQUIRE(exp == 1024);
+}
+
+TEST_CASE("WriteDoubleBE")
+{
+    LexIO::VectorStream buffer;
+    LexIO::WriteDoubleBE(buffer, ldexp(-0.96457516339869276, 1024));
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
 
     REQUIRE(LexIO::ReadU8(buffer) == 0xff);
