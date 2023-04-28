@@ -16,6 +16,7 @@
 
 #include "./test.h"
 #include "doctest.h"
+#include <cmath>
 
 //******************************************************************************
 
@@ -178,7 +179,7 @@ TEST_CASE("ReadFloatLE")
     const float check = LexIO::ReadFloatLE(buffer);
 
     int exp;
-    const float x = frexpf(check, &exp);
+    const float x = std::frexpf(check, &exp);
     REQUIRE(x == -0.666405201f);
     REQUIRE(exp == -7);
 }
@@ -186,7 +187,7 @@ TEST_CASE("ReadFloatLE")
 TEST_CASE("WriteFloatLE")
 {
     LexIO::VectorStream buffer;
-    LexIO::WriteFloatLE(buffer, ldexpf(-0.666405201f, -7));
+    LexIO::WriteFloatLE(buffer, std::ldexpf(-0.666405201f, -7));
 
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
@@ -201,7 +202,7 @@ TEST_CASE("ReadFloatBE")
     const float check = LexIO::ReadFloatBE(buffer);
 
     int exp;
-    const float x = frexpf(check, &exp);
+    const float x = std::frexpf(check, &exp);
     REQUIRE(x == -0.666405201f);
     REQUIRE(exp == -7);
 }
@@ -209,7 +210,7 @@ TEST_CASE("ReadFloatBE")
 TEST_CASE("WriteFloatBE")
 {
     LexIO::VectorStream buffer;
-    LexIO::WriteFloatBE(buffer, ldexpf(-0.666405201f, -7));
+    LexIO::WriteFloatBE(buffer, std::ldexpf(-0.666405201f, -7));
 
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
     REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
@@ -312,7 +313,7 @@ TEST_CASE("ReadDoubleLE")
     const double check = LexIO::ReadDoubleLE(buffer);
 
     int exp;
-    const double x = frexp(check, &exp);
+    const double x = std::frexp(check, &exp);
     REQUIRE(x == -0.96457516339869276);
     REQUIRE(exp == 1024);
 }
@@ -320,7 +321,7 @@ TEST_CASE("ReadDoubleLE")
 TEST_CASE("WriteDoubleLE")
 {
     LexIO::VectorStream buffer;
-    LexIO::WriteDoubleLE(buffer, ldexp(-0.96457516339869276, 1024));
+    LexIO::WriteDoubleLE(buffer, std::ldexp(-0.96457516339869276, 1024));
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
 
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
@@ -339,7 +340,7 @@ TEST_CASE("ReadDoubleBE")
     const double check = LexIO::ReadDoubleBE(buffer);
 
     int exp;
-    const double x = frexp(check, &exp);
+    const double x = std::frexp(check, &exp);
     REQUIRE(x == -0.96457516339869276);
     REQUIRE(exp == 1024);
 }
@@ -347,7 +348,7 @@ TEST_CASE("ReadDoubleBE")
 TEST_CASE("WriteDoubleBE")
 {
     LexIO::VectorStream buffer;
-    LexIO::WriteDoubleBE(buffer, ldexp(-0.96457516339869276, 1024));
+    LexIO::WriteDoubleBE(buffer, std::ldexp(-0.96457516339869276, 1024));
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
 
     REQUIRE(LexIO::ReadU8(buffer) == 0xff);
