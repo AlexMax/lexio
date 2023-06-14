@@ -137,67 +137,6 @@ static LexIO::VectorStream GetBuffer()
 
 //******************************************************************************
 
-TEST_CASE("Test Read(span<char>)")
-{
-    LexIO::VectorStream buffer = GetBuffer();
-
-    std::string data;
-    data.resize(9);
-    const size_t bytes = LexIO::Read({data.begin(), data.end()}, buffer);
-    REQUIRE(bytes == 9);
-    REQUIRE(data == "The quick");
-}
-
-TEST_CASE("Test Read(void, size)")
-{
-    LexIO::VectorStream buffer = GetBuffer();
-
-    void *data = calloc(10, 1);
-    const size_t bytes = LexIO::Read(data, 9, buffer);
-    char *dataChar = static_cast<char *>(data);
-    REQUIRE(bytes == 9);
-    REQUIRE(strlen(dataChar) == 9);
-    REQUIRE(!strcmp(dataChar, "The quick"));
-    free(data);
-}
-
-TEST_CASE("Test Write(span<char>)")
-{
-    LexIO::VectorStream buffer;
-    std::string data{"The quick"};
-    std::array<uint8_t, 10> check;
-    memset(check.data(), 0x00, check.size());
-
-    size_t bytes = LexIO::Write(buffer, {data.begin(), data.end()});
-    REQUIRE(bytes == 9);
-
-    LexIO::Seek(buffer, LexIO::WhenceStart{0});
-    bytes = LexIO::Read(check, buffer);
-    REQUIRE(bytes == 9);
-
-    char *checkChar = reinterpret_cast<char *>(check.data());
-    REQUIRE(strcmp(checkChar, data.c_str()) == 0);
-}
-
-TEST_CASE("Test Write(void, size)")
-{
-    LexIO::VectorStream buffer;
-    std::string data{"The quick"};
-    const void *dataVoid = static_cast<const void *>(data.data());
-    std::array<uint8_t, 10> check;
-    memset(check.data(), 0x00, check.size());
-
-    size_t bytes = LexIO::Write(buffer, dataVoid, data.length());
-    REQUIRE(bytes == 9);
-
-    LexIO::Seek(buffer, LexIO::WhenceStart{0});
-    bytes = LexIO::Read(check, buffer);
-    REQUIRE(bytes == 9);
-
-    char *checkChar = reinterpret_cast<char *>(check.data());
-    REQUIRE(strcmp(checkChar, data.c_str()) == 0);
-}
-
 TEST_CASE("Test ReadAll")
 {
     LexIO::VectorStream basic = GetBuffer();

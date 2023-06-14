@@ -35,6 +35,7 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <type_traits>
 
 // Feature detection - since we support C++14 use cppreference to see when
 // features were added to the compiler.
@@ -128,6 +129,22 @@ struct WhenceEnd
 
 namespace Detail
 {
+
+/**
+ * @see https://en.cppreference.com/w/cpp/numeric/bit_cast
+ */
+template <class TO, class FROM>
+inline TO BitCast(const FROM &src) noexcept
+{
+    static_assert(sizeof(TO) == sizeof(FROM), "BitCast requires equal size.");
+    static_assert(std::is_trivially_copyable_v<FROM>, "BitCast FROM must be trivially copyable.");
+    static_assert(std::is_trivially_copyable_v<TO>, "BitCast TO must be trivially copyable.");
+    static_assert(std::is_trivially_constructible_v<TO>, "BitCast TO must be trivially constructible.");
+
+    TO dst;
+    std::memcpy(&dst, &src, sizeof(TO));
+    return dst;
+}
 
 /**
  * @see https://en.cppreference.com/w/cpp/types/void_t
@@ -448,42 +465,6 @@ inline size_t Seek(SEEKABLE &seekable, const WhenceEnd whence)
 //******************************************************************************
 
 /**
- * @brief Read function that writes into a char span.
- *
- * @param outChars A span of char to read data into, the length of which is
- *                 the number of bytes to read.
- * @param reader Reader to operate on.
- * @return Actual number of bytes read.  Must be between 0 and the requested
- *         length.  0 can mean EOF or empty buffer.
- */
-template <typename READER>
-inline size_t Read(LEXIO_SPAN(char) outChars, READER &reader)
-{
-    ByteSpanT outBytes{reinterpret_cast<uint8_t *>(LEXIO_SPAN_DATA(outChars)), LEXIO_SPAN_SIZE(outChars)};
-    const size_t actualSize = Read(outBytes, reader);
-    return actualSize;
-}
-
-/**
- * @brief Read overload that writes into a void pointer/length combo.  Not
- *        recommended unless you're dealing with C coding style or libraries.
- *
- * @param outData An preallocated void pointer, assumed to have an underlying
- *                type of size 1.
- * @param outSize Size of preallocated buffer in bytes.
- * @param reader Reader to operate on.
- * @return Actual number of bytes read.  Must be between 0 and the requested
- *         length.  0 can mean EOF or empty buffer.
- */
-template <typename READER>
-inline size_t Read(void *outData, const size_t outSize, READER &reader)
-{
-    ByteSpanT outBytes{reinterpret_cast<uint8_t *>(outData), outSize};
-    const size_t actualSize = Read(outBytes, reader);
-    return actualSize;
-}
-
-/**
  * @brief Get the current contents of the buffer.
  *
  * @param bufReader BufferedReader to operate on.
@@ -565,20 +546,6 @@ size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
         ConsumeBuffer(bufReader, count);
         size += count;
     }
-}
-
-template <typename WRITER>
-inline size_t Write(WRITER &writer, const LEXIO_SPAN(const char) chars)
-{
-    ConstByteSpanT outBytes{reinterpret_cast<const uint8_t *>(LEXIO_SPAN_DATA(chars)), LEXIO_SPAN_SIZE(chars)};
-    return Write(writer, outBytes);
-}
-
-template <typename WRITER>
-inline size_t Write(WRITER &writer, const void *data, const size_t size)
-{
-    ConstByteSpanT outBytes{reinterpret_cast<const uint8_t *>(data), size};
-    return Write(writer, outBytes);
 }
 
 /**

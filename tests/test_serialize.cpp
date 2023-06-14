@@ -20,6 +20,22 @@
 
 //******************************************************************************
 
+int32_t BBAA9988i32()
+{
+    uint32_t src = 0xbbaa9988;
+    int32_t dst;
+    std::memcpy(&dst, &src, sizeof(dst));
+    return dst;
+}
+
+int64_t FFEEDDCCBBAA9988i64()
+{
+    uint64_t src = 0xffeeddccbbaa9988;
+    int64_t dst;
+    std::memcpy(&dst, &src, sizeof(dst));
+    return dst;
+}
+
 TEST_SUITE_BEGIN("file");
 
 TEST_CASE("ReadU8")
@@ -361,6 +377,66 @@ TEST_CASE("WriteDoubleBE")
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
+TEST_CASE("ReadUVarint32")
+{
+    LexIO::VectorStream buffer({0x88, 0xb3, 0xaa, 0xdd, 0x0b});
+    REQUIRE(LexIO::ReadUVarint32(buffer) == 0xbbaa9988);
+}
+
+TEST_CASE("WriteUVarint32")
+{
+    LexIO::VectorStream buffer;
+    LexIO::WriteUVarint32(buffer, 0xbbaa9988);
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+
+    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xb3);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
+    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
+    REQUIRE(LexIO::ReadU8(buffer) == 0x0b);
+    REQUIRE_THROWS(LexIO::ReadU8(buffer));
+}
+
+TEST_CASE("ReadVarint32")
+{
+    LexIO::VectorStream buffer({0x88, 0xb3, 0xaa, 0xdd, 0x0b});
+    REQUIRE(LexIO::ReadVarint32(buffer) == BBAA9988i32());
+}
+
+TEST_CASE("WriteVarint32")
+{
+    LexIO::VectorStream buffer;
+    LexIO::WriteVarint32(buffer, BBAA9988i32());
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0x88);
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0xb3);
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0xaa);
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0xdd);
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0x0b);
+    REQUIRE_THROWS(LexIO::ReadU8(buffer));
+}
+
+TEST_CASE("ReadSVarint32")
+{
+    LexIO::VectorStream buffer({0xef, 0x99, 0xab, 0xc5, 0x08});
+    REQUIRE(LexIO::ReadSVarint32(buffer) == BBAA9988i32());
+}
+
+TEST_CASE("WriteSVarint32")
+{
+    LexIO::VectorStream buffer;
+    LexIO::WriteSVarint32(buffer, BBAA9988i32());
+    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0xef);
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0x99);
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0xab);
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0xc5);
+    REQUIRE(int(LexIO::ReadU8(buffer)) == 0x08);
+    REQUIRE_THROWS(LexIO::ReadU8(buffer));
+}
+
 TEST_CASE("ReadUVarint64")
 {
     LexIO::VectorStream buffer({0x88, 0xb3, 0xaa, 0xdd, 0xcb, 0xb9, 0xb7, 0xf7, 0xff, 0x01});
@@ -389,13 +465,13 @@ TEST_CASE("WriteUVarint64")
 TEST_CASE("ReadVarint64")
 {
     LexIO::VectorStream buffer({0x88, 0xb3, 0xaa, 0xdd, 0xcb, 0xb9, 0xb7, 0xf7, 0xff, 0x01});
-    REQUIRE(LexIO::ReadVarint64(buffer) == -4822678189205112);
+    REQUIRE(LexIO::ReadVarint64(buffer) == FFEEDDCCBBAA9988i64());
 }
 
 TEST_CASE("WriteVarint64")
 {
     LexIO::VectorStream buffer;
-    LexIO::WriteVarint64(buffer, -4822678189205112);
+    LexIO::WriteVarint64(buffer, FFEEDDCCBBAA9988i64());
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
 
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0x88);
@@ -414,13 +490,13 @@ TEST_CASE("WriteVarint64")
 TEST_CASE("ReadSVarint64")
 {
     LexIO::VectorStream buffer({0xef, 0x99, 0xab, 0xc5, 0xe8, 0x8c, 0x91, 0x11});
-    REQUIRE(LexIO::ReadSVarint64(buffer) == -4822678189205112);
+    REQUIRE(LexIO::ReadSVarint64(buffer) == FFEEDDCCBBAA9988i64());
 }
 
 TEST_CASE("WriteSVarint64")
 {
     LexIO::VectorStream buffer;
-    LexIO::WriteSVarint64(buffer, -4822678189205112);
+    LexIO::WriteSVarint64(buffer, FFEEDDCCBBAA9988i64());
     LexIO::Seek(buffer, LexIO::WhenceStart(0));
 
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0xef);
@@ -432,6 +508,108 @@ TEST_CASE("WriteSVarint64")
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0x91);
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0x11);
     REQUIRE_THROWS(LexIO::ReadU8(buffer));
+}
+
+template <typename T, std::size_t N>
+constexpr std::size_t CountOf(T const (&)[N]) noexcept
+{
+    return N;
+}
+
+static LexIO::VectorStream GetBuffer()
+{
+    const uint8_t text[] = "The quick brown fox\njumps over the lazy dog.\n";
+    LexIO::ConstByteSpanT textSpan{&text[0], CountOf(text) - 1};
+
+    LexIO::VectorStream rvo;
+    rvo.RawWrite(textSpan);
+    rvo.Seek(LexIO::WhenceStart(0));
+    return rvo;
+}
+
+TEST_CASE("ReadBytes")
+{
+    LexIO::VectorStream buffer = GetBuffer();
+
+    std::array<uint8_t, 10> data;
+    data.fill(0x00);
+
+    REQUIRE_NOTHROW(LexIO::ReadBytes(data.begin(), data.end() - 1, buffer));
+    char *dataChar = LexIO::Detail::BitCast<char *>(&(*data.begin()));
+    REQUIRE(strlen(dataChar) == 9);
+    REQUIRE(!strcmp(dataChar, "The quick"));
+}
+
+TEST_CASE("WriteBytes")
+{
+    LexIO::VectorStream buffer;
+    std::string src{"The quick"};
+    std::array<uint8_t, 10> data;
+    data.fill(0x00);
+    std::memcpy(data.data(), src.data(), src.size());
+
+    REQUIRE_NOTHROW(LexIO::WriteBytes(buffer, data.begin(), data.end()));
+
+    std::array<uint8_t, 10> check;
+    check.fill(0x00);
+    LexIO::Seek(buffer, LexIO::WhenceStart{0});
+    REQUIRE(LexIO::Read(check, buffer) == 10);
+    REQUIRE(memcmp(check.data(), data.data(), check.size()) == 0);
+}
+
+TEST_CASE("ReadData")
+{
+    LexIO::VectorStream buffer = GetBuffer();
+
+    void *data = calloc(10, 1);
+    REQUIRE_NOTHROW(LexIO::ReadData(data, 9, buffer));
+    char *dataChar = static_cast<char *>(data);
+    REQUIRE(strlen(dataChar) == 9);
+    REQUIRE(!strcmp(dataChar, "The quick"));
+    free(data);
+}
+
+TEST_CASE("WriteData")
+{
+    LexIO::VectorStream buffer;
+    std::string data{"The quick"};
+    const void *dataVoid = static_cast<const void *>(data.data());
+    std::array<uint8_t, 10> check;
+    memset(check.data(), 0x00, check.size());
+
+    REQUIRE_NOTHROW(LexIO::WriteData(buffer, dataVoid, data.length()));
+
+    LexIO::Seek(buffer, LexIO::WhenceStart{0});
+    REQUIRE(LexIO::Read(check, buffer) == 9);
+
+    char *checkChar = reinterpret_cast<char *>(check.data());
+    REQUIRE(strcmp(checkChar, data.c_str()) == 0);
+}
+
+TEST_CASE("ReadString")
+{
+    LexIO::VectorStream buffer = GetBuffer();
+
+    std::string data;
+    data.resize(9);
+    REQUIRE_NOTHROW(LexIO::ReadString(data.begin(), data.end(), buffer));
+    REQUIRE(data == "The quick");
+}
+
+TEST_CASE("WriteString")
+{
+    LexIO::VectorStream buffer;
+    std::string data{"The quick"};
+    std::array<uint8_t, 10> check;
+    memset(check.data(), 0x00, check.size());
+
+    REQUIRE_NOTHROW(LexIO::WriteString(buffer, data.cbegin(), data.cend()));
+
+    LexIO::Seek(buffer, LexIO::WhenceStart{0});
+    REQUIRE(LexIO::Read(check, buffer) == 9);
+
+    char *checkChar = reinterpret_cast<char *>(check.data());
+    REQUIRE(strcmp(checkChar, data.c_str()) == 0);
 }
 
 TEST_SUITE_END();

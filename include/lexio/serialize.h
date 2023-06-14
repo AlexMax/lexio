@@ -418,6 +418,63 @@ inline void WriteDoubleBE(WRITER &writer, const double value)
  *         continuation flag.
  *
  * @param reader Reader to operate on.
+ * @return An unsigned 32-bit integer from the Reader.
+ * @throws std::runtime_error if there are too many varint bytes for a 64-bit integer.
+ */
+template <typename READER>
+inline uint32_t ReadUVarint32(READER &reader)
+{
+    constexpr int MAX_BYTES = 5;
+    uint32_t rvo = 0;
+
+    for (int count = 0;; count++)
+    {
+        if (count == MAX_BYTES)
+        {
+            throw std::runtime_error("too many bytes for 32-bit integer");
+        }
+        const uint8_t b = ReadU8(reader);
+        rvo |= static_cast<uint32_t>(b & 0x7F) << (7 * count);
+
+        if ((b & 0x80) == 0)
+        {
+            break;
+        }
+    }
+
+    return rvo;
+}
+
+/**
+ * @brief Write a protobuf-style Varint.
+ *
+ * @detail This variable-length integer encoding uses the least significant
+ *         7 bits of each byte for the numeric payload, and the msb is a
+ *         continuation flag.
+ *
+ * @param writer Writer to operate on.
+ * @param value An unsigned 32-bit integer to write to the Writer.
+ */
+template <typename WRITER>
+inline void WriteUVarint32(WRITER &writer, const uint32_t value)
+{
+    uint32_t v = value;
+    while (v >= 0x80)
+    {
+        WriteU8(writer, static_cast<uint8_t>(v | 0x80));
+        v >>= 7;
+    }
+    WriteU8(writer, static_cast<uint8_t>(v));
+}
+
+/**
+ * @brief Read a protobuf-style Varint.
+ *
+ * @detail This variable-length integer encoding uses the least significant
+ *         7 bits of each byte for the numeric payload, and the msb is a
+ *         continuation flag.
+ *
+ * @param reader Reader to operate on.
  * @return An unsigned 64-bit integer from the Reader.
  * @throws std::runtime_error if there are too many varint bytes for a 64-bit integer.
  */
@@ -473,6 +530,34 @@ inline void WriteUVarint64(WRITER &writer, const uint64_t value)
  * @detail This function decodes negative numbers as large positive numbers.
  *
  * @param reader Reader to operate on.
+ * @return An signed 32-bit integer from the Reader.
+ */
+template <typename READER>
+inline int32_t ReadVarint32(READER &reader)
+{
+    return static_cast<int32_t>(ReadUVarint32(reader));
+}
+
+/**
+ * @brief Write a signed integer encoded as a protobuf-style Varint.
+ *
+ * @detail This function encodes negative numbers as large positive numbers.
+ *
+ * @param writer Writer to operate on.
+ * @param value An unsigned 32-bit integer to write to the Writer.
+ */
+template <typename WRITER>
+inline void WriteVarint32(WRITER &writer, const int32_t value)
+{
+    WriteUVarint32(writer, static_cast<uint32_t>(value));
+}
+
+/**
+ * @brief Read a signed integer encoded as a protobuf-style Varint.
+ *
+ * @detail This function decodes negative numbers as large positive numbers.
+ *
+ * @param reader Reader to operate on.
  * @return An signed 64-bit integer from the Reader.
  */
 template <typename READER>
@@ -493,6 +578,36 @@ template <typename WRITER>
 inline void WriteVarint64(WRITER &writer, const int64_t value)
 {
     WriteUVarint64(writer, static_cast<uint64_t>(value));
+}
+
+/**
+ * @brief Read a signed integer zig-zag encoded as a protobuf-style Varint.
+ *
+ * @detail This function decodes the Varint using zig-zag encoding.
+ *
+ * @param reader Reader to operate on.
+ * @return An signed 32-bit integer from the Reader.
+ */
+template <typename READER>
+inline int32_t ReadSVarint32(READER &reader)
+{
+    const uint32_t var = ReadUVarint32(reader);
+    return static_cast<int32_t>((var >> 1) ^ (~(var & 1) + 1));
+}
+
+/**
+ * @brief Write a signed integer zig-zag encoded as a protobuf-style Varint.
+ *
+ * @detail This function encodes the Varint using zig-zag encoding.
+ *
+ * @param writer Writer to operate on.
+ * @param value An unsigned 32-bit integer to write to the Writer.
+ */
+template <typename WRITER>
+inline void WriteSVarint32(WRITER &writer, const int64_t value)
+{
+    const uint32_t var = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 63);
+    WriteUVarint32(writer, var);
 }
 
 /**
@@ -526,6 +641,125 @@ inline void WriteSVarint64(WRITER &writer, const int64_t value)
 }
 
 //******************************************************************************
+
+/**
+ * @brief Read a fixed-size byte buffer from the passed reader.
+ *
+ * @param outBegin Start of byte buffer to write to (begin iterator).
+ * @param outEnd One past end of byte buffer to write to (end iterator).
+ * @param reader Reader to operate on.
+ */
+template <typename READER, typename IT>
+inline void ReadBytes(IT outBegin, IT outEnd, READER &reader)
+{
+    const size_t length = outEnd - outBegin;
+    const size_t count = Read(ByteSpanT(&(*outBegin), length), reader);
+    if (count != length)
+    {
+        throw std::runtime_error("could not read entire byte buffer");
+    }
+}
+
+/**
+ * @brief Write a fixed-size data buffer to the passed writer.
+ *
+ * @param writer Writer to operate on.
+ * @param begin Start of byte buffer to read from (begin iterator).
+ * @param end One past end of byte buffer to read from (end iterator).
+ */
+template <typename WRITER, typename IT>
+inline void WriteBytes(WRITER &writer, IT begin, IT end)
+{
+    const size_t length = end - begin;
+    const size_t count = Write(writer, ConstByteSpanT(&(*begin), length));
+    if (count != length)
+    {
+        throw std::runtime_error("could not write entire byte buffer");
+    }
+}
+
+//******************************************************************************
+
+/**
+ * @brief Read a fixed-size data buffer from the passed reader.
+ *
+ * @param outData Pointer to output data buffer.
+ * @param length Length of data in bytes.
+ * @param reader Reader to operate on.
+ */
+template <typename READER>
+inline void ReadData(void *outData, const size_t length, READER &reader)
+{
+    uint8_t *castData = Detail::BitCast<uint8_t *>(outData);
+
+    const size_t count = Read(ByteSpanT(castData, length), reader);
+    if (count != length)
+    {
+        throw std::runtime_error("could not read entire buffer");
+    }
+}
+
+/**
+ * @brief Write a fixed-size data buffer to the passed writer.
+ *
+ * @param writer Writer to operate on.
+ * @param data Pointer to data.
+ * @param length Length of data in bytes.
+ */
+template <typename WRITER>
+inline void WriteData(WRITER &writer, const void *data, const size_t length)
+{
+    const uint8_t *castData = Detail::BitCast<const uint8_t *>(data);
+
+    const size_t count = Write(writer, ConstByteSpanT(castData, length));
+    if (count != length)
+    {
+        throw std::runtime_error("could not write entire buffer");
+    }
+}
+
+//******************************************************************************
+
+/**
+ * @brief Read a fixed-size string from the passed reader.
+ *
+ * @param outBegin Start of char buffer to write to (begin iterator).
+ * @param outEnd One past end of char buffer to write to (end iterator).
+ * @param reader Reader to operate on.
+ * @throws std::runtime_error if the entire string could not be read.
+ */
+template <typename READER, typename IT>
+inline void ReadString(IT outBegin, IT outEnd, READER &reader)
+{
+    uint8_t *castBegin = Detail::BitCast<uint8_t *>(&(*outBegin));
+    const size_t length = outEnd - outBegin;
+
+    const size_t count = Read(ByteSpanT(castBegin, length), reader);
+    if (count != length)
+    {
+        throw std::runtime_error("could not read entire string");
+    }
+}
+
+/**
+ * @brief Write a fixed-size string to the passed writer.
+ *
+ * @param writer Writer to operate on.
+ * @param begin Start of char buffer to read from (begin iterator).
+ * @param end One past end of char buffer to read from (end iterator).
+ */
+template <typename WRITER, typename IT>
+inline void WriteString(WRITER &writer, IT begin, IT end)
+{
+    const uint8_t *castBegin = Detail::BitCast<const uint8_t *>(&(*begin));
+    const size_t length = end - begin;
+
+    const size_t count = Write(writer, ConstByteSpanT(castBegin, length));
+    if (count != length)
+    {
+        throw std::runtime_error("could not write entire string");
+    }
+}
 
 } // namespace LexIO
 
