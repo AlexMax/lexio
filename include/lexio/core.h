@@ -137,9 +137,9 @@ template <class TO, class FROM>
 inline TO BitCast(const FROM &src) noexcept
 {
     static_assert(sizeof(TO) == sizeof(FROM), "BitCast requires equal size.");
-    static_assert(std::is_trivially_copyable_v<FROM>, "BitCast FROM must be trivially copyable.");
-    static_assert(std::is_trivially_copyable_v<TO>, "BitCast TO must be trivially copyable.");
-    static_assert(std::is_trivially_constructible_v<TO>, "BitCast TO must be trivially constructible.");
+    static_assert(std::is_trivially_copyable<FROM>::value, "BitCast FROM must be trivially copyable.");
+    static_assert(std::is_trivially_copyable<TO>::value, "BitCast TO must be trivially copyable.");
+    static_assert(std::is_trivially_constructible<TO>::value, "BitCast TO must be trivially constructible.");
 
     TO dst;
     std::memcpy(&dst, &src, sizeof(TO));
