@@ -563,6 +563,20 @@ inline size_t Tell(SEEKABLE &seekable)
 }
 
 /**
+ * @brief Rewind the seekable stream to the beginning.
+ *
+ * @param seekable Seekable to operate on.
+ * @return Resulting position in stream, should be 0 on success.
+ * @throws std::runtime_error if Seek call throws, or some other error
+ *         condition occurrs.
+ */
+template <typename SEEKABLE>
+inline size_t Rewind(SEEKABLE &seekable)
+{
+    return Seek(seekable, WhenceStart(0));
+}
+
+/**
  * @brief Return length of underlying data.
  *
  * @param seekable Seekable to operate on.

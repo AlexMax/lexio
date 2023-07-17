@@ -124,10 +124,12 @@ constexpr std::size_t CountOf(T const (&)[N]) noexcept
     return N;
 }
 
+constexpr uint8_t BUFFER_TEXT[] = "The quick brown fox\njumps over the lazy dog.\n";
+constexpr size_t BUFFER_LENGTH = CountOf(BUFFER_TEXT) - sizeof('\0');
+
 static LexIO::VectorStream GetBuffer()
 {
-    const uint8_t text[] = "The quick brown fox\njumps over the lazy dog.\n";
-    LexIO::ConstByteSpanT textSpan{&text[0], CountOf(text) - 1};
+    LexIO::ConstByteSpanT textSpan{&BUFFER_TEXT[0], BUFFER_LENGTH};
 
     LexIO::VectorStream rvo;
     rvo.RawWrite(textSpan);
@@ -172,6 +174,46 @@ TEST_CASE("Test ReadUntil")
     REQUIRE(bytes == 20);
     REQUIRE(data.size() == 20);
     REQUIRE(*(data.end() - 1) == '\n');
+}
+
+TEST_CASE("Test Rewind")
+{
+    LexIO::VectorStream basic = GetBuffer();
+    REQUIRE(LexIO::Read8(basic) == 'T');
+    REQUIRE(LexIO::Read8(basic) == 'h');
+    REQUIRE(LexIO::Read8(basic) == 'e');
+    REQUIRE(LexIO::Rewind(basic) == 0);
+    REQUIRE(LexIO::Tell(basic) == 0);
+}
+
+TEST_CASE("Test Seek/Tell")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    LexIO::Seek(basic, LexIO::WhenceStart(5));
+    REQUIRE(LexIO::Tell(basic) == 5);
+
+    LexIO::Seek(basic, LexIO::WhenceCurrent(5));
+    REQUIRE(LexIO::Tell(basic) == 10);
+
+    LexIO::Seek(basic, LexIO::WhenceEnd(5));
+    REQUIRE(LexIO::Tell(basic) == BUFFER_LENGTH - 5);
+}
+
+TEST_CASE("Test Rewind")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    LexIO::Seek(basic, LexIO::WhenceStart(5));
+    REQUIRE(LexIO::Rewind(basic) == 0);
+    REQUIRE(LexIO::Tell(basic) == 0);
+}
+
+TEST_CASE("Test Length")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    REQUIRE(LexIO::Length(basic) == BUFFER_LENGTH);
 }
 
 TEST_SUITE_END();
