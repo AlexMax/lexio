@@ -43,6 +43,58 @@ inline constexpr uint8_t ToByte(const T val, const int sh, const T mask = 0xff)
     return static_cast<uint8_t>((val & (mask << sh)) >> sh);
 }
 
+template <typename TYPE, typename READER, typename TRY_READ>
+inline constexpr TYPE ReadWithExcept(READER &reader, TRY_READ &tryRead)
+{
+    TYPE rvo;
+    if (!tryRead(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
+}
+
+template <typename TYPE, typename WRITER, typename TRY_WRITE>
+inline constexpr void WriteWithExcept(WRITER &writer, const TYPE &value, TRY_WRITE &tryWrite)
+{
+    if (!tryWrite(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
+}
+
+template <typename TYPE, typename READER, typename TRY_READ>
+inline constexpr bool ReadSigned(TYPE &out, READER &reader, TRY_READ &tryRead)
+{
+    using UNSIGNED_TYPE = std::make_unsigned_t<TYPE>;
+    UNSIGNED_TYPE outVal;
+    if (!tryRead(outVal, reader))
+    {
+        return false;
+    }
+    out = static_cast<TYPE>(outVal);
+    return true;
+}
+
+template <typename TYPE, typename WRITER, typename TRY_WRITE>
+inline constexpr bool WriteSigned(WRITER &writer, const TYPE &value, TRY_WRITE &tryWrite)
+{
+    return tryWrite(writer, static_cast<TYPE>(value));
+}
+
+template <typename TYPE, typename READER, typename READ>
+inline constexpr TYPE ReadSignedWithExcept(READER &reader, READ &read)
+{
+    return static_cast<TYPE>(read(reader));
+}
+
+template <typename TYPE, typename WRITER, typename WRITE>
+inline constexpr void WriteSignedWithExcept(WRITER &writer, const TYPE &value, WRITE &write)
+{
+    using UNSIGNED_TYPE = std::make_unsigned_t<TYPE>;
+    write(writer, static_cast<UNSIGNED_TYPE>(value));
+}
+
 } // namespace Detail
 
 //******************************************************************************
@@ -60,17 +112,6 @@ inline bool TryReadU8(uint8_t &out, READER &reader)
     return true;
 }
 
-template <typename READER>
-inline uint8_t ReadU8(READER &reader)
-{
-    uint8_t rvo;
-    if (!TryReadU8(rvo, reader))
-    {
-        throw std::runtime_error("could not read 1 byte");
-    }
-    return rvo;
-}
-
 template <typename WRITER>
 inline bool TryWriteU8(WRITER &writer, const uint8_t value)
 {
@@ -79,13 +120,16 @@ inline bool TryWriteU8(WRITER &writer, const uint8_t value)
     return count == sizeof(uint8_t);
 }
 
+template <typename READER>
+inline uint8_t ReadU8(READER &reader)
+{
+    return Detail::ReadWithExcept<uint8_t>(reader, TryReadU8<READER>);
+}
+
 template <typename WRITER>
 inline void WriteU8(WRITER &writer, const uint8_t value)
 {
-    if (!TryWriteU8(writer, value))
-    {
-        throw std::runtime_error("could not write 1 byte");
-    }
+    Detail::WriteWithExcept<uint8_t>(writer, value, TryWriteU8<WRITER>);
 }
 
 //******************************************************************************
@@ -93,31 +137,25 @@ inline void WriteU8(WRITER &writer, const uint8_t value)
 template <typename READER>
 inline bool TryRead8(int8_t &out, READER &reader)
 {
-    uint8_t outVal;
-    if (!TryRead8(outVal, reader))
-    {
-        return false;
-    }
-    out = static_cast<int8_t>(outVal);
-    return true;
-}
-
-template <typename READER>
-inline int8_t Read8(READER &reader)
-{
-    return static_cast<int8_t>(ReadU8(reader));
+    return Detail::ReadSigned<int8_t>(out, reader, TryReadU8<READER>);
 }
 
 template <typename WRITER>
 inline bool TryWrite8(WRITER &writer, const int8_t value)
 {
-    return TryWriteU8(writer, static_cast<uint8_t>(value));
+    return Detail::WriteSigned<int8_t>(writer, value, TryWriteU8<WRITER>);
+}
+
+template <typename READER>
+inline int8_t Read8(READER &reader)
+{
+    return Detail::ReadSignedWithExcept<int8_t>(reader, ReadU8<READER>);
 }
 
 template <typename WRITER>
 inline void Write8(WRITER &writer, const int8_t value)
 {
-    WriteU8(writer, static_cast<uint8_t>(value));
+    Detail::WriteSignedWithExcept<int8_t>(writer, WriteU8<WRITER>);
 }
 
 //******************************************************************************
@@ -136,54 +174,62 @@ inline bool TryReadU16LE(uint16_t &out, READER &reader)
 }
 
 template <typename READER>
-inline uint16_t ReadU16LE(READER &reader)
-{
-    uint16_t out;
-    if (!TryReadU16LE(out, reader))
-    {
-        throw std::runtime_error("could not read 2 bytes");
-    }
-    return out;
-}
-
-template <typename WRITER>
-inline void WriteU16LE(WRITER &writer, const uint16_t value)
-{
-    const uint8_t buf[sizeof(uint16_t)] = {
-        Detail::ToByte(value, 0),
-        Detail::ToByte(value, 8),
-    };
-    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
-    if (count != sizeof(uint16_t))
-    {
-        throw std::runtime_error("could not write 2 bytes");
-    }
-}
-
-template <typename READER>
-inline uint16_t ReadU16BE(READER &reader)
+inline uint16_t TryReadU16BE(uint16_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
     const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
     if (count != sizeof(uint16_t))
     {
-        throw std::runtime_error("could not read 2 bytes");
+        return false;
     }
-    return Detail::FromByte<uint16_t>(buf[0], 8) | Detail::FromByte<uint16_t>(buf[1], 0);
+    out = Detail::FromByte<uint16_t>(buf[0], 8) | Detail::FromByte<uint16_t>(buf[1], 0);
+    return true;
 }
 
 template <typename WRITER>
-inline void WriteU16BE(WRITER &writer, const uint16_t value)
+inline bool TryWriteU16LE(WRITER &writer, const uint16_t value)
+{
+    const uint8_t buf[sizeof(uint16_t)] = {
+        Detail::ToByte(value, 0),
+        Detail::ToByte(value, 8),
+    };
+    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
+    return count == sizeof(uint16_t);
+}
+
+template <typename WRITER>
+inline bool TryWriteU16BE(WRITER &writer, const uint16_t value)
 {
     const uint8_t buf[sizeof(uint16_t)] = {
         Detail::ToByte(value, 8),
         Detail::ToByte(value, 0),
     };
     const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
-    if (count != sizeof(uint16_t))
-    {
-        throw std::runtime_error("could not write 2 bytes");
-    }
+    return count == sizeof(uint16_t);
+}
+
+template <typename READER>
+inline uint16_t ReadU16LE(READER &reader)
+{
+    return Detail::ReadWithExcept<uint16_t>(reader, TryReadU16LE<READER>);
+}
+
+template <typename READER>
+inline uint16_t ReadU16BE(READER &reader)
+{
+    return Detail::ReadWithExcept<uint16_t>(reader, TryReadU16BE<READER>);
+}
+
+template <typename WRITER>
+inline void WriteU16LE(WRITER &writer, const uint16_t value)
+{
+    Detail::WriteWithExcept<uint16_t>(writer, value, TryWriteU16LE<WRITER>);
+}
+
+template <typename WRITER>
+inline void WriteU16BE(WRITER &writer, const uint16_t value)
+{
+    Detail::WriteWithExcept<uint16_t>(writer, value, TryWriteU16BE<WRITER>);
 }
 
 //******************************************************************************
@@ -191,37 +237,49 @@ inline void WriteU16BE(WRITER &writer, const uint16_t value)
 template <typename READER>
 inline bool TryRead16LE(int16_t &out, READER &reader)
 {
-    uint16_t outVal;
-    if (!TryReadU16LE(outVal, reader))
-    {
-        return false;
-    }
-    out = static_cast<int16_t>(outVal);
-    return true;
+    return Detail::ReadSigned<int16_t>(out, reader, TryReadU16LE<READER>);
+}
+
+template <typename READER>
+inline bool TryRead16BE(int16_t &out, READER &reader)
+{
+    return Detail::ReadSigned<int16_t>(out, reader, TryReadU16BE<READER>);
+}
+
+template <typename WRITER>
+inline bool TryWrite16LE(WRITER &writer, const int16_t value)
+{
+    return Detail::WriteSigned<int16_t>(writer, value, TryWriteU16LE<WRITER>);
+}
+
+template <typename WRITER>
+inline bool TryWrite16BE(WRITER &writer, const int16_t value)
+{
+    return Detail::WriteSigned<int16_t>(writer, value, TryWriteU16BE<WRITER>);
 }
 
 template <typename READER>
 inline int16_t Read16LE(READER &reader)
 {
-    return static_cast<int16_t>(ReadU16LE(reader));
-}
-
-template <typename WRITER>
-inline void Write16LE(WRITER &writer, const int16_t value)
-{
-    WriteU16LE(writer, static_cast<uint16_t>(value));
+    return Detail::ReadSignedWithExcept<int16_t>(reader, ReadU16LE<READER>);
 }
 
 template <typename READER>
 inline int16_t Read16BE(READER &reader)
 {
-    return static_cast<int16_t>(ReadU16BE(reader));
+    return Detail::ReadSignedWithExcept<int16_t>(reader, ReadU16BE<READER>);
+}
+
+template <typename WRITER>
+inline void Write16LE(WRITER &writer, const int16_t value)
+{
+    Detail::WriteSignedWithExcept<uint16_t>(writer, value, TryWriteU16LE<WRITER>);
 }
 
 template <typename WRITER>
 inline void Write16BE(WRITER &writer, const int16_t value)
 {
-    WriteU16BE(writer, static_cast<uint16_t>(value));
+    Detail::WriteSignedWithExcept<uint16_t>(writer, value, TryWriteU16BE<WRITER>);
 }
 
 //******************************************************************************
@@ -241,47 +299,34 @@ inline bool TryReadU32LE(uint32_t &out, READER &reader)
 }
 
 template <typename READER>
-inline uint32_t ReadU32LE(READER &reader)
-{
-    uint32_t out;
-    if (!TryReadU32LE(out, reader))
-    {
-        throw std::runtime_error("could not read 4 bytes");
-    }
-    return out;
-}
-
-template <typename WRITER>
-inline void WriteU32LE(WRITER &writer, const uint32_t value)
-{
-    const uint8_t buf[sizeof(uint32_t)] = {
-        Detail::ToByte(value, 0),
-        Detail::ToByte(value, 8),
-        Detail::ToByte(value, 16),
-        Detail::ToByte(value, 24),
-    };
-    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
-    if (count != sizeof(uint32_t))
-    {
-        throw std::runtime_error("could not write 4 bytes");
-    }
-}
-
-template <typename READER>
-inline uint32_t ReadU32BE(READER &reader)
+inline bool TryReadU32BE(uint32_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
     const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
     if (count != sizeof(uint32_t))
     {
-        throw std::runtime_error("could not read 4 bytes");
+        return false;
     }
-    return Detail::FromByte<uint32_t>(buf[0], 24) | Detail::FromByte<uint32_t>(buf[1], 16) |
-           Detail::FromByte<uint32_t>(buf[2], 8) | Detail::FromByte<uint32_t>(buf[3], 0);
+    out = Detail::FromByte<uint32_t>(buf[0], 24) | Detail::FromByte<uint32_t>(buf[1], 16) |
+          Detail::FromByte<uint32_t>(buf[2], 8) | Detail::FromByte<uint32_t>(buf[3], 0);
+    return true;
 }
 
 template <typename WRITER>
-inline void WriteU32BE(WRITER &writer, const uint32_t value)
+inline bool TryWriteU32LE(WRITER &writer, const uint32_t value)
+{
+    const uint8_t buf[sizeof(uint32_t)] = {
+        Detail::ToByte(value, 0),
+        Detail::ToByte(value, 8),
+        Detail::ToByte(value, 16),
+        Detail::ToByte(value, 24),
+    };
+    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
+    return count == sizeof(uint32_t);
+}
+
+template <typename WRITER>
+inline bool TryWriteU32BE(WRITER &writer, const uint32_t value)
 {
     const uint8_t buf[sizeof(uint32_t)] = {
         Detail::ToByte(value, 24),
@@ -290,10 +335,31 @@ inline void WriteU32BE(WRITER &writer, const uint32_t value)
         Detail::ToByte(value, 0),
     };
     const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
-    if (count != sizeof(uint32_t))
-    {
-        throw std::runtime_error("could not write 4 bytes");
-    }
+    return count == sizeof(uint32_t);
+}
+
+template <typename READER>
+inline uint32_t ReadU32LE(READER &reader)
+{
+    return Detail::ReadWithExcept<uint32_t>(reader, TryReadU32LE<READER>);
+}
+
+template <typename READER>
+inline uint32_t ReadU32BE(READER &reader)
+{
+    return Detail::ReadWithExcept<uint32_t>(reader, TryReadU32BE<READER>);
+}
+
+template <typename WRITER>
+inline void WriteU32LE(WRITER &writer, const uint32_t value)
+{
+    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32LE<WRITER>);
+}
+
+template <typename WRITER>
+inline void WriteU32BE(WRITER &writer, const uint32_t value)
+{
+    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32BE<WRITER>);
 }
 
 //******************************************************************************
@@ -301,37 +367,49 @@ inline void WriteU32BE(WRITER &writer, const uint32_t value)
 template <typename READER>
 inline bool TryRead32LE(int32_t &out, READER &reader)
 {
-    uint32_t outVal;
-    if (!TryReadU32LE(outVal, reader))
-    {
-        return false;
-    }
-    out = static_cast<int32_t>(outVal);
-    return true;
+    return Detail::ReadSigned<int32_t>(out, reader, TryReadU32LE<READER>);
+}
+
+template <typename READER>
+inline bool TryRead32BE(int32_t &out, READER &reader)
+{
+    return Detail::ReadSigned<int32_t>(out, reader, TryReadU32BE<READER>);
+}
+
+template <typename WRITER>
+inline bool TryWrite32LE(WRITER &writer, const int32_t value)
+{
+    return Detail::WriteSigned<int32_t>(writer, value, TryWriteU32LE<WRITER>);
+}
+
+template <typename WRITER>
+inline bool TryWrite32BE(WRITER &writer, const int32_t value)
+{
+    return Detail::WriteSigned<int32_t>(writer, value, TryWriteU32BE<WRITER>);
 }
 
 template <typename READER>
 inline int32_t Read32LE(READER &reader)
 {
-    return static_cast<int32_t>(ReadU32LE(reader));
-}
-
-template <typename WRITER>
-inline void Write32LE(WRITER &writer, const int32_t value)
-{
-    WriteU32LE(writer, static_cast<uint32_t>(value));
+    return Detail::ReadSignedWithExcept<int32_t>(reader, ReadU32LE<READER>);
 }
 
 template <typename READER>
 inline int32_t Read32BE(READER &reader)
 {
-    return static_cast<int32_t>(ReadU32BE(reader));
+    return Detail::ReadSignedWithExcept<int32_t>(reader, ReadU32BE<READER>);
+}
+
+template <typename WRITER>
+inline void Write32LE(WRITER &writer, const int32_t value)
+{
+    Detail::WriteSignedWithExcept<int32_t>(writer, value, TryWriteU32LE<WRITER>);
 }
 
 template <typename WRITER>
 inline void Write32BE(WRITER &writer, const int32_t value)
 {
-    WriteU32BE(writer, static_cast<uint32_t>(value));
+    Detail::WriteSignedWithExcept<int32_t>(writer, value, TryWriteU32BE<WRITER>);
 }
 
 //******************************************************************************
@@ -339,35 +417,27 @@ inline void Write32BE(WRITER &writer, const int32_t value)
 template <typename READER>
 inline float ReadFloatLE(READER &reader)
 {
-    float rvo;
     uint32_t bits = ReadU32LE(reader);
-    std::memcpy(&rvo, &bits, sizeof(rvo));
-    return rvo;
-}
-
-template <typename WRITER>
-inline void WriteFloatLE(WRITER &writer, const float value)
-{
-    uint32_t out;
-    std::memcpy(&out, &value, sizeof(out));
-    WriteU32LE(writer, out);
+    return Detail::BitCast<float>(bits);
 }
 
 template <typename READER>
 inline float ReadFloatBE(READER &reader)
 {
-    float rvo;
     uint32_t bits = ReadU32BE(reader);
-    std::memcpy(&rvo, &bits, sizeof(rvo));
-    return rvo;
+    return Detail::BitCast<float>(bits);
+}
+
+template <typename WRITER>
+inline void WriteFloatLE(WRITER &writer, const float value)
+{
+    WriteU32LE(writer, Detail::BitCast<uint32_t>(value));
 }
 
 template <typename WRITER>
 inline void WriteFloatBE(WRITER &writer, const float value)
 {
-    uint32_t out;
-    std::memcpy(&out, &value, sizeof(out));
-    WriteU32BE(writer, out);
+    WriteU32BE(writer, Detail::BitCast<uint32_t>(value));
 }
 
 //******************************************************************************
@@ -389,57 +459,65 @@ inline bool TryReadU64LE(uint64_t &out, READER &reader)
 }
 
 template <typename READER>
-inline uint64_t ReadU64LE(READER &reader)
+inline bool TryReadU64BE(uint64_t &out, READER &reader)
 {
-    uint64_t out;
-    if (!TryReadU64LE(out, reader))
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
+    if (count != sizeof(uint64_t))
     {
-        throw std::runtime_error("could not read 8 bytes");
+        return false;
     }
-    return out;
+    out = Detail::FromByte<uint64_t>(buf[0], 56) | Detail::FromByte<uint64_t>(buf[1], 48) |
+          Detail::FromByte<uint64_t>(buf[2], 40) | Detail::FromByte<uint64_t>(buf[3], 32) |
+          Detail::FromByte<uint64_t>(buf[4], 24) | Detail::FromByte<uint64_t>(buf[5], 16) |
+          Detail::FromByte<uint64_t>(buf[6], 8) | Detail::FromByte<uint64_t>(buf[7], 0);
+    return true;
 }
 
 template <typename WRITER>
-inline void WriteU64LE(WRITER &writer, const uint64_t value)
+inline bool TryWriteU64LE(WRITER &writer, const uint64_t value)
 {
     const uint8_t buf[sizeof(uint64_t)] = {
         Detail::ToByte(value, 0),  Detail::ToByte(value, 8),  Detail::ToByte(value, 16), Detail::ToByte(value, 24),
         Detail::ToByte(value, 32), Detail::ToByte(value, 40), Detail::ToByte(value, 48), Detail::ToByte(value, 56),
     };
     const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
-    if (count != sizeof(uint64_t))
-    {
-        throw std::runtime_error("could not write 8 bytes");
-    }
-}
-
-template <typename READER>
-inline uint64_t ReadU64BE(READER &reader)
-{
-    uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
-    if (count != sizeof(uint64_t))
-    {
-        throw std::runtime_error("could not read 8 bytes");
-    }
-    return Detail::FromByte<uint64_t>(buf[0], 56) | Detail::FromByte<uint64_t>(buf[1], 48) |
-           Detail::FromByte<uint64_t>(buf[2], 40) | Detail::FromByte<uint64_t>(buf[3], 32) |
-           Detail::FromByte<uint64_t>(buf[4], 24) | Detail::FromByte<uint64_t>(buf[5], 16) |
-           Detail::FromByte<uint64_t>(buf[6], 8) | Detail::FromByte<uint64_t>(buf[7], 0);
+    return count == sizeof(uint64_t);
 }
 
 template <typename WRITER>
-inline void WriteU64BE(WRITER &writer, const uint64_t value)
+inline bool TryWriteU64BE(WRITER &writer, const uint64_t value)
 {
     const uint8_t buf[sizeof(uint64_t)] = {
         Detail::ToByte(value, 56), Detail::ToByte(value, 48), Detail::ToByte(value, 40), Detail::ToByte(value, 32),
         Detail::ToByte(value, 24), Detail::ToByte(value, 16), Detail::ToByte(value, 8),  Detail::ToByte(value, 0),
     };
     const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
-    if (count != sizeof(uint64_t))
-    {
-        throw std::runtime_error("could not write 8 bytes");
-    }
+    return count == sizeof(uint64_t);
+}
+
+template <typename READER>
+inline uint64_t ReadU64LE(READER &reader)
+{
+    return Detail::ReadWithExcept<uint64_t>(reader, TryReadU64LE<READER>);
+}
+
+template <typename READER>
+inline uint64_t ReadU64BE(READER &reader)
+{
+    return Detail::ReadWithExcept<uint64_t>(reader, TryReadU64BE<READER>);
+}
+
+template <typename WRITER>
+inline void WriteU64LE(WRITER &writer, const uint64_t value)
+{
+    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteU64LE<WRITER>);
+}
+
+template <typename WRITER>
+inline void WriteU64BE(WRITER &writer, const uint64_t value)
+{
+    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteU64BE<WRITER>);
 }
 
 //******************************************************************************
@@ -447,37 +525,49 @@ inline void WriteU64BE(WRITER &writer, const uint64_t value)
 template <typename READER>
 inline bool TryRead64LE(int64_t &out, READER &reader)
 {
-    uint64_t outVal;
-    if (!TryReadU64LE(outVal, reader))
-    {
-        return false;
-    }
-    out = static_cast<int64_t>(outVal);
-    return true;
+    return Detail::ReadSigned<int64_t>(out, reader, TryReadU64LE<READER>);
+}
+
+template <typename READER>
+inline bool TryRead64BE(int64_t &out, READER &reader)
+{
+    return Detail::ReadSigned<int64_t>(out, reader, TryReadU64BE<READER>);
+}
+
+template <typename WRITER>
+inline bool TryWrite64LE(WRITER &writer, const int64_t value)
+{
+    return Detail::WriteSigned<int64_t>(writer, value, TryWriteU64LE<WRITER>);
+}
+
+template <typename WRITER>
+inline bool TryWrite64BE(WRITER &writer, const int64_t value)
+{
+    return Detail::WriteSigned<int64_t>(writer, value, TryWriteU64BE<WRITER>);
 }
 
 template <typename READER>
 inline int64_t Read64LE(READER &reader)
 {
-    return static_cast<int64_t>(ReadU64LE(reader));
-}
-
-template <typename WRITER>
-inline void Write64LE(WRITER &writer, const int64_t value)
-{
-    WriteU64LE(writer, static_cast<uint64_t>(value));
+    return Detail::ReadSignedWithExcept<int64_t>(reader, ReadU64LE<READER>);
 }
 
 template <typename READER>
 inline int64_t Read64BE(READER &reader)
 {
-    return static_cast<int64_t>(ReadU64BE(reader));
+    return Detail::ReadSignedWithExcept<int64_t>(reader, ReadU64BE<READER>);
+}
+
+template <typename WRITER>
+inline void Write64LE(WRITER &writer, const int64_t value)
+{
+    Detail::WriteSignedWithExcept<int64_t>(writer, value, TryWriteU64LE<WRITER>);
 }
 
 template <typename WRITER>
 inline void Write64BE(WRITER &writer, const int64_t value)
 {
-    WriteU64BE(writer, static_cast<uint64_t>(value));
+    Detail::WriteSignedWithExcept<int64_t>(writer, value, TryWriteU64BE<WRITER>);
 }
 
 //******************************************************************************
