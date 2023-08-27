@@ -19,6 +19,7 @@
 
 #include "./core.h"
 
+#include "./abstract.h"
 #include "./array.h"
 #include "./bufreader.h"
 #include "./container.h"

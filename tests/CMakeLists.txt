@@ -17,6 +17,7 @@ target_include_directories(doctest INTERFACE "${DOCTEST_INCLUDE}")
 
 # Test suite.
 add_executable(test
+    test_abstract.cpp
     test_core.cpp
     test_container.cpp
     test_file.cpp
