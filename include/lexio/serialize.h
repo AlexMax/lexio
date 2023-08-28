@@ -608,6 +608,51 @@ inline void WriteDoubleBE(WRITER &writer, const double value)
 
 //******************************************************************************
 
+template <typename READER>
+inline bool TryReadUVarint32(uint32_t &out, READER &reader)
+{
+    constexpr int MAX_BYTES = 5;
+    uint32_t rvo = 0;
+    uint8_t b = 0;
+
+    for (int count = 0;; count++)
+    {
+        if (count == MAX_BYTES)
+        {
+            return false;
+        }
+        else if (!TryReadU8<READER>(b, reader))
+        {
+            return false;
+        }
+
+        rvo |= static_cast<uint32_t>(b & 0x7F) << (7 * count);
+
+        if ((b & 0x80) == 0)
+        {
+            break;
+        }
+    }
+
+    out = rvo;
+    return true;
+}
+
+template <typename WRITER>
+inline bool TryWriteUVarint32(WRITER &writer, const uint32_t value)
+{
+    uint32_t v = value;
+    while (v >= 0x80)
+    {
+        if (!TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v | 0x80)))
+        {
+            return false;
+        }
+        v >>= 7;
+    }
+    return TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v));
+}
+
 /**
  * @brief Read a protobuf-style Varint.
  *
@@ -622,25 +667,7 @@ inline void WriteDoubleBE(WRITER &writer, const double value)
 template <typename READER>
 inline uint32_t ReadUVarint32(READER &reader)
 {
-    constexpr int MAX_BYTES = 5;
-    uint32_t rvo = 0;
-
-    for (int count = 0;; count++)
-    {
-        if (count == MAX_BYTES)
-        {
-            throw std::runtime_error("too many bytes for 32-bit integer");
-        }
-        const uint8_t b = ReadU8(reader);
-        rvo |= static_cast<uint32_t>(b & 0x7F) << (7 * count);
-
-        if ((b & 0x80) == 0)
-        {
-            break;
-        }
-    }
-
-    return rvo;
+    return Detail::ReadWithExcept<uint32_t>(reader, TryReadUVarint32<READER>);
 }
 
 /**
@@ -656,13 +683,145 @@ inline uint32_t ReadUVarint32(READER &reader)
 template <typename WRITER>
 inline void WriteUVarint32(WRITER &writer, const uint32_t value)
 {
-    uint32_t v = value;
+    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteUVarint32<WRITER>);
+}
+
+//******************************************************************************
+
+template <typename READER>
+inline bool TryReadVarint32(int32_t &out, READER &reader)
+{
+    return Detail::ReadSigned<int32_t>(out, reader, TryReadUVarint32<READER>);
+}
+
+template <typename WRITER>
+inline bool TryWriteVarint32(WRITER &writer, const int32_t value)
+{
+    return Detail::WriteSigned<int32_t>(writer, value, TryWriteUVarint32<WRITER>);
+}
+
+/**
+ * @brief Read a signed integer encoded as a protobuf-style Varint.
+ *
+ * @detail This function decodes negative numbers as large positive numbers.
+ *
+ * @param reader Reader to operate on.
+ * @return An signed 32-bit integer from the Reader.
+ */
+template <typename READER>
+inline int32_t ReadVarint32(READER &reader)
+{
+    return Detail::ReadWithExcept<int32_t>(reader, TryReadVarint32<READER>);
+}
+
+/**
+ * @brief Write a signed integer encoded as a protobuf-style Varint.
+ *
+ * @detail This function encodes negative numbers as large positive numbers.
+ *
+ * @param writer Writer to operate on.
+ * @param value An unsigned 32-bit integer to write to the Writer.
+ */
+template <typename WRITER>
+inline void WriteVarint32(WRITER &writer, const int32_t value)
+{
+    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteVarint32<WRITER>);
+}
+
+//******************************************************************************
+
+template <typename READER>
+inline bool TryReadSVarint32(int32_t &out, READER &reader)
+{
+    uint32_t outVal;
+    if (!TryReadUVarint32<READER>(outVal, reader))
+    {
+        return false;
+    }
+    out = static_cast<int32_t>((outVal >> 1) ^ (~(outVal & 1) + 1));
+    return true;
+}
+
+template <typename WRITER>
+inline bool TryWriteSVarint32(WRITER &writer, const int32_t value)
+{
+    const uint32_t var = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 31);
+    return TryWriteUVarint32<WRITER>(writer, var);
+}
+
+/**
+ * @brief Read a signed integer zig-zag encoded as a protobuf-style Varint.
+ *
+ * @detail This function decodes the Varint using zig-zag encoding.
+ *
+ * @param reader Reader to operate on.
+ * @return An signed 32-bit integer from the Reader.
+ */
+template <typename READER>
+inline uint32_t ReadSVarint32(READER &reader)
+{
+    return Detail::ReadWithExcept<int32_t>(reader, TryReadSVarint32<READER>);
+}
+
+/**
+ * @brief Write a signed integer zig-zag encoded as a protobuf-style Varint.
+ *
+ * @detail This function encodes the Varint using zig-zag encoding.
+ *
+ * @param writer Writer to operate on.
+ * @param value An unsigned 32-bit integer to write to the Writer.
+ */
+template <typename WRITER>
+inline void WriteSVarint32(WRITER &writer, const int32_t value)
+{
+    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteSVarint32<WRITER>);
+}
+
+//******************************************************************************
+
+template <typename READER>
+inline bool TryReadUVarint64(uint64_t &out, READER &reader)
+{
+    constexpr int MAX_BYTES = 10;
+    uint64_t rvo = 0;
+    uint8_t b = 0;
+
+    for (int count = 0;; count++)
+    {
+        if (count == MAX_BYTES)
+        {
+            return false;
+        }
+        if (!TryReadU8<READER>(b, reader))
+        {
+            return false;
+        }
+
+        rvo |= static_cast<uint64_t>(b & 0x7F) << (7 * count);
+
+        if ((b & 0x80) == 0)
+        {
+            break;
+        }
+    }
+
+    out = rvo;
+    return true;
+}
+
+template <typename WRITER>
+inline bool TryWriteUVarint64(WRITER &writer, const uint64_t value)
+{
+    uint64_t v = value;
     while (v >= 0x80)
     {
-        WriteU8(writer, static_cast<uint8_t>(v | 0x80));
+        if (!TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v | 0x80)))
+        {
+            return false;
+        }
         v >>= 7;
     }
-    WriteU8(writer, static_cast<uint8_t>(v));
+    return TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v));
 }
 
 /**
@@ -679,25 +838,7 @@ inline void WriteUVarint32(WRITER &writer, const uint32_t value)
 template <typename READER>
 inline uint64_t ReadUVarint64(READER &reader)
 {
-    constexpr int MAX_BYTES = 10;
-    uint64_t rvo = 0;
-
-    for (int count = 0;; count++)
-    {
-        if (count == MAX_BYTES)
-        {
-            throw std::runtime_error("too many bytes for 64-bit integer");
-        }
-        const uint8_t b = ReadU8(reader);
-        rvo |= static_cast<uint64_t>(b & 0x7F) << (7 * count);
-
-        if ((b & 0x80) == 0)
-        {
-            break;
-        }
-    }
-
-    return rvo;
+    return Detail::ReadWithExcept<uint64_t>(reader, TryReadUVarint64<READER>);
 }
 
 /**
@@ -713,42 +854,10 @@ inline uint64_t ReadUVarint64(READER &reader)
 template <typename WRITER>
 inline void WriteUVarint64(WRITER &writer, const uint64_t value)
 {
-    uint64_t v = value;
-    while (v >= 0x80)
-    {
-        WriteU8(writer, static_cast<uint8_t>(v | 0x80));
-        v >>= 7;
-    }
-    WriteU8(writer, static_cast<uint8_t>(v));
+    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteUVarint64<WRITER>);
 }
 
-/**
- * @brief Read a signed integer encoded as a protobuf-style Varint.
- *
- * @detail This function decodes negative numbers as large positive numbers.
- *
- * @param reader Reader to operate on.
- * @return An signed 32-bit integer from the Reader.
- */
-template <typename READER>
-inline int32_t ReadVarint32(READER &reader)
-{
-    return static_cast<int32_t>(ReadUVarint32(reader));
-}
-
-/**
- * @brief Write a signed integer encoded as a protobuf-style Varint.
- *
- * @detail This function encodes negative numbers as large positive numbers.
- *
- * @param writer Writer to operate on.
- * @param value An unsigned 32-bit integer to write to the Writer.
- */
-template <typename WRITER>
-inline void WriteVarint32(WRITER &writer, const int32_t value)
-{
-    WriteUVarint32(writer, static_cast<uint32_t>(value));
-}
+//******************************************************************************
 
 /**
  * @brief Read a signed integer encoded as a protobuf-style Varint.
@@ -776,36 +885,6 @@ template <typename WRITER>
 inline void WriteVarint64(WRITER &writer, const int64_t value)
 {
     WriteUVarint64(writer, static_cast<uint64_t>(value));
-}
-
-/**
- * @brief Read a signed integer zig-zag encoded as a protobuf-style Varint.
- *
- * @detail This function decodes the Varint using zig-zag encoding.
- *
- * @param reader Reader to operate on.
- * @return An signed 32-bit integer from the Reader.
- */
-template <typename READER>
-inline int32_t ReadSVarint32(READER &reader)
-{
-    const uint32_t var = ReadUVarint32(reader);
-    return static_cast<int32_t>((var >> 1) ^ (~(var & 1) + 1));
-}
-
-/**
- * @brief Write a signed integer zig-zag encoded as a protobuf-style Varint.
- *
- * @detail This function encodes the Varint using zig-zag encoding.
- *
- * @param writer Writer to operate on.
- * @param value An unsigned 32-bit integer to write to the Writer.
- */
-template <typename WRITER>
-inline void WriteSVarint32(WRITER &writer, const int64_t value)
-{
-    const uint32_t var = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 63);
-    WriteUVarint32(writer, var);
 }
 
 /**
