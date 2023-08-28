@@ -338,8 +338,6 @@ inline void WriteUVarint32(WRITER &writer, const uint32_t value)
     Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteUVarint32<WRITER>);
 }
 
-//******************************************************************************
-
 /**
  * @brief Read a signed integer encoded as a protobuf-style Varint.
  *
@@ -368,8 +366,6 @@ inline void WriteVarint32(WRITER &writer, const int32_t value)
     Detail::WriteWithExcept<int32_t>(writer, value, TryWriteVarint32<WRITER>);
 }
 
-//******************************************************************************
-
 /**
  * @brief Read a signed integer zig-zag encoded as a protobuf-style Varint.
  *
@@ -397,8 +393,6 @@ inline void WriteSVarint32(WRITER &writer, const int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWriteSVarint32<WRITER>);
 }
-
-//******************************************************************************
 
 /**
  * @brief Read a protobuf-style Varint.
@@ -433,8 +427,6 @@ inline void WriteUVarint64(WRITER &writer, const uint64_t value)
     Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteUVarint64<WRITER>);
 }
 
-//******************************************************************************
-
 /**
  * @brief Read a signed integer encoded as a protobuf-style Varint.
  *
@@ -446,7 +438,7 @@ inline void WriteUVarint64(WRITER &writer, const uint64_t value)
 template <typename READER>
 inline int64_t ReadVarint64(READER &reader)
 {
-    return static_cast<int64_t>(ReadUVarint64(reader));
+    return Detail::ReadWithExcept<int64_t>(reader, TryReadVarint64<READER>);
 }
 
 /**
@@ -460,7 +452,7 @@ inline int64_t ReadVarint64(READER &reader)
 template <typename WRITER>
 inline void WriteVarint64(WRITER &writer, const int64_t value)
 {
-    WriteUVarint64(writer, static_cast<uint64_t>(value));
+    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteVarint64<WRITER>);
 }
 
 /**
@@ -474,8 +466,7 @@ inline void WriteVarint64(WRITER &writer, const int64_t value)
 template <typename READER>
 inline int64_t ReadSVarint64(READER &reader)
 {
-    const uint64_t var = ReadUVarint64(reader);
-    return static_cast<int64_t>((var >> 1) ^ (~(var & 1) + 1));
+    return Detail::ReadWithExcept<int64_t>(reader, TryReadSVarint64<READER>);
 }
 
 /**
@@ -489,11 +480,8 @@ inline int64_t ReadSVarint64(READER &reader)
 template <typename WRITER>
 inline void WriteSVarint64(WRITER &writer, const int64_t value)
 {
-    const uint64_t var = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
-    WriteUVarint64(writer, var);
+    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteSVarint64<WRITER>);
 }
-
-//******************************************************************************
 
 /**
  * @brief Read a fixed-size byte buffer from the passed reader.

@@ -485,6 +485,41 @@ inline bool TryWriteUVarint64(WRITER &writer, const uint64_t value)
     return TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v));
 }
 
+//******************************************************************************
+
+template <typename READER>
+inline bool TryReadVarint64(int64_t &out, READER &reader)
+{
+    return Detail::ReadSigned<int64_t>(out, reader, TryReadUVarint64<READER>);
+}
+
+template <typename WRITER>
+inline bool TryWriteVarint64(WRITER &writer, const int64_t value)
+{
+    return Detail::WriteSigned<int64_t>(writer, value, TryWriteUVarint64<WRITER>);
+}
+
+//******************************************************************************
+
+template <typename READER>
+inline bool TryReadSVarint64(int64_t &out, READER &reader)
+{
+    uint64_t outVal;
+    if (!TryReadUVarint64<READER>(outVal, reader))
+    {
+        return false;
+    }
+    out = static_cast<int64_t>((outVal >> 1) ^ (~(outVal & 1) + 1));
+    return true;
+}
+
+template <typename WRITER>
+inline bool TryWriteSVarint64(WRITER &writer, const int64_t value)
+{
+    const uint64_t var = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
+    return TryWriteUVarint64<WRITER>(writer, var);
+}
+
 } // namespace LexIO
 
 #endif
