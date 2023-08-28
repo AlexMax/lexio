@@ -22,6 +22,7 @@ set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/container.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/file.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/tryserialize.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/vector.h")
 
 # Main LexIO header-only library

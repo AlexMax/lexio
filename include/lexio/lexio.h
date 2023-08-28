@@ -24,6 +24,7 @@
 #include "./bufreader.h"
 #include "./container.h"
 #include "./file.h"
+#include "./tryserialize.h"
 #include "./serialize.h"
 #include "./vector.h"
 
