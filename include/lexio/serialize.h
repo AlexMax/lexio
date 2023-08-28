@@ -493,11 +493,9 @@ inline void WriteSVarint64(WRITER &writer, const int64_t value)
 template <typename READER, typename IT>
 inline void ReadBytes(IT outBegin, IT outEnd, READER &reader)
 {
-    const size_t length = outEnd - outBegin;
-    const size_t count = Read(ByteSpanT(&(*outBegin), length), reader);
-    if (count != length)
+    if (!TryReadBytes<READER, IT>(outBegin, outEnd, reader))
     {
-        throw std::runtime_error("could not read entire byte buffer");
+        throw std::runtime_error("could not read");
     }
 }
 
@@ -511,11 +509,9 @@ inline void ReadBytes(IT outBegin, IT outEnd, READER &reader)
 template <typename WRITER, typename IT>
 inline void WriteBytes(WRITER &writer, IT begin, IT end)
 {
-    const size_t length = end - begin;
-    const size_t count = Write(writer, ConstByteSpanT(&(*begin), length));
-    if (count != length)
+    if (!TryWriteBytes<WRITER, IT>(writer, begin, end))
     {
-        throw std::runtime_error("could not write entire byte buffer");
+        throw std::runtime_error("could not write");
     }
 }
 
@@ -531,12 +527,9 @@ inline void WriteBytes(WRITER &writer, IT begin, IT end)
 template <typename READER>
 inline void ReadData(void *outData, const size_t length, READER &reader)
 {
-    uint8_t *castData = Detail::BitCast<uint8_t *>(outData);
-
-    const size_t count = Read(ByteSpanT(castData, length), reader);
-    if (count != length)
+    if (!TryReadData<READER>(outData, length, reader))
     {
-        throw std::runtime_error("could not read entire buffer");
+        throw std::runtime_error("could not read");
     }
 }
 
@@ -550,16 +543,11 @@ inline void ReadData(void *outData, const size_t length, READER &reader)
 template <typename WRITER>
 inline void WriteData(WRITER &writer, const void *data, const size_t length)
 {
-    const uint8_t *castData = Detail::BitCast<const uint8_t *>(data);
-
-    const size_t count = Write(writer, ConstByteSpanT(castData, length));
-    if (count != length)
+    if (!TryWriteData<WRITER>(writer, data, length))
     {
-        throw std::runtime_error("could not write entire buffer");
+        throw std::runtime_error("could not write");
     }
 }
-
-//******************************************************************************
 
 /**
  * @brief Read a fixed-size string from the passed reader.
@@ -572,13 +560,9 @@ inline void WriteData(WRITER &writer, const void *data, const size_t length)
 template <typename READER, typename IT>
 inline void ReadString(IT outBegin, IT outEnd, READER &reader)
 {
-    uint8_t *castBegin = Detail::BitCast<uint8_t *>(&(*outBegin));
-    const size_t length = outEnd - outBegin;
-
-    const size_t count = Read(ByteSpanT(castBegin, length), reader);
-    if (count != length)
+    if (!TryReadString<READER, IT>(outBegin, outEnd, reader))
     {
-        throw std::runtime_error("could not read entire string");
+        throw std::runtime_error("could not read");
     }
 }
 
@@ -592,13 +576,9 @@ inline void ReadString(IT outBegin, IT outEnd, READER &reader)
 template <typename WRITER, typename IT>
 inline void WriteString(WRITER &writer, IT begin, IT end)
 {
-    const uint8_t *castBegin = Detail::BitCast<const uint8_t *>(&(*begin));
-    const size_t length = end - begin;
-
-    const size_t count = Write(writer, ConstByteSpanT(castBegin, length));
-    if (count != length)
+    if (!TryWriteString<WRITER, IT>(writer, begin, end))
     {
-        throw std::runtime_error("could not write entire string");
+        throw std::runtime_error("could not write");
     }
 }
 

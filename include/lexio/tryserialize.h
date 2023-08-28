@@ -520,6 +520,90 @@ inline bool TryWriteSVarint64(WRITER &writer, const int64_t value)
     return TryWriteUVarint64<WRITER>(writer, var);
 }
 
+//******************************************************************************
+
+template <typename READER, typename IT>
+inline bool TryReadBytes(IT outBegin, IT outEnd, READER &reader)
+{
+    const size_t length = outEnd - outBegin;
+    const size_t count = Read(ByteSpanT(&(*outBegin), length), reader);
+    if (count != length)
+    {
+        return false;
+    }
+    return true;
+}
+
+template <typename WRITER, typename IT>
+inline bool TryWriteBytes(WRITER &writer, IT begin, IT end)
+{
+    const size_t length = end - begin;
+    const size_t count = Write(writer, ConstByteSpanT(&(*begin), length));
+    if (count != length)
+    {
+        return false;
+    }
+    return true;
+}
+
+//******************************************************************************
+
+template <typename READER>
+inline bool TryReadData(void *outData, const size_t length, READER &reader)
+{
+    uint8_t *castData = Detail::BitCast<uint8_t *>(outData);
+
+    const size_t count = Read(ByteSpanT(castData, length), reader);
+    if (count != length)
+    {
+        return false;
+    }
+    return true;
+}
+
+template <typename WRITER>
+inline bool TryWriteData(WRITER &writer, const void *data, const size_t length)
+{
+    const uint8_t *castData = Detail::BitCast<const uint8_t *>(data);
+
+    const size_t count = Write(writer, ConstByteSpanT(castData, length));
+    if (count != length)
+    {
+        return false;
+    }
+    return true;
+}
+
+//******************************************************************************
+
+template <typename READER, typename IT>
+inline bool TryReadString(IT outBegin, IT outEnd, READER &reader)
+{
+    uint8_t *castBegin = Detail::BitCast<uint8_t *>(&(*outBegin));
+    const size_t length = outEnd - outBegin;
+
+    const size_t count = Read(ByteSpanT(castBegin, length), reader);
+    if (count != length)
+    {
+        return false;
+    }
+    return true;
+}
+
+template <typename WRITER, typename IT>
+inline bool TryWriteString(WRITER &writer, IT begin, IT end)
+{
+    const uint8_t *castBegin = Detail::BitCast<const uint8_t *>(&(*begin));
+    const size_t length = end - begin;
+
+    const size_t count = Write(writer, ConstByteSpanT(castBegin, length));
+    if (count != length)
+    {
+        return false;
+    }
+    return true;
+}
+
 } // namespace LexIO
 
 #endif
