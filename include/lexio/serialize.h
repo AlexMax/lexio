@@ -515,8 +515,6 @@ inline void WriteBytes(WRITER &writer, IT begin, IT end)
     }
 }
 
-//******************************************************************************
-
 /**
  * @brief Read a fixed-size data buffer from the passed reader.
  *
