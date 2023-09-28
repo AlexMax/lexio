@@ -80,7 +80,7 @@ inline int8_t Read8(READER &reader)
 template <typename WRITER>
 inline void Write8(WRITER &writer, const int8_t value)
 {
-    Detail::WriteSignedWithExcept<int8_t>(writer, WriteU8<WRITER>);
+    Detail::WriteSignedWithExcept<int8_t>(writer, value, WriteU8<WRITER>);
 }
 
 //******************************************************************************

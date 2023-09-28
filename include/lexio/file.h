@@ -331,7 +331,7 @@ class FilePOSIX
         }
     }
 
-    size_t RawRead(ByteSpanT buffer)
+    size_t LexRead(ByteSpanT buffer)
     {
         const ssize_t bytesRead = read(m_fd, buffer.data(), buffer.size());
         if (bytesRead == -1)
@@ -341,7 +341,7 @@ class FilePOSIX
         return static_cast<size_t>(bytesRead);
     }
 
-    size_t RawWrite(ConstByteSpanT buffer)
+    size_t LexWrite(ConstByteSpanT buffer)
     {
         const ssize_t bytesRead = write(m_fd, buffer.data(), buffer.size());
         if (bytesRead == -1)
@@ -351,7 +351,7 @@ class FilePOSIX
         return static_cast<size_t>(bytesRead);
     }
 
-    void Flush()
+    void LexFlush()
     {
         const int ok = fsync(m_fd);
         if (ok == -1)
@@ -360,29 +360,24 @@ class FilePOSIX
         }
     }
 
-    size_t Seek(const WhenceStart whence)
+    size_t LexSeek(const SeekPos pos)
     {
-        const off_t newOffset = lseek(m_fd, static_cast<off_t>(whence.offset), SEEK_SET);
-        if (newOffset == -1)
-        {
-            throw POSIXError("Could not seek file.", errno);
-        }
-        return static_cast<size_t>(newOffset);
-    }
+        int whence = 0;
 
-    size_t Seek(const WhenceCurrent whence)
-    {
-        const off_t newOffset = lseek(m_fd, static_cast<off_t>(whence.offset), SEEK_CUR);
-        if (newOffset == -1)
+        switch (pos.whence)
         {
-            throw POSIXError("Could not seek file.", errno);
+        case LexIO::seek::start:
+            whence = SEEK_SET;
+            break;
+        case LexIO::seek::current:
+            whence = SEEK_CUR;
+            break;
+        case LexIO::seek::end:
+            whence = SEEK_END;
+            break;
         }
-        return static_cast<size_t>(newOffset);
-    }
 
-    size_t Seek(const WhenceEnd whence)
-    {
-        const off_t newOffset = lseek(m_fd, static_cast<off_t>(whence.offset), SEEK_END);
+        const off_t newOffset = lseek(m_fd, static_cast<off_t>(pos.offset), whence);
         if (newOffset == -1)
         {
             throw POSIXError("Could not seek file.", errno);
