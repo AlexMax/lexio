@@ -39,13 +39,13 @@ TEST_CASE("Test file opened in read mode")
     REQUIRE_THROWS(LexIO::Write(file, writeBuffer));
 
     // Test seeking.
-    size_t pos = LexIO::Seek(file, LexIO::WhenceStart(2));
+    size_t pos = LexIO::Seek(file, 2, LexIO::seek::start);
     REQUIRE(pos == 2);
 
-    pos = LexIO::Seek(file, LexIO::WhenceCurrent(6));
+    pos = LexIO::Seek(file, 6, LexIO::seek::current);
     REQUIRE(pos == 8);
 
-    pos = LexIO::Seek(file, LexIO::WhenceEnd(2));
+    pos = LexIO::Seek(file, 2, LexIO::seek::end);
     REQUIRE((pos == 47 || pos == 49)); // File contains two newlines.
 }
 

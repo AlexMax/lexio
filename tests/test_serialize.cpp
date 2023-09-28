@@ -57,7 +57,7 @@ TEST_CASE("WriteU8")
     LexIO::VectorStream buffer;
     LexIO::WriteU8(buffer, 0x88);
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
 
@@ -80,7 +80,7 @@ TEST_CASE("WriteU16LE")
     LexIO::VectorStream buffer;
     LexIO::WriteU16LE(buffer, 0x9988);
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
 }
@@ -96,7 +96,7 @@ TEST_CASE("WriteU16BE")
     LexIO::VectorStream buffer;
     LexIO::WriteU16BE(buffer, 0x9988);
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
@@ -120,7 +120,7 @@ TEST_CASE("Write16LE")
     LexIO::VectorStream buffer;
     LexIO::Write16LE(buffer, -26232);
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
 }
@@ -136,7 +136,7 @@ TEST_CASE("Write16BE")
     LexIO::VectorStream buffer;
     LexIO::Write16BE(buffer, -26232);
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
 }
@@ -160,7 +160,7 @@ TEST_CASE("WriteU32LE")
     LexIO::VectorStream buffer;
     LexIO::WriteU32LE(buffer, 0xbbaa9988);
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
     REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
@@ -178,7 +178,7 @@ TEST_CASE("WriteU32BE")
     LexIO::VectorStream buffer;
     LexIO::WriteU32BE(buffer, 0xbbaa9988);
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
     REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
@@ -204,7 +204,7 @@ TEST_CASE("Write32LE")
     LexIO::VectorStream buffer;
     LexIO::Write32LE(buffer, -1146447480);
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
     REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
@@ -222,7 +222,7 @@ TEST_CASE("Write32BE")
     LexIO::VectorStream buffer;
     LexIO::Write32BE(buffer, -1146447480);
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
     REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
@@ -245,7 +245,7 @@ TEST_CASE("WriteFloatLE")
     LexIO::VectorStream buffer;
     LexIO::WriteFloatLE(buffer, std::ldexp(-0.666405201f, -7));
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
     REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
@@ -268,7 +268,7 @@ TEST_CASE("WriteFloatBE")
     LexIO::VectorStream buffer;
     LexIO::WriteFloatBE(buffer, std::ldexp(-0.666405201f, -7));
 
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
     REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
@@ -293,7 +293,7 @@ TEST_CASE("WriteU64LE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteU64LE(buffer, 0xffeeddccbbaa9988);
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
@@ -315,7 +315,7 @@ TEST_CASE("WriteU64BE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteU64BE(buffer, 0xffeeddccbbaa9988);
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(LexIO::ReadU8(buffer) == 0xff);
     REQUIRE(LexIO::ReadU8(buffer) == 0xee);
@@ -345,7 +345,7 @@ TEST_CASE("Write64LE")
 {
     LexIO::VectorStream buffer;
     LexIO::Write64LE(buffer, -4822678189205112);
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
@@ -367,7 +367,7 @@ TEST_CASE("Write64BE")
 {
     LexIO::VectorStream buffer;
     LexIO::Write64BE(buffer, -4822678189205112);
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(LexIO::ReadU8(buffer) == 0xff);
     REQUIRE(LexIO::ReadU8(buffer) == 0xee);
@@ -394,7 +394,7 @@ TEST_CASE("WriteDoubleLE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteDoubleLE(buffer, std::ldexp(-0.96457516339869276, 1024));
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0x99);
@@ -421,7 +421,7 @@ TEST_CASE("WriteDoubleBE")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteDoubleBE(buffer, std::ldexp(-0.96457516339869276, 1024));
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(LexIO::ReadU8(buffer) == 0xff);
     REQUIRE(LexIO::ReadU8(buffer) == 0xee);
@@ -443,7 +443,7 @@ TEST_CASE("WriteUVarint32")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteUVarint32(buffer, 0xbbaa9988);
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0xb3);
@@ -463,7 +463,7 @@ TEST_CASE("WriteVarint32")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteVarint32(buffer, BBAA9988i32());
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0x88);
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0xb3);
@@ -483,7 +483,7 @@ TEST_CASE("WriteSVarint32")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteSVarint32(buffer, BBAA9988i32());
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0xef);
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0x99);
@@ -503,7 +503,7 @@ TEST_CASE("WriteUVarint64")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteUVarint64(buffer, 0xffeeddccbbaa9988);
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(LexIO::ReadU8(buffer) == 0x88);
     REQUIRE(LexIO::ReadU8(buffer) == 0xb3);
@@ -528,7 +528,7 @@ TEST_CASE("WriteVarint64")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteVarint64(buffer, FFEEDDCCBBAA9988i64());
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0x88);
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0xb3);
@@ -553,7 +553,7 @@ TEST_CASE("WriteSVarint64")
 {
     LexIO::VectorStream buffer;
     LexIO::WriteSVarint64(buffer, FFEEDDCCBBAA9988i64());
-    LexIO::Seek(buffer, LexIO::WhenceStart(0));
+    LexIO::Rewind(buffer);
 
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0xef);
     REQUIRE(int(LexIO::ReadU8(buffer)) == 0x99);
@@ -578,8 +578,8 @@ static LexIO::VectorStream GetBuffer()
     LexIO::ConstByteSpanT textSpan{&text[0], CountOf(text) - 1};
 
     LexIO::VectorStream rvo;
-    rvo.RawWrite(textSpan);
-    rvo.Seek(LexIO::WhenceStart(0));
+    rvo.LexWrite(textSpan);
+    rvo.LexSeek(LexIO::SeekPos(0, LexIO::seek::start));
     return rvo;
 }
 
@@ -608,7 +608,7 @@ TEST_CASE("WriteBytes")
 
     std::array<uint8_t, 10> check;
     check.fill(0x00);
-    LexIO::Seek(buffer, LexIO::WhenceStart{0});
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::Read(check, buffer) == 10);
     REQUIRE(memcmp(check.data(), data.data(), check.size()) == 0);
 }
@@ -635,7 +635,7 @@ TEST_CASE("WriteData")
 
     REQUIRE_NOTHROW(LexIO::WriteData(buffer, dataVoid, data.length()));
 
-    LexIO::Seek(buffer, LexIO::WhenceStart{0});
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::Read(check, buffer) == 9);
 
     char *checkChar = reinterpret_cast<char *>(check.data());
@@ -661,7 +661,7 @@ TEST_CASE("WriteString")
 
     REQUIRE_NOTHROW(LexIO::WriteString(buffer, data.cbegin(), data.cend()));
 
-    LexIO::Seek(buffer, LexIO::WhenceStart{0});
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::Read(check, buffer) == 9);
 
     char *checkChar = reinterpret_cast<char *>(check.data());

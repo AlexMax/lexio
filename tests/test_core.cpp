@@ -23,11 +23,7 @@ TEST_SUITE_BEGIN("utils");
 
 struct GoodReader
 {
-    size_t RawRead(LexIO::ByteSpanT buffer)
-    {
-        (void)buffer;
-        return 0;
-    }
+    size_t LexRead(LexIO::ByteSpanT) { return 0; }
 };
 
 static_assert(LexIO::IsReader<GoodReader>::value, "GoodReader does not fulfill IsReader");
@@ -37,13 +33,9 @@ static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReade
 
 struct GoodBufferedReader : public GoodReader
 {
-    size_t GetBufferSize() const { return 0; }
-    LexIO::ConstByteSpanT FillBuffer(const size_t size)
-    {
-        (void)size;
-        return LexIO::ConstByteSpanT();
-    }
-    void ConsumeBuffer(const size_t size) { (void)size; }
+    size_t LexGetBufferSize() const { return 0; }
+    LexIO::ConstByteSpanT LexFillBuffer(const size_t) { return LexIO::ConstByteSpanT(); }
+    void LexConsumeBuffer(const size_t size) { (void)size; }
 };
 
 static_assert(LexIO::IsBufferedReader<GoodBufferedReader>::value,
@@ -54,12 +46,8 @@ static_assert(LexIO::IsBufferedReaderV<GoodBufferedReader>, "GoodBufferedReader 
 
 struct GoodWriter
 {
-    size_t RawWrite(LexIO::ConstByteSpanT buffer)
-    {
-        (void)buffer;
-        return 0;
-    }
-    void Flush() {}
+    size_t LexWrite(LexIO::ConstByteSpanT) { return 0; }
+    void LexFlush() {}
 };
 
 static_assert(LexIO::IsWriter<GoodWriter>::value, "GoodWriter does not fulfill IsWriter");
@@ -69,21 +57,7 @@ static_assert(LexIO::IsWriterV<GoodWriter>, "GoodWriter does not fulfill IsWrite
 
 struct GoodSeekable
 {
-    size_t Seek(const LexIO::WhenceStart whence)
-    {
-        (void)whence;
-        return 0;
-    }
-    size_t Seek(const LexIO::WhenceCurrent whence)
-    {
-        (void)whence;
-        return 0;
-    }
-    size_t Seek(const LexIO::WhenceEnd whence)
-    {
-        (void)whence;
-        return 0;
-    }
+    size_t LexSeek(const LexIO::SeekPos) { return 0; }
 };
 
 static_assert(LexIO::IsSeekable<GoodSeekable>::value, "GoodSeekable does not fulfill IsSeekable");
@@ -99,7 +73,7 @@ static_assert(!LexIO::IsReaderV<BadReaderMissingClass>, "BadReaderMissingClass i
 
 struct BadReaderBadParam
 {
-    size_t RawRead(uint8_t *&buffer, const size_t size)
+    size_t LexRead(uint8_t *&buffer, const size_t size)
     {
         (void)buffer;
         (void)size;
@@ -111,7 +85,7 @@ static_assert(!LexIO::IsReaderV<BadReaderBadParam>, "BadReaderBadParam incorrect
 
 struct BadReaderBadReturn
 {
-    void RawRead(LexIO::ByteSpanT buffer) { (void)buffer; }
+    void LexRead(LexIO::ByteSpanT buffer) { (void)buffer; }
 };
 
 static_assert(!LexIO::IsReaderV<BadReaderBadReturn>, "BadReaderBadReturn incorrectly fulfills IsReaderV");
@@ -132,8 +106,8 @@ static LexIO::VectorStream GetBuffer()
     LexIO::ConstByteSpanT textSpan{&BUFFER_TEXT[0], BUFFER_LENGTH};
 
     LexIO::VectorStream rvo;
-    rvo.RawWrite(textSpan);
-    rvo.Seek(LexIO::WhenceStart(0));
+    rvo.LexWrite(textSpan);
+    rvo.LexSeek(LexIO::SeekPos(0, LexIO::seek::start));
     return rvo;
 }
 
@@ -190,13 +164,27 @@ TEST_CASE("Test Seek/Tell")
 {
     LexIO::VectorStream basic = GetBuffer();
 
-    LexIO::Seek(basic, LexIO::WhenceStart(5));
+    LexIO::Seek(basic, 5, LexIO::seek::start);
     REQUIRE(LexIO::Tell(basic) == 5);
 
-    LexIO::Seek(basic, LexIO::WhenceCurrent(5));
+    LexIO::Seek(basic, 5, LexIO::seek::current);
     REQUIRE(LexIO::Tell(basic) == 10);
 
-    LexIO::Seek(basic, LexIO::WhenceEnd(5));
+    LexIO::Seek(basic, 5, LexIO::seek::end);
+    REQUIRE(LexIO::Tell(basic) == BUFFER_LENGTH - 5);
+}
+
+TEST_CASE("Test Seek/Tell with SeekPos")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::seek::start));
+    REQUIRE(LexIO::Tell(basic) == 5);
+
+    LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::seek::current));
+    REQUIRE(LexIO::Tell(basic) == 10);
+
+    LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::seek::end));
     REQUIRE(LexIO::Tell(basic) == BUFFER_LENGTH - 5);
 }
 
@@ -204,7 +192,7 @@ TEST_CASE("Test Rewind")
 {
     LexIO::VectorStream basic = GetBuffer();
 
-    LexIO::Seek(basic, LexIO::WhenceStart(5));
+    LexIO::Seek(basic, 5, LexIO::seek::start);
     REQUIRE(LexIO::Rewind(basic) == 0);
     REQUIRE(LexIO::Tell(basic) == 0);
 }

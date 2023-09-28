@@ -36,7 +36,7 @@ void CommonTest(T &buf)
     REQUIRE(LexIO::Length(buf) == 15);
 
     // Test writing.
-    LexIO::Seek(buf, LexIO::WhenceStart(0));
+    LexIO::Rewind(buf);
     REQUIRE(LexIO::Tell(buf) == 0);
     REQUIRE(LexIO::ReadU8(buf) == 192);
     REQUIRE(LexIO::ReadU16LE(buf) == 1993);
@@ -45,20 +45,20 @@ void CommonTest(T &buf)
     REQUIRE(LexIO::Tell(buf) == 15);
 
     // Test seeking.
-    LexIO::Seek(buf, LexIO::WhenceStart(2));
+    LexIO::Seek(buf, 2, LexIO::seek::start);
     REQUIRE(LexIO::Tell(buf) == 2);
-    LexIO::Seek(buf, LexIO::WhenceCurrent(2));
+    LexIO::Seek(buf, 2, LexIO::seek::current);
     REQUIRE(LexIO::Tell(buf) == 4);
-    LexIO::Seek(buf, LexIO::WhenceCurrent(-2));
+    LexIO::Seek(buf, -2, LexIO::seek::current);
     REQUIRE(LexIO::Tell(buf) == 2);
-    LexIO::Seek(buf, LexIO::WhenceEnd(2));
+    LexIO::Seek(buf, 2, LexIO::seek::end);
     REQUIRE(LexIO::Tell(buf) == 13);
 
     // Test overwriting data.
     LexIO::WriteU16LE(buf, 1993);
     REQUIRE(LexIO::Tell(buf) == 15);
     REQUIRE(LexIO::Length(buf) == 15);
-    LexIO::Seek(buf, LexIO::WhenceCurrent(-2));
+    LexIO::Seek(buf, -2, LexIO::seek::current);
     REQUIRE(LexIO::Tell(buf) == 13);
     REQUIRE(LexIO::Length(buf) == 15);
     REQUIRE(LexIO::ReadU16LE(buf) == 1993);

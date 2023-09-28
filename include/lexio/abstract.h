@@ -29,62 +29,52 @@ namespace LexIO
 struct Abstract
 {
     virtual ~Abstract() {}
-    virtual size_t RawRead(ByteSpanT) { throw std::runtime_error("not implemented"); }
-    virtual size_t GetBufferSize() const { throw std::runtime_error("not implemented"); }
-    virtual ConstByteSpanT FillBuffer(const size_t) { throw std::runtime_error("not implemented"); }
-    virtual void ConsumeBuffer(const size_t) { throw std::runtime_error("not implemented"); }
-    virtual size_t RawWrite(ConstByteSpanT) { throw std::runtime_error("not implemented"); }
-    virtual void Flush() { throw std::runtime_error("not implemented"); }
-    virtual size_t Seek(const WhenceStart) { throw std::runtime_error("not implemented"); }
-    virtual size_t Seek(const WhenceCurrent) { throw std::runtime_error("not implemented"); }
-    virtual size_t Seek(const WhenceEnd) { throw std::runtime_error("not implemented"); }
+    virtual size_t LexRead(ByteSpanT) { throw std::runtime_error("not implemented"); }
+    virtual size_t LexGetBufferSize() const { throw std::runtime_error("not implemented"); }
+    virtual ConstByteSpanT LexFillBuffer(const size_t) { throw std::runtime_error("not implemented"); }
+    virtual void LexConsumeBuffer(const size_t) { throw std::runtime_error("not implemented"); }
+    virtual size_t LexWrite(ConstByteSpanT) { throw std::runtime_error("not implemented"); }
+    virtual void LexFlush() { throw std::runtime_error("not implemented"); }
+    virtual size_t LexSeek(const SeekPos) { throw std::runtime_error("not implemented"); }
 };
 
 namespace Detail
 {
 
 #define READER_METHODS_                                                                                                \
-    virtual size_t RawRead(ByteSpanT buffer) override                                                                  \
+    virtual size_t LexRead(ByteSpanT buffer) override                                                                  \
     {                                                                                                                  \
-        return m_impl->RawRead(buffer);                                                                                \
+        return m_impl->LexRead(buffer);                                                                                \
     }
 
 #define BUFFERED_READER_METHODS_                                                                                       \
-    virtual size_t GetBufferSize() const override                                                                      \
+    virtual size_t LexGetBufferSize() const override                                                                   \
     {                                                                                                                  \
-        return m_impl->GetBufferSize();                                                                                \
+        return m_impl->LexGetBufferSize();                                                                             \
     }                                                                                                                  \
-    virtual ConstByteSpanT FillBuffer(const size_t size) override                                                      \
+    virtual ConstByteSpanT LexFillBuffer(const size_t size) override                                                   \
     {                                                                                                                  \
-        return m_impl->FillBuffer(size);                                                                               \
+        return m_impl->LexFillBuffer(size);                                                                            \
     }                                                                                                                  \
-    virtual void ConsumeBuffer(const size_t size) override                                                             \
+    virtual void LexConsumeBuffer(const size_t size) override                                                          \
     {                                                                                                                  \
-        m_impl->ConsumeBuffer(size);                                                                                   \
+        m_impl->LexConsumeBuffer(size);                                                                                \
     }
 
 #define WRITER_METHODS_                                                                                                \
-    virtual size_t RawWrite(ConstByteSpanT buffer) override                                                            \
+    virtual size_t LexWrite(ConstByteSpanT buffer) override                                                            \
     {                                                                                                                  \
-        return m_impl->RawWrite(buffer);                                                                               \
+        return m_impl->LexWrite(buffer);                                                                               \
     }                                                                                                                  \
-    virtual void Flush() override                                                                                      \
+    virtual void LexFlush() override                                                                                   \
     {                                                                                                                  \
-        m_impl->Flush();                                                                                               \
+        m_impl->LexFlush();                                                                                            \
     }
 
 #define SEEKABLE_METHODS_                                                                                              \
-    virtual size_t Seek(const WhenceStart whence) override                                                             \
+    virtual size_t LexSeek(const SeekPos pos) override                                                                 \
     {                                                                                                                  \
-        return m_impl->Seek(whence);                                                                                   \
-    }                                                                                                                  \
-    virtual size_t Seek(const WhenceCurrent whence) override                                                           \
-    {                                                                                                                  \
-        return m_impl->Seek(whence);                                                                                   \
-    }                                                                                                                  \
-    virtual size_t Seek(const WhenceEnd whence) override                                                               \
-    {                                                                                                                  \
-        return m_impl->Seek(whence);                                                                                   \
+        return m_impl->LexSeek(pos);                                                                                   \
     }
 
 template <typename T>

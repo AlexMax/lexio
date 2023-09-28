@@ -101,30 +101,26 @@ using ByteSpanT = LEXIO_SPAN(uint8_t);
 using ConstByteSpanT = LEXIO_SPAN(const uint8_t);
 
 /**
- * @brief Parameter for Seek() that seeks from the start of the stream.
+ * @brief Possible seek directions.
  */
-struct WhenceStart
+enum class seek
 {
-    const ptrdiff_t offset;
-    WhenceStart(const ptrdiff_t off) : offset(off) {}
+    start,   // Relative to start of stream.
+    current, // Relative to current stream position.
+    end,     // Relative to end of stream.
 };
 
 /**
- * @brief Parameter for Seek() that seeks from the current offset of the stream.
+ * @brief Parameter for Seek() that dictates the desired seek.
  */
-struct WhenceCurrent
+struct SeekPos
 {
-    const ptrdiff_t offset;
-    WhenceCurrent(const ptrdiff_t off) : offset(off) {}
-};
+    ptrdiff_t offset = 0;
+    seek whence = seek::start;
 
-/**
- * @brief Parameter for Seek() that seeks from the end of the stream.
- */
-struct WhenceEnd
-{
-    const ptrdiff_t offset;
-    WhenceEnd(const ptrdiff_t off) : offset(off) {}
+    SeekPos() = default;
+    SeekPos(ptrdiff_t offset_) : offset(offset_) {}
+    SeekPos(ptrdiff_t offset_, seek whence_) : offset(offset_), whence(whence_) {}
 };
 
 namespace Detail
@@ -194,31 +190,29 @@ using IsDetected = typename Detector<Nonesuch, void, Op, Args...>::value_t;
  * @brief This type exists if the passed T conforms to Reader.
  */
 template <typename T>
-using ReaderType = decltype(std::declval<size_t &>() = std::declval<T>().RawRead(std::declval<ByteSpanT>()));
+using ReaderType = decltype(std::declval<size_t &>() = std::declval<T>().LexRead(std::declval<ByteSpanT>()));
 
 /**
  * @brief This type exists if the passed T conforms to BufferedReader.
  */
 template <typename T>
 using BufferedReaderType =
-    decltype(std::declval<size_t &>() = std::declval<T>().GetBufferSize(),
-             std::declval<ConstByteSpanT &>() = std::declval<T>().FillBuffer(std::declval<size_t>()),
-             std::declval<T>().ConsumeBuffer(std::declval<size_t>()));
+    decltype(std::declval<size_t &>() = std::declval<T>().LexGetBufferSize(),
+             std::declval<ConstByteSpanT &>() = std::declval<T>().LexFillBuffer(std::declval<size_t>()),
+             std::declval<T>().LexConsumeBuffer(std::declval<size_t>()));
 
 /**
  * @brief This type exists if the passed T conforms to Writer.
  */
 template <typename T>
-using WriterType = decltype(std::declval<size_t &>() = std::declval<T>().RawWrite(std::declval<ConstByteSpanT>()),
-                            std::declval<T>().Flush());
+using WriterType = decltype(std::declval<size_t &>() = std::declval<T>().LexWrite(std::declval<ConstByteSpanT>()),
+                            std::declval<T>().LexFlush());
 
 /**
  * @brief This type exists if the passed T conforms to Seekable.
  */
 template <typename T>
-using SeekableType = decltype(std::declval<size_t &>() = std::declval<T>().Seek(std::declval<WhenceStart>()),
-                              std::declval<size_t &>() = std::declval<T>().Seek(std::declval<WhenceCurrent>()),
-                              std::declval<size_t &>() = std::declval<T>().Seek(std::declval<WhenceEnd>()));
+using SeekableType = decltype(std::declval<size_t &>() = std::declval<T>().LexSeek(std::declval<SeekPos>()));
 
 } // namespace Detail
 
@@ -332,7 +326,7 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
 template <typename READER>
 inline size_t Read(ByteSpanT outBytes, READER &reader)
 {
-    return reader.RawRead(outBytes);
+    return reader.LexRead(outBytes);
 }
 
 /**
@@ -344,9 +338,9 @@ inline size_t Read(ByteSpanT outBytes, READER &reader)
  * @return Size of internal buffer.
  */
 template <typename BUFFERED_READER>
-inline size_t GetBufferSize(BUFFERED_READER &bufReader) noexcept
+inline size_t GetBufferSize(BUFFERED_READER &bufReader)
 {
-    return bufReader.GetBufferSize();
+    return bufReader.LexGetBufferSize();
 }
 
 /**
@@ -365,7 +359,7 @@ inline size_t GetBufferSize(BUFFERED_READER &bufReader) noexcept
 template <typename BUFFERED_READER>
 inline ConstByteSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
 {
-    return bufReader.FillBuffer(size);
+    return bufReader.LexFillBuffer(size);
 }
 
 /**
@@ -381,7 +375,7 @@ inline ConstByteSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
 template <typename BUFFERED_READER>
 inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
 {
-    bufReader.ConsumeBuffer(size);
+    bufReader.LexConsumeBuffer(size);
 }
 
 /**
@@ -397,7 +391,7 @@ inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
 template <typename WRITER>
 inline size_t Write(WRITER &writer, ConstByteSpanT bytes)
 {
-    return writer.RawWrite(bytes);
+    return writer.LexWrite(bytes);
 }
 
 /**
@@ -408,52 +402,38 @@ inline size_t Write(WRITER &writer, ConstByteSpanT bytes)
 template <typename WRITER>
 inline void Flush(WRITER &writer)
 {
-    return writer.Flush();
+    return writer.LexFlush();
 }
 
 /**
- * @brief Seek to a position relative to the start of the underlying data.
+ * @brief Seek to a position in the underlying Seekable.
  *
  * @param seekable Seekable to operate on.
- * @param whence Offset from start to seek.
+ * @param pos Seek position.
  * @return Absolute position in stream after seek.
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
 template <typename SEEKABLE>
-inline size_t Seek(SEEKABLE &seekable, const WhenceStart whence)
+inline size_t Seek(SEEKABLE &seekable, const SeekPos pos)
 {
-    return seekable.Seek(whence);
+    return seekable.LexSeek(pos);
 }
 
 /**
- * @brief Seek to a position relative to the current offset.
+ * @brief Seek to a position in the underlying Seekable.
  *
  * @param seekable Seekable to operate on.
- * @param whence Offset from current position to seek.
+ * @param offset Seek offset.
+ * @param whence Position to seek relative to.
  * @return Absolute position in stream after seek.
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
 template <typename SEEKABLE>
-inline size_t Seek(SEEKABLE &seekable, const WhenceCurrent whence)
+inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const seek whence)
 {
-    return seekable.Seek(whence);
-}
-
-/**
- * @brief Seek to a position relative to the end of the underlying data.
- *
- * @param seekable Seekable to operate on.
- * @param whence Offset from end to seek.
- * @return Absolute position in stream after seek.
- * @throws std::runtime_error if underlying seek operation goes past start
- *         of data, or has some other error condition.
- */
-template <typename SEEKABLE>
-inline size_t Seek(SEEKABLE &seekable, const WhenceEnd whence)
-{
-    return seekable.Seek(whence);
+    return seekable.LexSeek(SeekPos(offset, whence));
 }
 
 //******************************************************************************
@@ -559,7 +539,7 @@ size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
 template <typename SEEKABLE>
 inline size_t Tell(SEEKABLE &seekable)
 {
-    return Seek(seekable, WhenceCurrent(0));
+    return Seek(seekable, 0, seek::current);
 }
 
 /**
@@ -573,7 +553,7 @@ inline size_t Tell(SEEKABLE &seekable)
 template <typename SEEKABLE>
 inline size_t Rewind(SEEKABLE &seekable)
 {
-    return Seek(seekable, WhenceStart(0));
+    return Seek(seekable, 0, seek::start);
 }
 
 /**
@@ -587,9 +567,9 @@ inline size_t Rewind(SEEKABLE &seekable)
 template <typename SEEKABLE>
 inline size_t Length(SEEKABLE &seekable)
 {
-    const size_t old = Seek(seekable, WhenceCurrent(0));
-    const size_t len = Seek(seekable, WhenceEnd(0));
-    Seek(seekable, WhenceStart(size_t(old)));
+    const size_t old = Seek(seekable, 0, seek::current);
+    const size_t len = Seek(seekable, 0, seek::end);
+    Seek(seekable, ptrdiff_t(old), seek::start);
     return len;
 }
 

@@ -66,7 +66,7 @@ class ContainerBase
      */
     const T &Container() const { return m_container; }
 
-    virtual size_t RawRead(ByteSpanT buffer)
+    virtual size_t LexRead(ByteSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_container.size());
@@ -76,9 +76,7 @@ class ContainerBase
         return actualLength;
     }
 
-    virtual void Flush() {}
-
-    virtual size_t RawWrite(ConstByteSpanT buffer)
+    virtual size_t LexWrite(ConstByteSpanT buffer)
     {
         const size_t wantedOffset = m_offset + buffer.size();
         const size_t destOffset = std::min(wantedOffset, m_container.size());
@@ -88,24 +86,24 @@ class ContainerBase
         return actualLength;
     }
 
-    virtual size_t Seek(const WhenceStart whence)
-    {
-        OffsetCheck(whence.offset);
-        m_offset = static_cast<size_t>(whence.offset);
-        return m_offset;
-    }
+    virtual void LexFlush() {}
 
-    virtual size_t Seek(const WhenceCurrent whence)
+    virtual size_t LexSeek(const SeekPos pos)
     {
-        const ptrdiff_t offset = static_cast<ptrdiff_t>(m_offset) + whence.offset;
-        OffsetCheck(offset);
-        m_offset = static_cast<size_t>(offset);
-        return m_offset;
-    }
+        ptrdiff_t offset = 0;
+        switch (pos.whence)
+        {
+        case LexIO::seek::start:
+            offset = pos.offset;
+            break;
+        case LexIO::seek::current:
+            offset = static_cast<ptrdiff_t>(m_offset) + pos.offset;
+            break;
+        case LexIO::seek::end:
+            offset = static_cast<ptrdiff_t>(m_container.size()) - pos.offset;
+            break;
+        }
 
-    virtual size_t Seek(const WhenceEnd whence)
-    {
-        const ptrdiff_t offset = static_cast<ptrdiff_t>(m_container.size()) - whence.offset;
         OffsetCheck(offset);
         m_offset = static_cast<size_t>(offset);
         return m_offset;
@@ -169,7 +167,7 @@ class ContainerDynamic : public ContainerBase<T>
         std::copy(list.begin(), list.end(), this->Container().begin());
     }
 
-    size_t RawWrite(ConstByteSpanT buffer) override
+    size_t LexWrite(ConstByteSpanT buffer) override
     {
         // Writes off the end of the burffer grow the buffer to fit.
         const size_t wantedOffset = this->Offset() + buffer.size();

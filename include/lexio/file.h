@@ -158,7 +158,7 @@ class FileWin32
         }
     }
 
-    size_t RawRead(ByteSpanT buffer)
+    size_t LexRead(ByteSpanT buffer)
     {
         DWORD bytesToRead = static_cast<DWORD>(buffer.size());
         DWORD bytesRead = 0;
@@ -170,7 +170,7 @@ class FileWin32
         return bytesRead;
     }
 
-    size_t RawWrite(ConstByteSpanT buffer)
+    size_t LexWrite(ConstByteSpanT buffer)
     {
         DWORD bytesToRead = static_cast<DWORD>(buffer.size());
         DWORD bytesRead = 0;
@@ -182,7 +182,7 @@ class FileWin32
         return bytesRead;
     }
 
-    void Flush()
+    void LexFlush()
     {
         const BOOL ok = FlushFileBuffers(m_fileHandle);
         if (ok == FALSE)
@@ -191,35 +191,26 @@ class FileWin32
         }
     }
 
-    size_t Seek(const WhenceStart whence)
+    size_t LexSeek(const SeekPos pos)
     {
+        DWORD whence = 0;
         LARGE_INTEGER offset, newOffset;
-        offset.QuadPart = whence.offset;
-        const BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, FILE_BEGIN);
-        if (ok == 0)
-        {
-            throw Win32Error("Could not seek file.", GetLastError());
-        }
-        return static_cast<size_t>(newOffset.QuadPart);
-    }
+        offset.QuadPart = pos.offset;
 
-    size_t Seek(const WhenceCurrent whence)
-    {
-        LARGE_INTEGER offset, newOffset;
-        offset.QuadPart = whence.offset;
-        const BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, FILE_CURRENT);
-        if (ok == 0)
+        switch (pos.whence)
         {
-            throw Win32Error("Could not seek file.", GetLastError());
+        case LexIO::seek::start:
+            whence = FILE_BEGIN;
+            break;
+        case LexIO::seek::current:
+            whence = FILE_CURRENT;
+            break;
+        case LexIO::seek::end:
+            whence = FILE_END;
+            break;
         }
-        return static_cast<size_t>(newOffset.QuadPart);
-    }
 
-    size_t Seek(const WhenceEnd whence)
-    {
-        LARGE_INTEGER offset, newOffset;
-        offset.QuadPart = whence.offset;
-        const BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, FILE_END);
+        const BOOL ok = SetFilePointerEx(m_fileHandle, offset, &newOffset, whence);
         if (ok == 0)
         {
             throw Win32Error("Could not seek file.", GetLastError());
