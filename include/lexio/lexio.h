@@ -19,11 +19,11 @@
 
 #include "./core.h"
 
-#include "./abstract.h"
 #include "./array.h"
 #include "./bufreader.h"
 #include "./container.h"
 #include "./file.h"
+#include "./ref.h"
 #include "./tryserialize.h"
 #include "./serialize.h"
 #include "./vector.h"

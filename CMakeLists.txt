@@ -16,11 +16,11 @@ project(lexio LANGUAGES CXX)
 set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/abstract.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/array.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bufreader.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/container.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/file.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/ref.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/tryserialize.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/vector.h")
