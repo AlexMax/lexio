@@ -21,6 +21,12 @@
 
 TEST_SUITE_BEGIN("ref");
 
+static void AcceptReader(const LexIO::ReaderRef &) {}
+static void AcceptBufferedReader(const LexIO::BufferedReaderRef &) {}
+static void AcceptWriter(const LexIO::WriterRef &) {}
+static void AcceptSeekable(const LexIO::SeekableRef &) {}
+static void AcceptReaderSeekable(const LexIO::ReaderSeekableRef &) {}
+
 //******************************************************************************
 
 TEST_CASE("Test LexIO::ReaderRef")
@@ -35,6 +41,8 @@ TEST_CASE("Test LexIO::ReaderRef")
     LexIO::ReaderRef ref(test);
 
     CHECK(LexIO::Read(span, ref) == 0);
+
+    AcceptReader(ref);
 }
 
 TEST_CASE("Test LexIO::BufferedReaderRef")
@@ -55,6 +63,9 @@ TEST_CASE("Test LexIO::BufferedReaderRef")
     CHECK(LexIO::GetBufferSize(ref) == 0);
     CHECK(LexIO::FillBuffer(ref, 0).size() == 0);
     LexIO::ConsumeBuffer(ref, 0);
+
+    AcceptReader(ref);
+    AcceptBufferedReader(ref);
 }
 
 TEST_CASE("Test LexIO::WriterRef")
@@ -71,6 +82,8 @@ TEST_CASE("Test LexIO::WriterRef")
 
     CHECK(LexIO::Write(ref, span) == 0);
     LexIO::Flush(ref);
+
+    AcceptWriter(ref);
 }
 
 TEST_CASE("Test LexIO::ReaderWriterRef")
@@ -89,6 +102,9 @@ TEST_CASE("Test LexIO::ReaderWriterRef")
     CHECK(LexIO::Read(span, ref) == 0);
     CHECK(LexIO::Write(ref, span) == 0);
     LexIO::Flush(ref);
+
+    AcceptReader(ref);
+    AcceptWriter(ref);
 }
 
 TEST_CASE("Test LexIO::BufferedReaderWriterRef")
@@ -113,6 +129,10 @@ TEST_CASE("Test LexIO::BufferedReaderWriterRef")
     LexIO::ConsumeBuffer(ref, 0);
     CHECK(LexIO::Write(ref, span) == 0);
     LexIO::Flush(ref);
+
+    AcceptReader(ref);
+    AcceptBufferedReader(ref);
+    AcceptWriter(ref);
 }
 
 TEST_CASE("Test LexIO::ReaderSeekableRef")
@@ -129,6 +149,10 @@ TEST_CASE("Test LexIO::ReaderSeekableRef")
 
     CHECK(LexIO::Read(span, ref) == 0);
     CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
+
+    AcceptReader(ref);
+    AcceptSeekable(ref);
+    AcceptReaderSeekable(ref);
 }
 
 TEST_CASE("Test LexIO::BufferedReaderSeekableRef")
@@ -151,6 +175,11 @@ TEST_CASE("Test LexIO::BufferedReaderSeekableRef")
     CHECK(LexIO::FillBuffer(ref, 0).size() == 0);
     LexIO::ConsumeBuffer(ref, 0);
     CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
+
+    AcceptReader(ref);
+    AcceptBufferedReader(ref);
+    AcceptSeekable(ref);
+    AcceptReaderSeekable(ref);
 }
 
 TEST_CASE("Test LexIO::ReaderWriterSeekableRef")
@@ -171,6 +200,11 @@ TEST_CASE("Test LexIO::ReaderWriterSeekableRef")
     CHECK(LexIO::Write(ref, span) == 0);
     LexIO::Flush(ref);
     CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
+
+    AcceptReader(ref);
+    AcceptWriter(ref);
+    AcceptSeekable(ref);
+    AcceptReaderSeekable(ref);
 }
 
 TEST_CASE("Test LexIO::BufferedReaderWriterSeekableRef")
@@ -197,6 +231,12 @@ TEST_CASE("Test LexIO::BufferedReaderWriterSeekableRef")
     CHECK(LexIO::Write(ref, span) == 0);
     LexIO::Flush(ref);
     CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
+
+    AcceptReader(ref);
+    AcceptBufferedReader(ref);
+    AcceptWriter(ref);
+    AcceptSeekable(ref);
+    AcceptReaderSeekable(ref);
 }
 
 TEST_SUITE_END();

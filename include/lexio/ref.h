@@ -37,8 +37,11 @@ using lexSeek_t = size_t (*)(void *, const SeekPos);
 
 class ReaderRef
 {
+  protected:
     void *m_ptr;
     Detail::lexRead_t m_lexRead;
+
+    ReaderRef(void *ptr, Detail::lexRead_t read) : m_ptr(ptr), m_lexRead(read) {}
 
   public:
     template <typename READER>
@@ -49,15 +52,23 @@ class ReaderRef
     {
     }
 
-    size_t LexRead(ByteSpanT outBytes) { return m_lexRead(m_ptr, outBytes); }
+    size_t LexRead(ByteSpanT outBytes) const { return m_lexRead(m_ptr, outBytes); }
 };
 
 class BufferedReaderRef : public ReaderRef
 {
+  protected:
     void *m_ptr;
     Detail::lexGetBufferSize_t m_lexGetBufferSize;
     Detail::lexFillBuffer_t m_lexFillBuffer;
     Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
+
+    BufferedReaderRef(void *ptr, Detail::lexRead_t lexRead, Detail::lexGetBufferSize_t lexGetBufferSize,
+                      Detail::lexFillBuffer_t lexFillBuffer, Detail::lexConsumeBuffer_t lexConsumeBuffer)
+        : ReaderRef(ptr, lexRead), m_ptr(ptr), m_lexGetBufferSize(lexGetBufferSize), m_lexFillBuffer(lexFillBuffer),
+          m_lexConsumeBuffer(lexConsumeBuffer)
+    {
+    }
 
   public:
     template <typename BUFFERED_READER>
@@ -75,15 +86,21 @@ class BufferedReaderRef : public ReaderRef
     }
 
     size_t LexGetBufferSize() const { return m_lexGetBufferSize(m_ptr); }
-    ConstByteSpanT LexFillBuffer(const size_t size) { return m_lexFillBuffer(m_ptr, size); }
-    void LexConsumeBuffer(const size_t size) { m_lexConsumeBuffer(m_ptr, size); }
+    ConstByteSpanT LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
 };
 
 class WriterRef
 {
+  protected:
     void *m_ptr;
     Detail::lexWrite_t m_lexWrite;
     Detail::lexFlush_t m_lexFlush;
+
+    WriterRef(void *ptr, Detail::lexWrite_t lexWrite, Detail::lexFlush_t lexFlush)
+        : m_ptr(ptr), m_lexWrite(lexWrite), m_lexFlush(lexFlush)
+    {
+    }
 
   public:
     template <typename WRITER>
@@ -97,14 +114,17 @@ class WriterRef
     {
     }
 
-    size_t LexWrite(ConstByteSpanT bytes) { return m_lexWrite(m_ptr, bytes); }
-    void LexFlush() { m_lexFlush(m_ptr); }
+    size_t LexWrite(ConstByteSpanT bytes) const { return m_lexWrite(m_ptr, bytes); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
 };
 
 class SeekableRef
 {
+  protected:
     void *m_ptr;
     Detail::lexSeek_t m_lexSeek;
+
+    SeekableRef(void *ptr, Detail::lexSeek_t lexSeek) : m_ptr(ptr), m_lexSeek(lexSeek) {}
 
   public:
     template <typename SEEKABLE>
@@ -115,7 +135,7 @@ class SeekableRef
     {
     }
 
-    size_t LexSeek(const SeekPos pos) { return m_lexSeek(m_ptr, pos); }
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
 };
 
 class ReaderWriterRef : public ReaderRef, public WriterRef
@@ -144,6 +164,11 @@ class ReaderSeekableRef : public ReaderRef, public SeekableRef
     ReaderSeekableRef(READER_SEEKABLE &readerSeekable) : ReaderRef(readerSeekable), SeekableRef(readerSeekable)
     {
     }
+
+    ReaderSeekableRef(void *ptr, Detail::lexRead_t lexRead, Detail::lexSeek_t lexSeek)
+        : ReaderRef(ptr, lexRead), SeekableRef(ptr, lexSeek)
+    {
+    }
 };
 
 class BufferedReaderSeekableRef : public BufferedReaderRef, public SeekableRef
@@ -154,6 +179,8 @@ class BufferedReaderSeekableRef : public BufferedReaderRef, public SeekableRef
         : BufferedReaderRef(bufferedReaderSeekable), SeekableRef(bufferedReaderSeekable)
     {
     }
+
+    operator ReaderSeekableRef() { return ReaderSeekableRef{ReaderRef::m_ptr, m_lexRead, m_lexSeek}; }
 };
 
 class ReaderWriterSeekableRef : public ReaderWriterRef, public SeekableRef
@@ -164,6 +191,8 @@ class ReaderWriterSeekableRef : public ReaderWriterRef, public SeekableRef
         : ReaderWriterRef(readerWriterSeekable), SeekableRef(readerWriterSeekable)
     {
     }
+
+    operator ReaderSeekableRef() { return ReaderSeekableRef{ReaderRef::m_ptr, m_lexRead, m_lexSeek}; }
 };
 
 class BufferedReaderWriterSeekableRef : public BufferedReaderWriterRef, public SeekableRef
@@ -174,6 +203,8 @@ class BufferedReaderWriterSeekableRef : public BufferedReaderWriterRef, public S
         : BufferedReaderWriterRef(bufferedReaderWriterSeekable), SeekableRef(bufferedReaderWriterSeekable)
     {
     }
+
+    operator ReaderSeekableRef() { return ReaderSeekableRef{ReaderRef::m_ptr, m_lexRead, m_lexSeek}; }
 };
 
 } // namespace LexIO
