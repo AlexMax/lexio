@@ -40,3 +40,9 @@ message(STATUS "CLANG_TIDY_EXE: ${CLANG_TIDY_EXE}")
 message(STATUS "LEXIO_TEST_NONSTD: ${LEXIO_TEST_NONSTD}")
 message(STATUS "SANITIZE_ADDRESS: ${SANITIZE_ADDRESS}")
 message(STATUS "SANITIZE_UNDEFINED: ${SANITIZE_UNDEFINED}")
+
+### Documentation ###
+find_package(Doxygen)
+if(TARGET Doxygen::doxygen)
+    doxygen_add_docs(docs ${LEXIO_HEADERS})
+endif()

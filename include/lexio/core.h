@@ -14,21 +14,20 @@
 //  limitations under the License.
 //
 
-//******************************************************************************
-//
-// Core interfaces and functions needed by LexIO streams.
-//
-// LexIO streams are not derived from abstract classes, but by classes that
-// adhere to traits that are enforced by the type traits in this file.  There
-// are four basic types of stream.
-//
-// - Reader: These classes can read from a data source.
-// - BufferedReader: These classes read from a data source and keep said
-//                   data in an internal buffer.
-// - Writer: These classes can write to a data source.
-// - Seekable: These classes can seek to various points in the stream.
-//
-//******************************************************************************
+/**
+ * @file core.h
+ * Core interfaces and functions needed by LexIO streams.
+ *
+ * LexIO streams are not derived from abstract classes, but by classes that
+ * adhere to traits that are enforced by the type traits in this file.  There
+ * are four basic types of stream.
+ *
+ * - Reader: These classes can read from a data source.
+ * - BufferedReader: These classes read from a data source and keep said
+ *                   data in an internal buffer.
+ * - Writer: These classes can write to a data source.
+ * - Seekable: These classes can seek to various points in the stream.
+ */
 
 #ifndef LEXIO_CORE_H
 #define LEXIO_CORE_H
@@ -94,6 +93,9 @@
 #define LEXIO_INLINE_VAR
 #endif
 
+/**
+ * @brief LexIO library namespace.
+ */
 namespace LexIO
 {
 
@@ -464,7 +466,7 @@ inline ConstByteSpanT GetBuffer(BUFFERED_READER &bufReader)
  * @return Total number of bytes read.
  */
 template <typename OUT_ITER, typename BUFFERED_READER>
-size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
+inline size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
 {
     size_t size = 0;
     for (;;)
@@ -496,7 +498,7 @@ size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
  * @return Total number of bytes read.
  */
 template <typename OUT_ITER, typename BUFFERED_READER>
-size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
+inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
 {
     size_t size = 0;
     for (;;)
