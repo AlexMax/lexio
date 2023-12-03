@@ -1,30 +1,24 @@
 include(CheckCXXCompilerFlag)
+include(FetchContent)
+
+# Catch2
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.4.0)
+FetchContent_MakeAvailable(Catch2)
 
 set(LEXIO_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/../include")
-set(DOCTEST_INCLUDE "${CMAKE_CURRENT_BINARY_DIR}/include")
-set(DOCTEST_ARCHIVE "${CMAKE_CURRENT_SOURCE_DIR}/doctest.h.zip")
-
-file(MAKE_DIRECTORY "${DOCTEST_INCLUDE}")
-add_custom_command(OUTPUT "${DOCTEST_INCLUDE}/doctest.h"
-    COMMAND "${CMAKE_COMMAND}" -E tar xf "${DOCTEST_ARCHIVE}" --format=zip
-    WORKING_DIRECTORY "${DOCTEST_INCLUDE}"
-    VERBATIM)
-add_custom_target(doctest_header DEPENDS "${DOCTEST_INCLUDE}/doctest.h")
-
-add_library(doctest INTERFACE "${DOCTEST_INCLUDE}/doctest.h")
-add_dependencies(doctest doctest_header)
-target_include_directories(doctest INTERFACE "${DOCTEST_INCLUDE}")
 
 # Test suite.
 add_executable(test
     test_core.cpp
     test_container.cpp
     test_file.cpp
-    test_main.cpp
     test_ref.cpp
     test_serialize.cpp
     test.h)
-target_link_libraries(test lexio doctest)
+target_link_libraries(test lexio Catch2::Catch2WithMain)
 
 if(LEXIO_TEST_NONSTD)
     target_compile_definitions(test PUBLIC LEXIO_TEST_NONSTD)

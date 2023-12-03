@@ -15,7 +15,7 @@
 //
 
 #include "./test.h"
-#include "doctest.h"
+#include "catch2/catch_all.hpp"
 #include <cmath>
 
 //******************************************************************************
@@ -35,8 +35,6 @@ int64_t FFEEDDCCBBAA9988i64()
     std::memcpy(&dst, &src, sizeof(dst));
     return dst;
 }
-
-TEST_SUITE_BEGIN("file");
 
 TEST_CASE("TryReadU8/ReadU8")
 {
@@ -667,5 +665,3 @@ TEST_CASE("WriteString")
     char *checkChar = reinterpret_cast<char *>(check.data());
     REQUIRE(strcmp(checkChar, data.c_str()) == 0);
 }
-
-TEST_SUITE_END();

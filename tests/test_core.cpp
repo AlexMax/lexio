@@ -15,11 +15,9 @@
 //
 
 #include "./test.h"
-#include "doctest.h"
+#include "catch2/catch_all.hpp"
 
 //******************************************************************************
-
-TEST_SUITE_BEGIN("utils");
 
 struct GoodReader
 {
@@ -188,7 +186,7 @@ TEST_CASE("Test Seek/Tell with SeekPos")
     REQUIRE(LexIO::Tell(basic) == BUFFER_LENGTH - 5);
 }
 
-TEST_CASE("Test Rewind")
+TEST_CASE("Test Tell after Rewind")
 {
     LexIO::VectorStream basic = GetBuffer();
 
@@ -203,5 +201,3 @@ TEST_CASE("Test Length")
 
     REQUIRE(LexIO::Length(basic) == BUFFER_LENGTH);
 }
-
-TEST_SUITE_END();

@@ -15,11 +15,9 @@
 //
 
 #include "./test.h"
-#include "doctest.h"
+#include "catch2/catch_all.hpp"
 
 //******************************************************************************
-
-TEST_SUITE_BEGIN("file");
 
 TEST_CASE("Test file opened in read mode")
 {
@@ -48,5 +46,3 @@ TEST_CASE("Test file opened in read mode")
     pos = LexIO::Seek(file, 2, LexIO::seek::end);
     REQUIRE((pos == 47 || pos == 49)); // File contains two newlines.
 }
-
-TEST_SUITE_END();

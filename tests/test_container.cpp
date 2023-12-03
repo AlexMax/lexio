@@ -15,11 +15,9 @@
 //
 
 #include "./test.h"
-#include "doctest.h"
+#include "catch2/catch_all.hpp"
 
 //******************************************************************************
-
-TEST_SUITE_BEGIN("container");
 
 template <typename T>
 void CommonTest(T &buf)
@@ -92,5 +90,3 @@ TEST_CASE("Test ContainerDynamic with std::vector")
     REQUIRE_NOTHROW(LexIO::WriteU8(buf, 0));
     REQUIRE(LexIO::Tell(buf) == TEST_SIZE + 1);
 }
-
-TEST_SUITE_END();

@@ -15,11 +15,9 @@
 //
 
 #include "./test.h"
-#include "doctest.h"
+#include "catch2/catch_all.hpp"
 
 #include <memory>
-
-TEST_SUITE_BEGIN("ref");
 
 static void AcceptReader(const LexIO::ReaderRef &) {}
 static void AcceptBufferedReader(const LexIO::BufferedReaderRef &) {}
@@ -238,5 +236,3 @@ TEST_CASE("Test LexIO::BufferedReaderWriterSeekableRef")
     AcceptSeekable(ref);
     AcceptReaderSeekable(ref);
 }
-
-TEST_SUITE_END();
