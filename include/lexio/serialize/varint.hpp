@@ -91,7 +91,7 @@ inline void WriteVarint32(WRITER &writer, const int32_t value)
  * @return An signed 32-bit integer from the Reader.
  */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint32_t ReadSVarint32(READER &reader)
+inline int32_t ReadSVarint32(READER &reader)
 {
     return Detail::ReadWithExcept<int32_t>(reader, TryReadSVarint32<READER>);
 }

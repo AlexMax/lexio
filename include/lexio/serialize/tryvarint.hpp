@@ -68,6 +68,18 @@ inline bool TryWriteUVarint32(WRITER &writer, const uint32_t value)
     return TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v));
 }
 
+constexpr size_t UVarint32Bytes(const uint32_t value)
+{
+    size_t count = 1;
+    uint32_t v = value;
+    while (v >= 0x80)
+    {
+        count += 1;
+        v >>= 7;
+    }
+    return count;
+}
+
 //******************************************************************************
 
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
@@ -80,6 +92,18 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteVarint32(WRITER &writer, const int32_t value)
 {
     return Detail::WriteSigned<int32_t>(writer, value, TryWriteUVarint32<WRITER>);
+}
+
+constexpr size_t Varint32Bytes(const int32_t value)
+{
+    size_t count = 1;
+    uint32_t v = 0 + value;
+    while (v >= 0x80)
+    {
+        count += 1;
+        v >>= 7;
+    }
+    return count;
 }
 
 //******************************************************************************
@@ -150,6 +174,18 @@ inline bool TryWriteUVarint64(WRITER &writer, const uint64_t value)
     return TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v));
 }
 
+constexpr size_t UVarint64Bytes(const uint64_t value)
+{
+    size_t count = 1;
+    uint64_t v = value;
+    while (v >= 0x80)
+    {
+        count += 1;
+        v >>= 7;
+    }
+    return count;
+}
+
 //******************************************************************************
 
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
@@ -162,6 +198,18 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteVarint64(WRITER &writer, const int64_t value)
 {
     return Detail::WriteSigned<int64_t>(writer, value, TryWriteUVarint64<WRITER>);
+}
+
+constexpr size_t Varint64Bytes(const int64_t value)
+{
+    size_t count = 1;
+    uint64_t v = 0 + value;
+    while (v >= 0x80)
+    {
+        count += 1;
+        v >>= 7;
+    }
+    return count;
 }
 
 //******************************************************************************
