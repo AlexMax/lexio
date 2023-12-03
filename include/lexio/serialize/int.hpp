@@ -71,6 +71,13 @@ inline uint8_t ReadU8(READER &reader)
     return Detail::ReadWithExcept<uint8_t>(reader, TryReadU8<READER>);
 }
 
+/**
+ * @brief Write a uint8_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteU8(WRITER &writer, const uint8_t value)
 {
@@ -92,6 +99,13 @@ inline int8_t Read8(READER &reader)
     return Detail::ReadWithExcept<int8_t>(reader, TryRead8<READER>);
 }
 
+/**
+ * @brief Write a int8_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write8(WRITER &writer, const int8_t value)
 {
@@ -126,12 +140,26 @@ inline uint16_t ReadU16BE(READER &reader)
     return Detail::ReadWithExcept<uint16_t>(reader, TryReadU16BE<READER>);
 }
 
+/**
+ * @brief Write a little-endian uint16_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteU16LE(WRITER &writer, const uint16_t value)
 {
     Detail::WriteWithExcept<uint16_t>(writer, value, TryWriteU16LE<WRITER>);
 }
 
+/**
+ * @brief Write a big-endian uint16_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteU16BE(WRITER &writer, const uint16_t value)
 {
@@ -166,12 +194,26 @@ inline int16_t Read16BE(READER &reader)
     return Detail::ReadWithExcept<int16_t>(reader, TryRead16BE<READER>);
 }
 
+/**
+ * @brief Write a little-endian int16_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write16LE(WRITER &writer, const int16_t value)
 {
     Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16LE<WRITER>);
 }
 
+/**
+ * @brief Write a big-endian int16_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write16BE(WRITER &writer, const int16_t value)
 {
@@ -206,12 +248,26 @@ inline uint32_t ReadU32BE(READER &reader)
     return Detail::ReadWithExcept<uint32_t>(reader, TryReadU32BE<READER>);
 }
 
+/**
+ * @brief Write a little-endian uint32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteU32LE(WRITER &writer, const uint32_t value)
 {
     Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32LE<WRITER>);
 }
 
+/**
+ * @brief Write a big-endian uint32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteU32BE(WRITER &writer, const uint32_t value)
 {
@@ -246,12 +302,26 @@ inline int32_t Read32BE(READER &reader)
     return Detail::ReadWithExcept<int32_t>(reader, TryRead32BE<READER>);
 }
 
+/**
+ * @brief Write a little-endian int32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write32LE(WRITER &writer, const int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32LE<WRITER>);
 }
 
+/**
+ * @brief Write a big-endian int32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write32BE(WRITER &writer, const int32_t value)
 {
@@ -286,12 +356,26 @@ inline uint64_t ReadU64BE(READER &reader)
     return Detail::ReadWithExcept<uint64_t>(reader, TryReadU64BE<READER>);
 }
 
+/**
+ * @brief Write a little-endian uint64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteU64LE(WRITER &writer, const uint64_t value)
 {
     Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteU64LE<WRITER>);
 }
 
+/**
+ * @brief Write a big-endian uint64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteU64BE(WRITER &writer, const uint64_t value)
 {
@@ -326,12 +410,26 @@ inline int64_t Read64BE(READER &reader)
     return Detail::ReadWithExcept<int64_t>(reader, TryRead64BE<READER>);
 }
 
+/**
+ * @brief Write a little-endian int64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write64LE(WRITER &writer, const int64_t value)
 {
     Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64LE<WRITER>);
 }
 
+/**
+ * @brief Write a big-endian int64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @throws std::runtime_error if stream could not be written.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write64BE(WRITER &writer, const int64_t value)
 {
