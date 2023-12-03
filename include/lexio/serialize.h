@@ -264,27 +264,25 @@ inline void Write32BE(WRITER &writer, const int32_t value)
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline float ReadFloatLE(READER &reader)
 {
-    uint32_t bits = ReadU32LE(reader);
-    return Detail::BitCast<float>(bits);
+    return Detail::ReadWithExcept<float>(reader, TryReadFloatLE<READER>);
 }
 
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline float ReadFloatBE(READER &reader)
 {
-    uint32_t bits = ReadU32BE(reader);
-    return Detail::BitCast<float>(bits);
+    return Detail::ReadWithExcept<float>(reader, TryReadFloatBE<READER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteFloatLE(WRITER &writer, const float value)
 {
-    WriteU32LE(writer, Detail::BitCast<uint32_t>(value));
+    Detail::WriteWithExcept<float>(writer, value, TryWriteFloatLE<WRITER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteFloatBE(WRITER &writer, const float value)
 {
-    WriteU32BE(writer, Detail::BitCast<uint32_t>(value));
+    Detail::WriteWithExcept<float>(writer, value, TryWriteFloatBE<WRITER>);
 }
 
 //******************************************************************************

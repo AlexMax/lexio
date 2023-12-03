@@ -335,6 +335,46 @@ inline bool TryWrite32BE(WRITER &writer, const int32_t value)
 
 //******************************************************************************
 
+template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
+inline bool TryReadFloatLE(float &out, READER &reader)
+{
+    uint32_t bits;
+    if (!TryReadU32LE<READER>(bits, reader))
+    {
+        return false;
+    }
+    out = Detail::BitCast<float, uint32_t>(bits);
+    return true;
+}
+
+template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
+inline bool TryReadFloatBE(float &out, READER &reader)
+{
+    uint32_t bits;
+    if (!TryReadU32BE<READER>(bits, reader))
+    {
+        return false;
+    }
+    out = Detail::BitCast<float, uint32_t>(bits);
+    return true;
+}
+
+template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline bool TryWriteFloatLE(WRITER &writer, const float value)
+{
+    const uint32_t bits = Detail::BitCast<uint32_t, float>(value);
+    return TryWriteU32LE<WRITER>(writer, bits);
+}
+
+template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline bool TryWriteFloatBE(WRITER &writer, const float value)
+{
+    const uint32_t bits = Detail::BitCast<uint32_t, float>(value);
+    return TryWriteU32BE<WRITER>(writer, bits);
+}
+
+//******************************************************************************
+
 /**
  * @brief Try to read a little-endian uint64_t from a stream.
  *

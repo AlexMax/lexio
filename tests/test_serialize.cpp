@@ -223,10 +223,18 @@ TEST_CASE("TryWrite16LE/Write16LE")
     }
 }
 
-TEST_CASE("Read16BE")
+TEST_CASE("TryRead16BE/Read16BE")
 {
     LexIO::VectorStream buffer({0x99, 0x88});
+
+    int16_t test;
+    REQUIRE(LexIO::TryRead16BE(test, buffer) == true);
+    REQUIRE(test == -26232);
+    REQUIRE(LexIO::TryRead16BE(test, buffer) == false);
+
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::Read16BE(buffer) == -26232);
+    REQUIRE_THROWS(LexIO::Read16BE(buffer));
 }
 
 TEST_CASE("TryWrite16BE/Write16BE")
@@ -268,34 +276,76 @@ TEST_CASE("TryReadU32LE/ReadU32LE")
     REQUIRE_THROWS(LexIO::ReadU32LE(buffer));
 }
 
-TEST_CASE("WriteU32LE")
+TEST_CASE("TryWriteU32LE/WriteU32LE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::WriteU32LE(buffer, 0xbbaa9988);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint32_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint32_t)> &cbuffer = buffer;
 
-    LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
+        REQUIRE(LexIO::TryWriteU32LE(buffer, 0xbbaa9988) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(LexIO::TryWriteU32LE(buffer, 0xbbaa9988) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint32_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint32_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteU32LE(buffer, 0xbbaa9988));
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE_THROWS(LexIO::WriteU32LE(buffer, 0xbbaa9988));
+    }
 }
 
-TEST_CASE("ReadU32BE")
+TEST_CASE("TryReadU32BE/ReadU32BE")
 {
     LexIO::VectorStream buffer({0xbb, 0xaa, 0x99, 0x88});
-    REQUIRE(LexIO::ReadU32BE(buffer) == 0xbbaa9988);
-}
 
-TEST_CASE("WriteU32BE")
-{
-    LexIO::VectorStream buffer;
-    LexIO::WriteU32BE(buffer, 0xbbaa9988);
+    uint32_t test;
+    REQUIRE(LexIO::TryReadU32BE(test, buffer) == true);
+    REQUIRE(test == 0xbbaa9988);
+    REQUIRE(LexIO::TryReadU32BE(test, buffer) == false);
 
     LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::ReadU32BE(buffer) == 0xbbaa9988);
+    REQUIRE_THROWS(LexIO::ReadU32BE(buffer));
+}
+
+TEST_CASE("TryWriteU32BE/WriteU32BE")
+{
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint32_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint32_t)> &cbuffer = buffer;
+
+        REQUIRE(LexIO::TryWriteU32BE(buffer, 0xbbaa9988) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(LexIO::TryWriteU32BE(buffer, 0xbbaa9988) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint32_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint32_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteU32BE(buffer, 0xbbaa9988));
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE_THROWS(LexIO::WriteU32BE(buffer, 0xbbaa9988));
+    }
 }
 
 TEST_CASE("TryRead32LE/Read32LE")
@@ -312,80 +362,178 @@ TEST_CASE("TryRead32LE/Read32LE")
     REQUIRE_THROWS(LexIO::Read32LE(buffer));
 }
 
-TEST_CASE("Write32LE")
+TEST_CASE("TryWrite32LE/Write32LE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::Write32LE(buffer, -1146447480);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int32_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int32_t)> &cbuffer = buffer;
 
-    LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
+        REQUIRE(LexIO::TryWrite32LE(buffer, -1146447480) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(LexIO::TryWrite32LE(buffer, -1146447480) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int32_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int32_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::Write32LE(buffer, -1146447480));
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE_THROWS(LexIO::Write32LE(buffer, -1146447480));
+    }
 }
 
-TEST_CASE("Read32BE")
+TEST_CASE("TryRead32BE/Read32BE")
 {
     LexIO::VectorStream buffer({0xbb, 0xaa, 0x99, 0x88});
-    REQUIRE(LexIO::Read32BE(buffer) == -1146447480);
-}
 
-TEST_CASE("Write32BE")
-{
-    LexIO::VectorStream buffer;
-    LexIO::Write32BE(buffer, -1146447480);
+    int32_t test;
+    REQUIRE(LexIO::TryRead32BE(test, buffer) == true);
+    REQUIRE(test == -1146447480);
+    REQUIRE(LexIO::TryRead32BE(test, buffer) == false);
 
     LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::Read32BE(buffer) == -1146447480);
+    REQUIRE_THROWS(LexIO::Read32BE(buffer));
 }
 
-TEST_CASE("ReadFloatLE")
+TEST_CASE("TryWrite32BE/Write32BE")
+{
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int32_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int32_t)> &cbuffer = buffer;
+
+        REQUIRE(LexIO::TryWrite32BE(buffer, -1146447480) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(LexIO::TryWrite32BE(buffer, -1146447480) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int32_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int32_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::Write32BE(buffer, -1146447480));
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE_THROWS(LexIO::Write32BE(buffer, -1146447480));
+    }
+}
+
+TEST_CASE("TryReadFloatLE/ReadFloatLE")
 {
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb});
-    const float check = LexIO::ReadFloatLE(buffer);
 
-    int exp;
-    const float x = std::frexp(check, &exp);
+    int exp = 0;
+    float test, x;
+    REQUIRE(LexIO::TryReadFloatLE(test, buffer) == true);
+    x = std::frexp(test, &exp);
     REQUIRE(x == -0.666405201f);
     REQUIRE(exp == -7);
-}
-
-TEST_CASE("WriteFloatLE")
-{
-    LexIO::VectorStream buffer;
-    LexIO::WriteFloatLE(buffer, std::ldexp(-0.666405201f, -7));
+    REQUIRE(LexIO::TryReadFloatLE(test, buffer) == false);
 
     LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
+    REQUIRE_NOTHROW(test = LexIO::ReadFloatLE(buffer));
+    x = std::frexp(test, &exp);
+    REQUIRE(x == -0.666405201f);
+    REQUIRE(exp == -7);
+    REQUIRE_THROWS(LexIO::ReadFloatLE(buffer));
 }
 
-TEST_CASE("ReadFloatBE")
+TEST_CASE("TryWriteFloatLE/WriteFloatLE")
+{
+    const float test = std::ldexp(-0.666405201f, -7);
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(float)> buffer;
+        const LexIO::ArrayStream<sizeof(float)> &cbuffer = buffer;
+
+        REQUIRE(LexIO::TryWriteFloatLE(buffer, test) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(LexIO::TryWriteFloatLE(buffer, test) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(float)> buffer;
+        const LexIO::ArrayStream<sizeof(float)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteFloatLE(buffer, test));
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE_THROWS(LexIO::WriteFloatLE(buffer, test));
+    }
+}
+
+TEST_CASE("TryReadFloatBE/ReadFloatBE")
 {
     LexIO::VectorStream buffer({0xbb, 0xaa, 0x99, 0x88});
-    const float check = LexIO::ReadFloatBE(buffer);
 
-    int exp;
-    const float x = std::frexp(check, &exp);
+    int exp = 0;
+    float test, x;
+    REQUIRE(LexIO::TryReadFloatBE(test, buffer) == true);
+    x = std::frexp(test, &exp);
     REQUIRE(x == -0.666405201f);
     REQUIRE(exp == -7);
-}
-
-TEST_CASE("WriteFloatBE")
-{
-    LexIO::VectorStream buffer;
-    LexIO::WriteFloatBE(buffer, std::ldexp(-0.666405201f, -7));
+    REQUIRE(LexIO::TryReadFloatBE(test, buffer) == false);
 
     LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE_NOTHROW(test = LexIO::ReadFloatBE(buffer));
+    x = std::frexp(test, &exp);
+    REQUIRE(x == -0.666405201f);
+    REQUIRE(exp == -7);
+    REQUIRE_THROWS(LexIO::ReadFloatBE(buffer));
+}
+
+TEST_CASE("TryWriteFloatBE/WriteFloatBE")
+{
+    const float test = std::ldexp(-0.666405201f, -7);
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(float)> buffer;
+        const LexIO::ArrayStream<sizeof(float)> &cbuffer = buffer;
+
+        REQUIRE(LexIO::TryWriteFloatBE(buffer, test) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(LexIO::TryWriteFloatBE(buffer, test) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(float)> buffer;
+        const LexIO::ArrayStream<sizeof(float)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteFloatBE(buffer, test));
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE_THROWS(LexIO::WriteFloatBE(buffer, test));
+    }
 }
 
 TEST_CASE("TryReadU64LE/ReadU64LE")
