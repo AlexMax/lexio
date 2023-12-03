@@ -14,10 +14,9 @@
 //  limitations under the License.
 //
 
-#ifndef LEXIO_ABSTRACT_H
-#define LEXIO_ABSTRACT_H
+#pragma once
 
-#include "./core.h"
+#include "./core.hpp"
 
 #include <memory>
 
@@ -208,5 +207,3 @@ class BufferedReaderWriterSeekableRef : public BufferedReaderWriterRef, public S
 };
 
 } // namespace LexIO
-
-#endif

@@ -18,10 +18,9 @@
 // Sample buffer abstraction that uses malloc, realloc, and free under the hood.
 //
 
-#ifndef LEXIO_BUFREADER_H
-#define LEXIO_BUFREADER_H
+#pragma once
 
-#include "./core.h"
+#include "./core.hpp"
 
 namespace LexIO
 {
@@ -157,5 +156,3 @@ class BufReader
 };
 
 } // namespace LexIO
-
-#endif

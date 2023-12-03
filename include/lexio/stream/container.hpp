@@ -18,10 +18,9 @@
 // Stream abstraction that wraps STL-like types.
 //
 
-#ifndef LEXIO_CONTAINER_H
-#define LEXIO_CONTAINER_H
+#pragma once
 
-#include "./core.h"
+#include "../core.hpp"
 
 #include <vector> // Used by StdBufReader
 
@@ -179,5 +178,3 @@ class ContainerDynamic : public ContainerBase<T>
 };
 
 } // namespace LexIO
-
-#endif

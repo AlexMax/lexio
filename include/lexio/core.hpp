@@ -29,8 +29,7 @@
  * - Seekable: These classes can seek to various points in the stream.
  */
 
-#ifndef LEXIO_CORE_H
-#define LEXIO_CORE_H
+#pragma once
 
 #include <cstdint>
 #include <stdexcept>
@@ -576,5 +575,3 @@ inline size_t Length(SEEKABLE &seekable)
 }
 
 } // namespace LexIO
-
-#endif

@@ -15,17 +15,16 @@
 //
 
 /**
- * @file serialize.h
+ * @file int.h
  *
- * Serialization functions that throw exceptions on failure.
+ * Integer serialization functions that throw exceptions on failure.
  */
 
-#ifndef LEXIO_SERIALIZE_H
-#define LEXIO_SERIALIZE_H
+#pragma once
 
-#include "./core.h"
+#include "../core.hpp"
 
-#include "./tryserialize.h"
+#include "./tryint.hpp"
 
 namespace LexIO
 {
@@ -261,32 +260,6 @@ inline void Write32BE(WRITER &writer, const int32_t value)
 
 //******************************************************************************
 
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline float ReadFloatLE(READER &reader)
-{
-    return Detail::ReadWithExcept<float>(reader, TryReadFloatLE<READER>);
-}
-
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline float ReadFloatBE(READER &reader)
-{
-    return Detail::ReadWithExcept<float>(reader, TryReadFloatBE<READER>);
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteFloatLE(WRITER &writer, const float value)
-{
-    Detail::WriteWithExcept<float>(writer, value, TryWriteFloatLE<WRITER>);
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteFloatBE(WRITER &writer, const float value)
-{
-    Detail::WriteWithExcept<float>(writer, value, TryWriteFloatBE<WRITER>);
-}
-
-//******************************************************************************
-
 /**
  * @brief Read a little-endian uint64_t from a stream.
  *
@@ -366,220 +339,6 @@ inline void Write64BE(WRITER &writer, const int64_t value)
 }
 
 //******************************************************************************
-
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline double ReadDoubleLE(READER &reader)
-{
-    double rvo;
-    uint64_t bits = ReadU64LE(reader);
-    std::memcpy(&rvo, &bits, sizeof(rvo));
-    return rvo;
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteDoubleLE(WRITER &writer, const double value)
-{
-    uint64_t out;
-    std::memcpy(&out, &value, sizeof(out));
-    WriteU64LE(writer, out);
-}
-
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline double ReadDoubleBE(READER &reader)
-{
-    double rvo;
-    uint64_t bits = ReadU64BE(reader);
-    std::memcpy(&rvo, &bits, sizeof(rvo));
-    return rvo;
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteDoubleBE(WRITER &writer, const double value)
-{
-    uint64_t out;
-    std::memcpy(&out, &value, sizeof(out));
-    WriteU64BE(writer, out);
-}
-
-//******************************************************************************
-
-/**
- * @brief Read a protobuf-style Varint.
- *
- * @detail This variable-length integer encoding uses the least significant
- *         7 bits of each byte for the numeric payload, and the msb is a
- *         continuation flag.
- *
- * @param reader Reader to operate on.
- * @return An unsigned 32-bit integer from the Reader.
- * @throws std::runtime_error if there are too many varint bytes for a 64-bit integer.
- */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint32_t ReadUVarint32(READER &reader)
-{
-    return Detail::ReadWithExcept<uint32_t>(reader, TryReadUVarint32<READER>);
-}
-
-/**
- * @brief Write a protobuf-style Varint.
- *
- * @detail This variable-length integer encoding uses the least significant
- *         7 bits of each byte for the numeric payload, and the msb is a
- *         continuation flag.
- *
- * @param writer Writer to operate on.
- * @param value An unsigned 32-bit integer to write to the Writer.
- */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteUVarint32(WRITER &writer, const uint32_t value)
-{
-    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteUVarint32<WRITER>);
-}
-
-/**
- * @brief Read a signed integer encoded as a protobuf-style Varint.
- *
- * @detail This function decodes negative numbers as large positive numbers.
- *
- * @param reader Reader to operate on.
- * @return An signed 32-bit integer from the Reader.
- */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int32_t ReadVarint32(READER &reader)
-{
-    return Detail::ReadWithExcept<int32_t>(reader, TryReadVarint32<READER>);
-}
-
-/**
- * @brief Write a signed integer encoded as a protobuf-style Varint.
- *
- * @detail This function encodes negative numbers as large positive numbers.
- *
- * @param writer Writer to operate on.
- * @param value An unsigned 32-bit integer to write to the Writer.
- */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteVarint32(WRITER &writer, const int32_t value)
-{
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteVarint32<WRITER>);
-}
-
-/**
- * @brief Read a signed integer zig-zag encoded as a protobuf-style Varint.
- *
- * @detail This function decodes the Varint using zig-zag encoding.
- *
- * @param reader Reader to operate on.
- * @return An signed 32-bit integer from the Reader.
- */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint32_t ReadSVarint32(READER &reader)
-{
-    return Detail::ReadWithExcept<int32_t>(reader, TryReadSVarint32<READER>);
-}
-
-/**
- * @brief Write a signed integer zig-zag encoded as a protobuf-style Varint.
- *
- * @detail This function encodes the Varint using zig-zag encoding.
- *
- * @param writer Writer to operate on.
- * @param value An unsigned 32-bit integer to write to the Writer.
- */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteSVarint32(WRITER &writer, const int32_t value)
-{
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteSVarint32<WRITER>);
-}
-
-/**
- * @brief Read a protobuf-style Varint.
- *
- * @detail This variable-length integer encoding uses the least significant
- *         7 bits of each byte for the numeric payload, and the msb is a
- *         continuation flag.
- *
- * @param reader Reader to operate on.
- * @return An unsigned 64-bit integer from the Reader.
- * @throws std::runtime_error if there are too many varint bytes for a 64-bit integer.
- */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint64_t ReadUVarint64(READER &reader)
-{
-    return Detail::ReadWithExcept<uint64_t>(reader, TryReadUVarint64<READER>);
-}
-
-/**
- * @brief Write a protobuf-style Varint.
- *
- * @detail This variable-length integer encoding uses the least significant
- *         7 bits of each byte for the numeric payload, and the msb is a
- *         continuation flag.
- *
- * @param writer Writer to operate on.
- * @param value An unsigned 64-bit integer to write to the Writer.
- */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteUVarint64(WRITER &writer, const uint64_t value)
-{
-    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteUVarint64<WRITER>);
-}
-
-/**
- * @brief Read a signed integer encoded as a protobuf-style Varint.
- *
- * @detail This function decodes negative numbers as large positive numbers.
- *
- * @param reader Reader to operate on.
- * @return An signed 64-bit integer from the Reader.
- */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int64_t ReadVarint64(READER &reader)
-{
-    return Detail::ReadWithExcept<int64_t>(reader, TryReadVarint64<READER>);
-}
-
-/**
- * @brief Write a signed integer encoded as a protobuf-style Varint.
- *
- * @detail This function encodes negative numbers as large positive numbers.
- *
- * @param writer Writer to operate on.
- * @param value An unsigned 64-bit integer to write to the Writer.
- */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteVarint64(WRITER &writer, const int64_t value)
-{
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteVarint64<WRITER>);
-}
-
-/**
- * @brief Read a signed integer zig-zag encoded as a protobuf-style Varint.
- *
- * @detail This function decodes the Varint using zig-zag encoding.
- *
- * @param reader Reader to operate on.
- * @return An signed 64-bit integer from the Reader.
- */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int64_t ReadSVarint64(READER &reader)
-{
-    return Detail::ReadWithExcept<int64_t>(reader, TryReadSVarint64<READER>);
-}
-
-/**
- * @brief Write a signed integer zig-zag encoded as a protobuf-style Varint.
- *
- * @detail This function encodes the Varint using zig-zag encoding.
- *
- * @param writer Writer to operate on.
- * @param value An unsigned 64-bit integer to write to the Writer.
- */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteSVarint64(WRITER &writer, const int64_t value)
-{
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteSVarint64<WRITER>);
-}
 
 /**
  * @brief Read a fixed-size byte buffer from the passed reader.
@@ -679,5 +438,3 @@ inline void WriteString(WRITER &writer, IT begin, IT end)
 }
 
 } // namespace LexIO
-
-#endif

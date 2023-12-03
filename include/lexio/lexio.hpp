@@ -14,18 +14,11 @@
 //  limitations under the License.
 //
 
-#ifndef LEXIO_LEXIO_H
-#define LEXIO_LEXIO_H
+#pragma once
 
-#include "./core.h"
+#include "./core.hpp"
 
-#include "./array.h"
-#include "./bufreader.h"
-#include "./container.h"
-#include "./file.h"
-#include "./ref.h"
-#include "./tryserialize.h"
-#include "./serialize.h"
-#include "./vector.h"
-
-#endif
+#include "./bufreader.hpp"
+#include "./ref.hpp"
+#include "./serialize.hpp"
+#include "./stream.hpp"

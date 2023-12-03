@@ -15,15 +15,14 @@
 //
 
 /**
- * @file tryserialize.h
+ * @file tryint.h
  *
- * Serialization functions that return false on failure.
+ * Integer serialization functions that return false on failure.
  */
 
-#ifndef LEXIO_TRYSERIALIZE_H
-#define LEXIO_TRYSERIALIZE_H
+#pragma once
 
-#include "./core.h"
+#include "../core.hpp"
 
 #include <cstring>
 
@@ -335,46 +334,6 @@ inline bool TryWrite32BE(WRITER &writer, const int32_t value)
 
 //******************************************************************************
 
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadFloatLE(float &out, READER &reader)
-{
-    uint32_t bits;
-    if (!TryReadU32LE<READER>(bits, reader))
-    {
-        return false;
-    }
-    out = Detail::BitCast<float, uint32_t>(bits);
-    return true;
-}
-
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadFloatBE(float &out, READER &reader)
-{
-    uint32_t bits;
-    if (!TryReadU32BE<READER>(bits, reader))
-    {
-        return false;
-    }
-    out = Detail::BitCast<float, uint32_t>(bits);
-    return true;
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteFloatLE(WRITER &writer, const float value)
-{
-    const uint32_t bits = Detail::BitCast<uint32_t, float>(value);
-    return TryWriteU32LE<WRITER>(writer, bits);
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteFloatBE(WRITER &writer, const float value)
-{
-    const uint32_t bits = Detail::BitCast<uint32_t, float>(value);
-    return TryWriteU32BE<WRITER>(writer, bits);
-}
-
-//******************************************************************************
-
 /**
  * @brief Try to read a little-endian uint64_t from a stream.
  *
@@ -485,170 +444,6 @@ inline bool TryWrite64BE(WRITER &writer, const int64_t value)
 
 //******************************************************************************
 
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadUVarint32(uint32_t &out, READER &reader)
-{
-    constexpr int MAX_BYTES = 5;
-    uint32_t rvo = 0;
-    uint8_t b = 0;
-
-    for (int count = 0;; count++)
-    {
-        if (count == MAX_BYTES)
-        {
-            return false;
-        }
-        else if (!TryReadU8<READER>(b, reader))
-        {
-            return false;
-        }
-
-        rvo |= static_cast<uint32_t>(b & 0x7F) << (7 * count);
-
-        if ((b & 0x80) == 0)
-        {
-            break;
-        }
-    }
-
-    out = rvo;
-    return true;
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteUVarint32(WRITER &writer, const uint32_t value)
-{
-    uint32_t v = value;
-    while (v >= 0x80)
-    {
-        if (!TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v | 0x80)))
-        {
-            return false;
-        }
-        v >>= 7;
-    }
-    return TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v));
-}
-
-//******************************************************************************
-
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadVarint32(int32_t &out, READER &reader)
-{
-    return Detail::ReadSigned<int32_t>(out, reader, TryReadUVarint32<READER>);
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteVarint32(WRITER &writer, const int32_t value)
-{
-    return Detail::WriteSigned<int32_t>(writer, value, TryWriteUVarint32<WRITER>);
-}
-
-//******************************************************************************
-
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadSVarint32(int32_t &out, READER &reader)
-{
-    uint32_t outVal;
-    if (!TryReadUVarint32<READER>(outVal, reader))
-    {
-        return false;
-    }
-    out = static_cast<int32_t>((outVal >> 1) ^ (~(outVal & 1) + 1));
-    return true;
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteSVarint32(WRITER &writer, const int32_t value)
-{
-    const uint32_t var = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 31);
-    return TryWriteUVarint32<WRITER>(writer, var);
-}
-
-//******************************************************************************
-
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadUVarint64(uint64_t &out, READER &reader)
-{
-    constexpr int MAX_BYTES = 10;
-    uint64_t rvo = 0;
-    uint8_t b = 0;
-
-    for (int count = 0;; count++)
-    {
-        if (count == MAX_BYTES)
-        {
-            return false;
-        }
-        if (!TryReadU8<READER>(b, reader))
-        {
-            return false;
-        }
-
-        rvo |= static_cast<uint64_t>(b & 0x7F) << (7 * count);
-
-        if ((b & 0x80) == 0)
-        {
-            break;
-        }
-    }
-
-    out = rvo;
-    return true;
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteUVarint64(WRITER &writer, const uint64_t value)
-{
-    uint64_t v = value;
-    while (v >= 0x80)
-    {
-        if (!TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v | 0x80)))
-        {
-            return false;
-        }
-        v >>= 7;
-    }
-    return TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v));
-}
-
-//******************************************************************************
-
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadVarint64(int64_t &out, READER &reader)
-{
-    return Detail::ReadSigned<int64_t>(out, reader, TryReadUVarint64<READER>);
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteVarint64(WRITER &writer, const int64_t value)
-{
-    return Detail::WriteSigned<int64_t>(writer, value, TryWriteUVarint64<WRITER>);
-}
-
-//******************************************************************************
-
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadSVarint64(int64_t &out, READER &reader)
-{
-    uint64_t outVal;
-    if (!TryReadUVarint64<READER>(outVal, reader))
-    {
-        return false;
-    }
-    out = static_cast<int64_t>((outVal >> 1) ^ (~(outVal & 1) + 1));
-    return true;
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteSVarint64(WRITER &writer, const int64_t value)
-{
-    const uint64_t var = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
-    return TryWriteUVarint64<WRITER>(writer, var);
-}
-
-//******************************************************************************
-
 template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadBytes(IT outBegin, IT outEnd, READER &reader)
 {
@@ -732,5 +527,3 @@ inline bool TryWriteString(WRITER &writer, IT begin, IT end)
 }
 
 } // namespace LexIO
-
-#endif

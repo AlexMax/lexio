@@ -14,17 +14,13 @@
 //  limitations under the License.
 //
 
-#ifndef LEXIO_TEST_H
-#define LEXIO_TEST_H
+#pragma once
 
-#include <cstring>
-#include <iterator>
+#include "./serialize/tryint.hpp"
+#include "./serialize/int.hpp"
 
-#if defined(LEXIO_TEST_NONSTD)
-#include "nonstd/span.hpp"
-#define LEXIO_SPAN(T) nonstd::span<T>
-#endif
+#include "./serialize/tryvarint.hpp"
+#include "./serialize/varint.hpp"
 
-#include "lexio/lexio.hpp"
-
-#endif
+#include "./serialize/tryfloat.hpp"
+#include "./serialize/float.hpp"

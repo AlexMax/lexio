@@ -18,12 +18,11 @@
 // Stream and BufReader that uses std::vector under the hood.
 //
 
-#ifndef LEXIO_VECTOR_H
-#define LEXIO_VECTOR_H
+#pragma once
 
-#include "./core.h"
+#include "../core.hpp"
 
-#include "./container.h"
+#include "./container.hpp"
 
 #include <vector>
 
@@ -126,5 +125,3 @@ class VectorBufReader
 };
 
 } // namespace LexIO
-
-#endif

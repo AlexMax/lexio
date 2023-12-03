@@ -14,17 +14,9 @@
 //  limitations under the License.
 //
 
-#ifndef LEXIO_TEST_H
-#define LEXIO_TEST_H
+#pragma once
 
-#include <cstring>
-#include <iterator>
-
-#if defined(LEXIO_TEST_NONSTD)
-#include "nonstd/span.hpp"
-#define LEXIO_SPAN(T) nonstd::span<T>
-#endif
-
-#include "lexio/lexio.hpp"
-
-#endif
+#include "./stream/array.hpp"
+#include "./stream/container.hpp"
+#include "./stream/file.hpp"
+#include "./stream/vector.hpp"

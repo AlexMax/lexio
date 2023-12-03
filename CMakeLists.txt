@@ -14,16 +14,25 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 project(lexio LANGUAGES CXX)
 
 set(LEXIO_HEADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/array.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bufreader.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/container.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/file.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/ref.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/tryserialize.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/vector.h")
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bufreader.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/ref.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream.hpp"
+
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/float.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/int.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/tryfloat.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/tryint.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/tryvarint.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/varint.hpp"
+
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/array.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/container.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/file.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/vector.hpp")
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${LEXIO_HEADERS})
 
 # Main LexIO header-only library
 add_library(lexio INTERFACE ${LEXIO_HEADERS})
