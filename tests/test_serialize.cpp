@@ -550,42 +550,92 @@ TEST_CASE("TryReadU64LE/ReadU64LE")
     REQUIRE_THROWS(LexIO::ReadU64LE(buffer));
 }
 
-TEST_CASE("WriteU64LE")
+TEST_CASE("TryWriteU64LE/WriteU64LE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::WriteU64LE(buffer, 0xffeeddccbbaa9988);
-    LexIO::Rewind(buffer);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint64_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint64_t)> &cbuffer = buffer;
 
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xcc);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xee);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
+        REQUIRE(LexIO::TryWriteU64LE(buffer, 0xffeeddccbbaa9988) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE(LexIO::TryWriteU64LE(buffer, 0xffeeddccbbaa9988) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint64_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint64_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteU64LE(buffer, 0xffeeddccbbaa9988));
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE_THROWS(LexIO::WriteU64LE(buffer, 0xffeeddccbbaa9988));
+    }
 }
 
-TEST_CASE("ReadU64BE")
+TEST_CASE("TryReadU64BE/ReadU64BE")
 {
     LexIO::VectorStream buffer({0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88});
+
+    uint64_t test;
+    REQUIRE(LexIO::TryReadU64BE(test, buffer) == true);
+    REQUIRE(test == 0xffeeddccbbaa9988);
+    REQUIRE(LexIO::TryReadU64BE(test, buffer) == false);
+
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::ReadU64BE(buffer) == 0xffeeddccbbaa9988);
+    REQUIRE_THROWS(LexIO::ReadU64BE(buffer));
 }
 
-TEST_CASE("WriteU64BE")
+TEST_CASE("TryWriteU64BE/WriteU64BE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::WriteU64BE(buffer, 0xffeeddccbbaa9988);
-    LexIO::Rewind(buffer);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint64_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint64_t)> &cbuffer = buffer;
 
-    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xee);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xcc);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+        REQUIRE(LexIO::TryWriteU64BE(buffer, 0xffeeddccbbaa9988) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(LexIO::TryWriteU64BE(buffer, 0xffeeddccbbaa9988) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint64_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint64_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteU64BE(buffer, 0xffeeddccbbaa9988));
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE_THROWS(LexIO::WriteU64BE(buffer, 0xffeeddccbbaa9988));
+    }
 }
 
 TEST_CASE("TryRead64LE/Read64LE")
@@ -602,42 +652,92 @@ TEST_CASE("TryRead64LE/Read64LE")
     REQUIRE_THROWS(LexIO::Read64LE(buffer));
 }
 
-TEST_CASE("Write64LE")
+TEST_CASE("TryWrite64LE/Write64LE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::Write64LE(buffer, -4822678189205112);
-    LexIO::Rewind(buffer);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint64_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint64_t)> &cbuffer = buffer;
 
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xcc);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xee);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
+        REQUIRE(LexIO::TryWrite64LE(buffer, -4822678189205112) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE(LexIO::TryWrite64LE(buffer, -4822678189205112) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint64_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint64_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::Write64LE(buffer, -4822678189205112));
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE_THROWS(LexIO::Write64LE(buffer, -4822678189205112));
+    }
 }
 
-TEST_CASE("Read64BE")
+TEST_CASE("TryRead64BE/Read64BE")
 {
     LexIO::VectorStream buffer({0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88});
+
+    int64_t test;
+    REQUIRE(LexIO::TryRead64BE(test, buffer) == true);
+    REQUIRE(test == -4822678189205112);
+    REQUIRE(LexIO::TryRead64BE(test, buffer) == false);
+
+    LexIO::Rewind(buffer);
     REQUIRE(LexIO::Read64BE(buffer) == -4822678189205112);
+    REQUIRE_THROWS(LexIO::Read64BE(buffer));
 }
 
-TEST_CASE("Write64BE")
+TEST_CASE("TryWrite64BE/Write64BE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::Write64BE(buffer, -4822678189205112);
-    LexIO::Rewind(buffer);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int64_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int64_t)> &cbuffer = buffer;
 
-    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xee);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xcc);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+        REQUIRE(LexIO::TryWrite64BE(buffer, -4822678189205112) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(LexIO::TryWrite64BE(buffer, -4822678189205112) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int64_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int64_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::Write64BE(buffer, -4822678189205112));
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE_THROWS(LexIO::Write64BE(buffer, -4822678189205112));
+    }
 }
 
 TEST_CASE("ReadDoubleLE")
