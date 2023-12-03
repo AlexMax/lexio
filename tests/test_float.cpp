@@ -120,56 +120,120 @@ TEST_CASE("TryWriteFloatBE/WriteFloatBE")
     }
 }
 
-TEST_CASE("ReadDoubleLE")
+TEST_CASE("TryReadDoubleLE/ReadDoubleLE")
 {
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
-    const double check = LexIO::ReadDoubleLE(buffer);
 
-    int exp;
-    const double x = std::frexp(check, &exp);
+    int exp = 0;
+    double test, x;
+    REQUIRE(LexIO::TryReadDoubleLE(test, buffer) == true);
+    x = std::frexp(test, &exp);
     REQUIRE(x == -0.96457516339869276);
     REQUIRE(exp == 1024);
-}
+    REQUIRE(LexIO::TryReadDoubleLE(test, buffer) == false);
 
-TEST_CASE("WriteDoubleLE")
-{
-    LexIO::VectorStream buffer;
-    LexIO::WriteDoubleLE(buffer, std::ldexp(-0.96457516339869276, 1024));
     LexIO::Rewind(buffer);
-
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xcc);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xee);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
+    REQUIRE_NOTHROW(test = LexIO::ReadDoubleLE(buffer));
+    x = std::frexp(test, &exp);
+    REQUIRE(x == -0.96457516339869276);
+    REQUIRE(exp == 1024);
+    REQUIRE_THROWS(LexIO::ReadDoubleLE(buffer));
 }
 
-TEST_CASE("ReadDoubleBE")
+TEST_CASE("TryWriteDoubleLE/WriteDoubleLE")
+{
+    const double test = std::ldexp(-0.96457516339869276, 1024);
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(double)> buffer;
+        const LexIO::ArrayStream<sizeof(double)> &cbuffer = buffer;
+
+        REQUIRE(LexIO::TryWriteDoubleLE(buffer, test) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE(LexIO::TryWriteDoubleLE(buffer, test) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(double)> buffer;
+        const LexIO::ArrayStream<sizeof(double)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteDoubleLE(buffer, test));
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE_THROWS(LexIO::WriteDoubleLE(buffer, test));
+    }
+}
+
+TEST_CASE("TryReadDoubleBE/ReadDoubleBE")
 {
     LexIO::VectorStream buffer({0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88});
-    const double check = LexIO::ReadDoubleBE(buffer);
 
-    int exp;
-    const double x = std::frexp(check, &exp);
+    int exp = 0;
+    double test, x;
+    REQUIRE(LexIO::TryReadDoubleBE(test, buffer) == true);
+    x = std::frexp(test, &exp);
     REQUIRE(x == -0.96457516339869276);
     REQUIRE(exp == 1024);
+    REQUIRE(LexIO::TryReadDoubleBE(test, buffer) == false);
+
+    LexIO::Rewind(buffer);
+    REQUIRE_NOTHROW(test = LexIO::ReadDoubleBE(buffer));
+    x = std::frexp(test, &exp);
+    REQUIRE(x == -0.96457516339869276);
+    REQUIRE(exp == 1024);
+    REQUIRE_THROWS(LexIO::ReadDoubleBE(buffer));
 }
 
-TEST_CASE("WriteDoubleBE")
+TEST_CASE("TryWriteDoubleLE/WriteDoubleBE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::WriteDoubleBE(buffer, std::ldexp(-0.96457516339869276, 1024));
-    LexIO::Rewind(buffer);
+    const double test = std::ldexp(-0.96457516339869276, 1024);
 
-    REQUIRE(LexIO::ReadU8(buffer) == 0xff);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xee);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xdd);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xcc);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xbb);
-    REQUIRE(LexIO::ReadU8(buffer) == 0xaa);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(double)> buffer;
+        const LexIO::ArrayStream<sizeof(double)> &cbuffer = buffer;
+
+        REQUIRE(LexIO::TryWriteDoubleBE(buffer, test) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(LexIO::TryWriteDoubleBE(buffer, test) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(double)> buffer;
+        const LexIO::ArrayStream<sizeof(double)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteDoubleBE(buffer, test));
+        REQUIRE(cbuffer.Container()[i++] == 0xff);
+        REQUIRE(cbuffer.Container()[i++] == 0xee);
+        REQUIRE(cbuffer.Container()[i++] == 0xdd);
+        REQUIRE(cbuffer.Container()[i++] == 0xcc);
+        REQUIRE(cbuffer.Container()[i++] == 0xbb);
+        REQUIRE(cbuffer.Container()[i++] == 0xaa);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE_THROWS(LexIO::WriteDoubleBE(buffer, test));
+    }
 }

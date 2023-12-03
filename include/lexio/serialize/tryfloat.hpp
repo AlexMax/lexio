@@ -21,46 +21,82 @@
 namespace LexIO
 {
 
-//******************************************************************************
-
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadFloatLE(float &out, READER &reader)
 {
-    uint32_t bits;
+    uint32_t bits = 0;
     if (!TryReadU32LE<READER>(bits, reader))
     {
         return false;
     }
-    out = Detail::BitCast<float, uint32_t>(bits);
+    out = Detail::BitCast<float>(bits);
     return true;
 }
 
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadFloatBE(float &out, READER &reader)
 {
-    uint32_t bits;
+    uint32_t bits = 0;
     if (!TryReadU32BE<READER>(bits, reader))
     {
         return false;
     }
-    out = Detail::BitCast<float, uint32_t>(bits);
+    out = Detail::BitCast<float>(bits);
     return true;
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteFloatLE(WRITER &writer, const float value)
 {
-    const uint32_t bits = Detail::BitCast<uint32_t, float>(value);
+    const uint32_t bits = Detail::BitCast<uint32_t>(value);
     return TryWriteU32LE<WRITER>(writer, bits);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteFloatBE(WRITER &writer, const float value)
 {
-    const uint32_t bits = Detail::BitCast<uint32_t, float>(value);
+    const uint32_t bits = Detail::BitCast<uint32_t>(value);
     return TryWriteU32BE<WRITER>(writer, bits);
 }
 
 //******************************************************************************
+
+template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
+inline bool TryReadDoubleLE(double &out, READER &reader)
+{
+    uint64_t bits = 0;
+    if (!TryReadU64LE<READER>(bits, reader))
+    {
+        return false;
+    }
+    out = Detail::BitCast<double>(bits);
+    return true;
+}
+
+template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
+inline bool TryReadDoubleBE(double &out, READER &reader)
+{
+    uint64_t bits = 0;
+    if (!TryReadU64BE<READER>(bits, reader))
+    {
+        return false;
+    }
+    out = Detail::BitCast<double>(bits);
+    return true;
+}
+
+template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline bool TryWriteDoubleLE(WRITER &writer, const double value)
+{
+    const uint64_t bits = Detail::BitCast<uint64_t>(value);
+    return TryWriteU64LE<WRITER>(writer, bits);
+}
+
+template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline bool TryWriteDoubleBE(WRITER &writer, const double value)
+{
+    const uint64_t bits = Detail::BitCast<uint64_t>(value);
+    return TryWriteU64BE<WRITER>(writer, bits);
+}
 
 } // namespace LexIO

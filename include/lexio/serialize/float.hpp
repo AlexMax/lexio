@@ -52,35 +52,25 @@ inline void WriteFloatBE(WRITER &writer, const float value)
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline double ReadDoubleLE(READER &reader)
 {
-    double rvo;
-    uint64_t bits = ReadU64LE(reader);
-    std::memcpy(&rvo, &bits, sizeof(rvo));
-    return rvo;
-}
-
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteDoubleLE(WRITER &writer, const double value)
-{
-    uint64_t out;
-    std::memcpy(&out, &value, sizeof(out));
-    WriteU64LE(writer, out);
+    return Detail::ReadWithExcept<double>(reader, TryReadDoubleLE<READER>);
 }
 
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline double ReadDoubleBE(READER &reader)
 {
-    double rvo;
-    uint64_t bits = ReadU64BE(reader);
-    std::memcpy(&rvo, &bits, sizeof(rvo));
-    return rvo;
+    return Detail::ReadWithExcept<double>(reader, TryReadDoubleBE<READER>);
+}
+
+template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline void WriteDoubleLE(WRITER &writer, const double value)
+{
+    Detail::WriteWithExcept<double>(writer, value, TryWriteDoubleLE<WRITER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void WriteDoubleBE(WRITER &writer, const double value)
 {
-    uint64_t out;
-    std::memcpy(&out, &value, sizeof(out));
-    WriteU64BE(writer, out);
+    Detail::WriteWithExcept<double>(writer, value, TryWriteDoubleBE<WRITER>);
 }
 
 } // namespace LexIO
