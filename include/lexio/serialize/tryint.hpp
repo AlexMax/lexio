@@ -89,6 +89,13 @@ inline bool TryReadU8(uint8_t &out, READER &reader)
     return true;
 }
 
+/**
+ * @brief Try to write a uint8_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU8(WRITER &writer, const uint8_t value)
 {
@@ -112,6 +119,13 @@ inline bool TryRead8(int8_t &out, READER &reader)
     return Detail::ReadSigned<int8_t>(out, reader, TryReadU8<READER>);
 }
 
+/**
+ * @brief Try to write a int8_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWrite8(WRITER &writer, const int8_t value)
 {
@@ -160,6 +174,13 @@ inline bool TryReadU16BE(uint16_t &out, READER &reader)
     return true;
 }
 
+/**
+ * @brief Try to write a little-endian uint16_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU16LE(WRITER &writer, const uint16_t value)
 {
@@ -171,6 +192,13 @@ inline bool TryWriteU16LE(WRITER &writer, const uint16_t value)
     return count == sizeof(uint16_t);
 }
 
+/**
+ * @brief Try to write a big-endian uint16_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU16BE(WRITER &writer, const uint16_t value)
 {
@@ -210,12 +238,26 @@ inline bool TryRead16BE(int16_t &out, READER &reader)
     return Detail::ReadSigned<int16_t>(out, reader, TryReadU16BE<READER>);
 }
 
+/**
+ * @brief Try to write a little-endian int16_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWrite16LE(WRITER &writer, const int16_t value)
 {
     return Detail::WriteSigned<int16_t>(writer, value, TryWriteU16LE<WRITER>);
 }
 
+/**
+ * @brief Try to write a big-endian int16_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWrite16BE(WRITER &writer, const int16_t value)
 {
@@ -266,6 +308,13 @@ inline bool TryReadU32BE(uint32_t &out, READER &reader)
     return true;
 }
 
+/**
+ * @brief Try to write a little-endian uint32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU32LE(WRITER &writer, const uint32_t value)
 {
@@ -279,6 +328,13 @@ inline bool TryWriteU32LE(WRITER &writer, const uint32_t value)
     return count == sizeof(uint32_t);
 }
 
+/**
+ * @brief Try to write a big-endian uint32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU32BE(WRITER &writer, const uint32_t value)
 {
@@ -320,12 +376,26 @@ inline bool TryRead32BE(int32_t &out, READER &reader)
     return Detail::ReadSigned<int32_t>(out, reader, TryReadU32BE<READER>);
 }
 
+/**
+ * @brief Try to write a little-endian int32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWrite32LE(WRITER &writer, const int32_t value)
 {
     return Detail::WriteSigned<int32_t>(writer, value, TryWriteU32LE<WRITER>);
 }
 
+/**
+ * @brief Try to write a big-endian int32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWrite32BE(WRITER &writer, const int32_t value)
 {
@@ -380,6 +450,13 @@ inline bool TryReadU64BE(uint64_t &out, READER &reader)
     return true;
 }
 
+/**
+ * @brief Try to write a little-endian uint64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU64LE(WRITER &writer, const uint64_t value)
 {
@@ -391,6 +468,13 @@ inline bool TryWriteU64LE(WRITER &writer, const uint64_t value)
     return count == sizeof(uint64_t);
 }
 
+/**
+ * @brief Try to write a big-endian uint64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU64BE(WRITER &writer, const uint64_t value)
 {
@@ -430,12 +514,26 @@ inline bool TryRead64BE(int64_t &out, READER &reader)
     return Detail::ReadSigned<int64_t>(out, reader, TryReadU64BE<READER>);
 }
 
+/**
+ * @brief Try to write a little-endian int64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWrite64LE(WRITER &writer, const int64_t value)
 {
     return Detail::WriteSigned<int64_t>(writer, value, TryWriteU64LE<WRITER>);
 }
 
+/**
+ * @brief Try to write a big-endian int64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWrite64BE(WRITER &writer, const int64_t value)
 {
