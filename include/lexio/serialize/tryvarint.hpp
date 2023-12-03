@@ -127,6 +127,18 @@ inline bool TryWriteSVarint32(WRITER &writer, const int32_t value)
     return TryWriteUVarint32<WRITER>(writer, var);
 }
 
+constexpr size_t SVarint32Bytes(const int32_t value)
+{
+    size_t count = 1;
+    uint32_t v = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 31);
+    while (v >= 0x80)
+    {
+        count += 1;
+        v >>= 7;
+    }
+    return count;
+}
+
 //******************************************************************************
 
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
@@ -231,6 +243,18 @@ inline bool TryWriteSVarint64(WRITER &writer, const int64_t value)
 {
     const uint64_t var = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
     return TryWriteUVarint64<WRITER>(writer, var);
+}
+
+constexpr size_t SVarint64Bytes(const int64_t value)
+{
+    size_t count = 1;
+    uint64_t v = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
+    while (v >= 0x80)
+    {
+        count += 1;
+        v >>= 7;
+    }
+    return count;
 }
 
 } // namespace LexIO
