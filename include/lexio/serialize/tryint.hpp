@@ -148,7 +148,7 @@ inline bool TryReadU16LE(uint16_t &out, READER &reader)
  * @return True if the read was successful.
  */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint16_t TryReadU16BE(uint16_t &out, READER &reader)
+inline bool TryReadU16BE(uint16_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
     const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
