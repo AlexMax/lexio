@@ -14,11 +14,12 @@
 //  limitations under the License.
 //
 
-#ifndef LEXIO_TEST_H
-#define LEXIO_TEST_H
+#pragma once
 
 #include <cstring>
 #include <iterator>
+
+#include "config.h"
 
 #if defined(LEXIO_TEST_NONSTD)
 #include "nonstd/span.hpp"
@@ -26,5 +27,3 @@
 #endif
 
 #include "lexio/lexio.hpp"
-
-#endif

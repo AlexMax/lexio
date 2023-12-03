@@ -7,28 +7,32 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     GIT_TAG v3.4.0)
 FetchContent_MakeAvailable(Catch2)
+list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
+include(CTest)
+include(Catch)
 
-set(LEXIO_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/../include")
+set(TEST_SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_bytes.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_container.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_core.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_file.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_float.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_int.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_ref.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_varint.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/config.h")
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
 # Test suite.
-add_executable(test
-    test_bytes.cpp
-    test_core.cpp
-    test_container.cpp
-    test_file.cpp
-    test_float.cpp
-    test_int.cpp
-    test_ref.cpp
-    test_varint.cpp
-    test.h)
+add_executable(test ${TEST_SOURCES})
+target_include_directories(test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(test lexio Catch2::Catch2WithMain)
-
-if(LEXIO_TEST_NONSTD)
-    target_compile_definitions(test PUBLIC LEXIO_TEST_NONSTD)
-endif()
+catch_discover_tests(test)
 
 # Only use clang-tidy with Clang.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT MSVC)
     find_program(CLANG_TIDY_EXE clang-tidy)
     if(CLANG_TIDY_EXE)
         set_target_properties(test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")

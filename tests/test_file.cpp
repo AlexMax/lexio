@@ -23,7 +23,7 @@ TEST_CASE("Test file opened in read mode")
 {
     constexpr const char *firstLine = "The quick brown fox";
 
-    auto file = LexIO::Open("../../tests/test_file.txt", LexIO::OpenMode::read);
+    auto file = LexIO::Open(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
 
     // Test reading.
     uint8_t readBuffer[32];
