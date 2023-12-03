@@ -50,13 +50,60 @@ TEST_CASE("TryReadU8/ReadU8")
     REQUIRE_THROWS(LexIO::ReadU8(buffer));
 }
 
-TEST_CASE("WriteU8")
+TEST_CASE("TryWriteU8/WriteU8")
 {
-    LexIO::VectorStream buffer;
-    LexIO::WriteU8(buffer, 0x88);
+    {
+        LexIO::ArrayStream<sizeof(uint8_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint8_t)> &cbuffer = buffer;
+
+        REQUIRE(LexIO::TryWriteU8(buffer, 0x88) == true);
+        REQUIRE(cbuffer.Container()[0] == 0x88);
+        REQUIRE(LexIO::TryWriteU8(buffer, 0x88) == false);
+    }
+
+    {
+        LexIO::ArrayStream<1> buffer;
+        const LexIO::ArrayStream<1> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteU8(buffer, 0x88));
+        REQUIRE(cbuffer.Container()[0] == 0x88);
+        REQUIRE_THROWS(LexIO::WriteU8(buffer, 0x88));
+    }
+}
+
+TEST_CASE("TryRead8/Read8")
+{
+    LexIO::VectorStream buffer = {0x88};
+
+    int8_t test;
+    REQUIRE(LexIO::TryRead8(test, buffer) == true);
+    REQUIRE(test == -120);
+    REQUIRE(LexIO::TryRead8(test, buffer) == false);
 
     LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::Read8(buffer) == -120);
+    REQUIRE_THROWS(LexIO::Read8(buffer));
+}
+
+TEST_CASE("TryWrite8/Write8")
+{
+    {
+        LexIO::ArrayStream<sizeof(int8_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int8_t)> &cbuffer = buffer;
+
+        REQUIRE(LexIO::TryWrite8(buffer, -120) == true);
+        REQUIRE(cbuffer.Container()[0] == 0x88);
+        REQUIRE(LexIO::TryWrite8(buffer, -120) == false);
+    }
+
+    {
+        LexIO::ArrayStream<sizeof(int8_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int8_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::Write8(buffer, -120));
+        REQUIRE(cbuffer.Container()[0] == 0x88);
+        REQUIRE_THROWS(LexIO::Write8(buffer, -120));
+    }
 }
 
 TEST_CASE("TryReadU16LE/ReadU16LE")
@@ -73,30 +120,68 @@ TEST_CASE("TryReadU16LE/ReadU16LE")
     REQUIRE_THROWS(LexIO::ReadU16LE(buffer));
 }
 
-TEST_CASE("WriteU16LE")
+TEST_CASE("TryWriteU16LE/WriteU16LE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::WriteU16LE(buffer, 0x9988);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint16_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint16_t)> &cbuffer = buffer;
 
-    LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
+        REQUIRE(LexIO::TryWriteU16LE(buffer, 0x9988) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(LexIO::TryWriteU16LE(buffer, 0x9988) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint16_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint16_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteU16LE(buffer, 0x9988));
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE_THROWS(LexIO::WriteU16LE(buffer, 0x9988));
+    }
 }
 
-TEST_CASE("ReadU16BE")
+TEST_CASE("TryReadU16BE/ReadU16BE")
 {
     LexIO::VectorStream buffer({0x88, 0x99});
-    REQUIRE(LexIO::ReadU16BE(buffer) == 0x8899);
-}
 
-TEST_CASE("WriteU16BE")
-{
-    LexIO::VectorStream buffer;
-    LexIO::WriteU16BE(buffer, 0x9988);
+    uint16_t test;
+    REQUIRE(LexIO::TryReadU16BE(test, buffer) == true);
+    REQUIRE(test == 0x8899);
+    REQUIRE(LexIO::TryReadU16BE(test, buffer) == false);
 
     LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+    REQUIRE(LexIO::ReadU16BE(buffer) == 0x8899);
+    REQUIRE_THROWS(LexIO::ReadU16BE(buffer));
+}
+
+TEST_CASE("TryWriteU16BE/WriteU16BE")
+{
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint16_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint16_t)> &cbuffer = buffer;
+
+        REQUIRE(LexIO::TryWriteU16BE(buffer, 0x9988) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(LexIO::TryWriteU16BE(buffer, 0x9988) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(uint16_t)> buffer;
+        const LexIO::ArrayStream<sizeof(uint16_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::WriteU16BE(buffer, 0x9988));
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE_THROWS(LexIO::WriteU16BE(buffer, 0x9988));
+    }
 }
 
 TEST_CASE("TryRead16LE/Read16LE")
@@ -113,14 +198,29 @@ TEST_CASE("TryRead16LE/Read16LE")
     REQUIRE_THROWS(LexIO::Read16LE(buffer));
 }
 
-TEST_CASE("Write16LE")
+TEST_CASE("TryWrite16LE/Write16LE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::Write16LE(buffer, -26232);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int16_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int16_t)> &cbuffer = buffer;
 
-    LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
+        REQUIRE(LexIO::TryWrite16LE(buffer, -26232) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(LexIO::TryWrite16LE(buffer, -26232) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int16_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int16_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::Write16LE(buffer, -26232));
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE_THROWS(LexIO::Write16LE(buffer, -26232));
+    }
 }
 
 TEST_CASE("Read16BE")
@@ -129,14 +229,29 @@ TEST_CASE("Read16BE")
     REQUIRE(LexIO::Read16BE(buffer) == -26232);
 }
 
-TEST_CASE("Write16BE")
+TEST_CASE("TryWrite16BE/Write16BE")
 {
-    LexIO::VectorStream buffer;
-    LexIO::Write16BE(buffer, -26232);
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int16_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int16_t)> &cbuffer = buffer;
 
-    LexIO::Rewind(buffer);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x99);
-    REQUIRE(LexIO::ReadU8(buffer) == 0x88);
+        REQUIRE(LexIO::TryWrite16BE(buffer, -26232) == true);
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE(LexIO::TryWrite16BE(buffer, -26232) == false);
+    }
+
+    {
+        size_t i = 0;
+        LexIO::ArrayStream<sizeof(int16_t)> buffer;
+        const LexIO::ArrayStream<sizeof(int16_t)> &cbuffer = buffer;
+
+        REQUIRE_NOTHROW(LexIO::Write16BE(buffer, -26232));
+        REQUIRE(cbuffer.Container()[i++] == 0x99);
+        REQUIRE(cbuffer.Container()[i++] == 0x88);
+        REQUIRE_THROWS(LexIO::Write16BE(buffer, -26232));
+    }
 }
 
 TEST_CASE("TryReadU32LE/ReadU32LE")

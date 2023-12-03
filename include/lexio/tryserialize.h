@@ -66,19 +66,6 @@ inline constexpr bool WriteSigned(WRITER &writer, const TYPE &value, TRY_WRITE &
     return tryWrite(writer, static_cast<TYPE>(value));
 }
 
-template <typename TYPE, typename READER, typename READ>
-inline constexpr TYPE ReadSignedWithExcept(READER &reader, READ &read)
-{
-    return static_cast<TYPE>(read(reader));
-}
-
-template <typename TYPE, typename WRITER, typename WRITE>
-inline constexpr void WriteSignedWithExcept(WRITER &writer, const TYPE &value, WRITE &write)
-{
-    using UNSIGNED_TYPE = std::make_unsigned_t<TYPE>;
-    write(writer, static_cast<UNSIGNED_TYPE>(value));
-}
-
 } // namespace Detail
 
 //******************************************************************************

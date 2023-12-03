@@ -90,13 +90,13 @@ inline void WriteU8(WRITER &writer, const uint8_t value)
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline int8_t Read8(READER &reader)
 {
-    return Detail::ReadSignedWithExcept<int8_t>(reader, ReadU8<READER>);
+    return Detail::ReadWithExcept<int8_t>(reader, TryRead8<READER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write8(WRITER &writer, const int8_t value)
 {
-    Detail::WriteSignedWithExcept<int8_t>(writer, value, WriteU8<WRITER>);
+    Detail::WriteWithExcept<int8_t>(writer, value, TryWrite8<WRITER>);
 }
 
 //******************************************************************************
@@ -151,7 +151,7 @@ inline void WriteU16BE(WRITER &writer, const uint16_t value)
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline int16_t Read16LE(READER &reader)
 {
-    return Detail::ReadSignedWithExcept<int16_t>(reader, ReadU16LE<READER>);
+    return Detail::ReadWithExcept<int16_t>(reader, TryRead16LE<READER>);
 }
 
 /**
@@ -164,19 +164,19 @@ inline int16_t Read16LE(READER &reader)
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline int16_t Read16BE(READER &reader)
 {
-    return Detail::ReadSignedWithExcept<int16_t>(reader, ReadU16BE<READER>);
+    return Detail::ReadWithExcept<int16_t>(reader, TryRead16BE<READER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write16LE(WRITER &writer, const int16_t value)
 {
-    Detail::WriteSignedWithExcept<uint16_t>(writer, value, TryWriteU16LE<WRITER>);
+    Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16LE<WRITER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write16BE(WRITER &writer, const int16_t value)
 {
-    Detail::WriteSignedWithExcept<uint16_t>(writer, value, TryWriteU16BE<WRITER>);
+    Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16BE<WRITER>);
 }
 
 //******************************************************************************
@@ -231,7 +231,7 @@ inline void WriteU32BE(WRITER &writer, const uint32_t value)
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline int32_t Read32LE(READER &reader)
 {
-    return Detail::ReadSignedWithExcept<int32_t>(reader, ReadU32LE<READER>);
+    return Detail::ReadWithExcept<int32_t>(reader, TryRead32LE<READER>);
 }
 
 /**
@@ -244,19 +244,19 @@ inline int32_t Read32LE(READER &reader)
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline int32_t Read32BE(READER &reader)
 {
-    return Detail::ReadSignedWithExcept<int32_t>(reader, ReadU32BE<READER>);
+    return Detail::ReadWithExcept<int32_t>(reader, TryRead32BE<READER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write32LE(WRITER &writer, const int32_t value)
 {
-    Detail::WriteSignedWithExcept<int32_t>(writer, value, TryWriteU32LE<WRITER>);
+    Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32LE<WRITER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write32BE(WRITER &writer, const int32_t value)
 {
-    Detail::WriteSignedWithExcept<int32_t>(writer, value, TryWriteU32BE<WRITER>);
+    Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32BE<WRITER>);
 }
 
 //******************************************************************************
@@ -339,7 +339,7 @@ inline void WriteU64BE(WRITER &writer, const uint64_t value)
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline int64_t Read64LE(READER &reader)
 {
-    return Detail::ReadSignedWithExcept<int64_t>(reader, ReadU64LE<READER>);
+    return Detail::ReadWithExcept<int64_t>(reader, TryRead64LE<READER>);
 }
 
 /**
@@ -352,19 +352,19 @@ inline int64_t Read64LE(READER &reader)
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline int64_t Read64BE(READER &reader)
 {
-    return Detail::ReadSignedWithExcept<int64_t>(reader, ReadU64BE<READER>);
+    return Detail::ReadWithExcept<int64_t>(reader, TryRead64BE<READER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write64LE(WRITER &writer, const int64_t value)
 {
-    Detail::WriteSignedWithExcept<int64_t>(writer, value, TryWriteU64LE<WRITER>);
+    Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64LE<WRITER>);
 }
 
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Write64BE(WRITER &writer, const int64_t value)
 {
-    Detail::WriteSignedWithExcept<int64_t>(writer, value, TryWriteU64BE<WRITER>);
+    Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64BE<WRITER>);
 }
 
 //******************************************************************************
