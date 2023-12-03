@@ -325,7 +325,7 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-template <typename READER>
+template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline size_t Read(ByteSpanT outBytes, READER &reader)
 {
     return reader.LexRead(outBytes);
@@ -339,7 +339,7 @@ inline size_t Read(ByteSpanT outBytes, READER &reader)
  * @param bufReader BufferedReader to examine.
  * @return Size of internal buffer.
  */
-template <typename BUFFERED_READER>
+template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
 inline size_t GetBufferSize(BUFFERED_READER &bufReader)
 {
     return bufReader.LexGetBufferSize();
@@ -358,7 +358,7 @@ inline size_t GetBufferSize(BUFFERED_READER &bufReader)
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-template <typename BUFFERED_READER>
+template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
 inline ConstByteSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
 {
     return bufReader.LexFillBuffer(size);
@@ -374,7 +374,7 @@ inline ConstByteSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
  * @throws std::runtime_error if a size greater than the amount of data
  *         in the visible buffer is passed to the function.
  */
-template <typename BUFFERED_READER>
+template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
 inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
 {
     bufReader.LexConsumeBuffer(size);
@@ -390,7 +390,7 @@ inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-template <typename WRITER>
+template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline size_t Write(WRITER &writer, ConstByteSpanT bytes)
 {
     return writer.LexWrite(bytes);
@@ -401,7 +401,7 @@ inline size_t Write(WRITER &writer, ConstByteSpanT bytes)
  *
  * @param writer Writer to operate on.
  */
-template <typename WRITER>
+template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline void Flush(WRITER &writer)
 {
     return writer.LexFlush();
@@ -416,7 +416,7 @@ inline void Flush(WRITER &writer)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-template <typename SEEKABLE>
+template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
 inline size_t Seek(SEEKABLE &seekable, const SeekPos pos)
 {
     return seekable.LexSeek(pos);
@@ -432,7 +432,7 @@ inline size_t Seek(SEEKABLE &seekable, const SeekPos pos)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-template <typename SEEKABLE>
+template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
 inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const seek whence)
 {
     return seekable.LexSeek(SeekPos(offset, whence));
@@ -452,7 +452,7 @@ inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const seek whence
  * @param bufReader BufferedReader to operate on.
  * @return Span view of the internal buffer.
  */
-template <typename BUFFERED_READER>
+template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
 inline ConstByteSpanT GetBuffer(BUFFERED_READER &bufReader)
 {
     return FillBuffer(bufReader, 0);
@@ -465,7 +465,7 @@ inline ConstByteSpanT GetBuffer(BUFFERED_READER &bufReader)
  * @param bufReader BufferedReader to operate on.
  * @return Total number of bytes read.
  */
-template <typename OUT_ITER, typename BUFFERED_READER>
+template <typename OUT_ITER, typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
 inline size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
 {
     size_t size = 0;
@@ -497,7 +497,7 @@ inline size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
  * @param term Byte to stop at.
  * @return Total number of bytes read.
  */
-template <typename OUT_ITER, typename BUFFERED_READER>
+template <typename OUT_ITER, typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
 inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
 {
     size_t size = 0;
@@ -538,7 +538,7 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename SEEKABLE>
+template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
 inline size_t Tell(SEEKABLE &seekable)
 {
     return Seek(seekable, 0, seek::current);
@@ -552,7 +552,7 @@ inline size_t Tell(SEEKABLE &seekable)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename SEEKABLE>
+template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
 inline size_t Rewind(SEEKABLE &seekable)
 {
     return Seek(seekable, 0, seek::start);
@@ -566,7 +566,7 @@ inline size_t Rewind(SEEKABLE &seekable)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename SEEKABLE>
+template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
 inline size_t Length(SEEKABLE &seekable)
 {
     const size_t old = Seek(seekable, 0, seek::current);
