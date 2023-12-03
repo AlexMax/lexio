@@ -12,11 +12,14 @@ set(LEXIO_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/../include")
 
 # Test suite.
 add_executable(test
+    test_bytes.cpp
     test_core.cpp
     test_container.cpp
     test_file.cpp
+    test_float.cpp
+    test_int.cpp
     test_ref.cpp
-    test_serialize.cpp
+    test_varint.cpp
     test.h)
 target_link_libraries(test lexio Catch2::Catch2WithMain)
 

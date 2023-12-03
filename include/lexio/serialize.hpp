@@ -16,11 +16,14 @@
 
 #pragma once
 
-#include "./serialize/tryint.hpp"
+#include "./serialize/bytes.hpp"
+#include "./serialize/trybytes.hpp"
+
 #include "./serialize/int.hpp"
+#include "./serialize/tryint.hpp"
 
-#include "./serialize/tryvarint.hpp"
 #include "./serialize/varint.hpp"
+#include "./serialize/tryvarint.hpp"
 
-#include "./serialize/tryfloat.hpp"
 #include "./serialize/float.hpp"
+#include "./serialize/tryfloat.hpp"
