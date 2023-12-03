@@ -21,39 +21,70 @@
 namespace LexIO
 {
 
+using float32_t = float;
+using float64_t = double;
+
+/**
+ * @brief Try to read a little-endian float32_t from a stream.
+ *
+ * @param out Float that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadFloatLE(float &out, READER &reader)
+inline bool TryReadFloat32LE(float32_t &out, READER &reader)
 {
     uint32_t bits = 0;
     if (!TryReadU32LE<READER>(bits, reader))
     {
         return false;
     }
-    out = Detail::BitCast<float>(bits);
+    out = Detail::BitCast<float32_t>(bits);
     return true;
 }
 
+/**
+ * @brief Try to read a big-endian float32_t from a stream.
+ *
+ * @param out Float that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadFloatBE(float &out, READER &reader)
+inline bool TryReadFloat32BE(float32_t &out, READER &reader)
 {
     uint32_t bits = 0;
     if (!TryReadU32BE<READER>(bits, reader))
     {
         return false;
     }
-    out = Detail::BitCast<float>(bits);
+    out = Detail::BitCast<float32_t>(bits);
     return true;
 }
 
+/**
+ * @brief Try to write a little-endian float32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteFloatLE(WRITER &writer, const float value)
+inline bool TryWriteFloat32LE(WRITER &writer, const float32_t value)
 {
     const uint32_t bits = Detail::BitCast<uint32_t>(value);
     return TryWriteU32LE<WRITER>(writer, bits);
 }
 
+/**
+ * @brief Try to write a big-endian float32_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteFloatBE(WRITER &writer, const float value)
+inline bool TryWriteFloat32BE(WRITER &writer, const float32_t value)
 {
     const uint32_t bits = Detail::BitCast<uint32_t>(value);
     return TryWriteU32BE<WRITER>(writer, bits);
@@ -61,39 +92,67 @@ inline bool TryWriteFloatBE(WRITER &writer, const float value)
 
 //******************************************************************************
 
+/**
+ * @brief Try to read a little-endian float64_t from a stream.
+ *
+ * @param out Float that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadDoubleLE(double &out, READER &reader)
+inline bool TryReadFloat64LE(float64_t &out, READER &reader)
 {
     uint64_t bits = 0;
     if (!TryReadU64LE<READER>(bits, reader))
     {
         return false;
     }
-    out = Detail::BitCast<double>(bits);
+    out = Detail::BitCast<float64_t>(bits);
     return true;
 }
 
+/**
+ * @brief Try to read a big-endian float64_t from a stream.
+ *
+ * @param out Float that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadDoubleBE(double &out, READER &reader)
+inline bool TryReadFloat64BE(float64_t &out, READER &reader)
 {
     uint64_t bits = 0;
     if (!TryReadU64BE<READER>(bits, reader))
     {
         return false;
     }
-    out = Detail::BitCast<double>(bits);
+    out = Detail::BitCast<float64_t>(bits);
     return true;
 }
 
+/**
+ * @brief Try to write a little-endian float64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteDoubleLE(WRITER &writer, const double value)
+inline bool TryWriteFloat64LE(WRITER &writer, const float64_t value)
 {
     const uint64_t bits = Detail::BitCast<uint64_t>(value);
     return TryWriteU64LE<WRITER>(writer, bits);
 }
 
+/**
+ * @brief Try to write a big-endian float64_t to a stream.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteDoubleBE(WRITER &writer, const double value)
+inline bool TryWriteFloat64BE(WRITER &writer, const float64_t value)
 {
     const uint64_t bits = Detail::BitCast<uint64_t>(value);
     return TryWriteU64BE<WRITER>(writer, bits);
