@@ -42,7 +42,7 @@ endif()
 
 check_compiler_flag(CXX -Wmost W_MOST)
 if(W_MOST)
-    target_compile_options(lexio PRIVATE "-Wmost")
+    target_compile_options(test PRIVATE "-Wmost")
 endif()
 
 add_sanitizers(Catch2)
