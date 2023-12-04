@@ -1,6 +1,8 @@
 include(CheckCXXCompilerFlag)
 include(FetchContent)
 
+option(SANITIZE_ADDRESS "Enable AddressSanitizer for sanitized targets." OFF)
+
 # Catch2
 FetchContent_Declare(
     Catch2
@@ -10,6 +12,24 @@ FetchContent_MakeAvailable(Catch2)
 list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
 include(CTest)
 include(Catch)
+
+set(LEXIO_EXTRA_FLAGS "")
+check_cxx_compiler_flag(-Wmost W_MOST) # clang
+if(W_MOST)
+    list(APPEND LEXIO_EXTRA_FLAGS "-Wmost")
+endif()
+if(SANITIZE_ADDRESS)
+    check_cxx_compiler_flag(-fsanitize=address F_SANITIZE_ADDRESS)
+    if(F_SANITIZE_ADDRESS)
+        if(MSVC)
+            target_compile_options(Catch2 PUBLIC "/fsanitize=address")
+            target_compile_definitions(Catch2 PUBLIC "_DISABLE_VECTOR_ANNOTATION")
+            target_compile_definitions(Catch2 PUBLIC "_DISABLE_STRING_ANNOTATION")
+        else()
+            target_compile_options(Catch2 PUBLIC "-fsanitize=address")
+        endif()
+    endif()
+endif()
 
 set(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/test_bytes.cpp"
@@ -39,20 +59,11 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT MSVC)
     endif()
 endif()
 
-set(LEXIO_EXTRA_FLAGS "")
-check_cxx_compiler_flag(-Wmost W_MOST) # clang
-if(W_MOST)
-    list(APPEND LEXIO_EXTRA_FLAGS "-Wmost")
-endif()
-
 if(MSVC)
     target_compile_options(test PUBLIC ${LEXIO_EXTRA_FLAGS} /W4 /D_DISABLE_VECTOR_ANNOTATION)
 else()
     target_compile_options(test PUBLIC ${LEXIO_EXTRA_FLAGS} -Wall -Wextra -Wno-unknown-pragmas)
 endif()
-
-find_package(Sanitizers)
-add_sanitizers(test)
 
 if(NOT LEXIO_TEST_NONSTD)
     set(LEXIO_TEST_NONSTD OFF)

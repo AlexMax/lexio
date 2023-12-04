@@ -9,7 +9,14 @@
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "SANITIZE_ADDRESS",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "x64-Clang-Debug",
@@ -20,8 +27,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "clang_cl_x64_x64" ],
-      "variables": []
+      "inheritEnvironments": [ "clang_cl_x64_x64" ]
     }
   ]
 }
