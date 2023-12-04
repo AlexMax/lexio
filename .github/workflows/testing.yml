@@ -6,14 +6,17 @@ jobs:
     strategy:
       matrix:
         include:
-          - cc: /usr/bin/clang
-            cxx: /usr/bin/clang++
-          - cc: /usr/bin/clang
-            cxx: /usr/bin/clang++
-            cxx_standard: 14
+          - cc: /usr/bin/gcc
+            cxx: /usr/bin/g++
+            cxx_standard: 20
+          - cc: /usr/bin/gcc
+            cxx: /usr/bin/g++
+            cxx_standard: 17
             lexio_test_nonstd: "ON"
           - cc: /usr/bin/gcc
             cxx: /usr/bin/g++
+            cxx_standard: 14
+            lexio_test_nonstd: "ON"
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
@@ -21,9 +24,6 @@ jobs:
       LEXIO_TEST_NONSTD: ${{ matrix.lexio_test_nonstd }}
     steps:
     - uses: actions/checkout@v3
-    - uses: mjp41/workaround8649@7929373c0fe5caf844d8115adccef39e3b5362e7
-      with:
-        os: ${{ matrix.os }}
     - name: Configure
       run: bash ${{github.workspace}}/ci/configure.sh
     - name: Build
