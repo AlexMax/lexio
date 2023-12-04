@@ -62,7 +62,7 @@ endif()
 if(MSVC)
     target_compile_options(test PUBLIC ${LEXIO_EXTRA_FLAGS} /W4 /D_DISABLE_VECTOR_ANNOTATION)
 else()
-    target_compile_options(test PUBLIC ${LEXIO_EXTRA_FLAGS} -Wall -Wextra -Wno-unknown-pragmas)
+    target_compile_options(test PUBLIC ${LEXIO_EXTRA_FLAGS} -Wall -Wextra -Wno-unknown-pragmas -stdlib=libc++)
 endif()
 
 if(NOT LEXIO_TEST_NONSTD)
