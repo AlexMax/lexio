@@ -70,10 +70,10 @@ class VectorBufReader
 
     size_t LexRead(uint8_t *outDest, const size_t count)
     {
-        ConstByteSpanT peek = LexFillBuffer(count);
-        std::copy(peek.begin(), peek.end(), outStart);
-        LexConsumeBuffer(peek.size());
-        return peek.size();
+        BufferView peek = LexFillBuffer(count);
+        std::copy(peek.first, peek.first + peek.second, outDest);
+        LexConsumeBuffer(peek.second);
+        return peek.second;
     }
 
     size_t LexGetBufferSize() noexcept { return m_buffer.size(); }

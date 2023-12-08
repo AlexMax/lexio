@@ -330,9 +330,9 @@ class FilePOSIX
         }
     }
 
-    size_t LexRead(ByteSpanT buffer)
+    size_t LexRead(uint8_t *outDest, const size_t count)
     {
-        const ssize_t bytesRead = read(m_fd, buffer.data(), buffer.size());
+        const ssize_t bytesRead = read(m_fd, outDest, count);
         if (bytesRead == -1)
         {
             throw POSIXError("Could not read file.", errno);
@@ -340,9 +340,9 @@ class FilePOSIX
         return static_cast<size_t>(bytesRead);
     }
 
-    size_t LexWrite(ConstByteSpanT buffer)
+    size_t LexWrite(const uint8_t *src, const size_t count)
     {
-        const ssize_t bytesRead = write(m_fd, buffer.data(), buffer.size());
+        const ssize_t bytesRead = write(m_fd, src, count);
         if (bytesRead == -1)
         {
             throw POSIXError("Could not write file.", errno);
