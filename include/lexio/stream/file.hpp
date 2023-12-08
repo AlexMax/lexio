@@ -157,11 +157,11 @@ class FileWin32
         }
     }
 
-    size_t LexRead(ByteSpanT buffer)
+    size_t LexRead(uint8_t *outDest, const size_t count)
     {
-        DWORD bytesToRead = static_cast<DWORD>(buffer.size());
+        DWORD bytesToRead = static_cast<DWORD>(count);
         DWORD bytesRead = 0;
-        const BOOL ok = ReadFile(m_fileHandle, buffer.data(), bytesToRead, &bytesRead, NULL);
+        const BOOL ok = ReadFile(m_fileHandle, outDest, bytesToRead, &bytesRead, NULL);
         if (ok == FALSE)
         {
             throw Win32Error("Could not read file.", GetLastError());
@@ -169,11 +169,11 @@ class FileWin32
         return bytesRead;
     }
 
-    size_t LexWrite(ConstByteSpanT buffer)
+    size_t LexWrite(const uint8_t *src, const size_t count)
     {
-        DWORD bytesToRead = static_cast<DWORD>(buffer.size());
+        DWORD bytesToRead = static_cast<DWORD>(count);
         DWORD bytesRead = 0;
-        const BOOL ok = WriteFile(m_fileHandle, buffer.data(), bytesToRead, &bytesRead, NULL);
+        const BOOL ok = WriteFile(m_fileHandle, src, bytesToRead, &bytesRead, NULL);
         if (ok == FALSE)
         {
             throw Win32Error("Could not write file.", GetLastError());

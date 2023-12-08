@@ -91,7 +91,7 @@ template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadU8(uint8_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint8_t)] = {0};
-    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
+    const size_t count = Read<READER>(buf, reader);
     if (count != sizeof(uint8_t))
     {
         return false;
@@ -111,7 +111,7 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU8(WRITER &writer, const uint8_t value)
 {
     const uint8_t buf[sizeof(uint8_t)] = {value};
-    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
+    const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
     return count == sizeof(uint8_t);
 }
 
@@ -156,7 +156,7 @@ template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadU16LE(uint16_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
+    const size_t count = Read<READER>(buf, reader);
     if (count != sizeof(uint16_t))
     {
         return false;
@@ -181,7 +181,7 @@ template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadU16BE(uint16_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
+    const size_t count = Read<READER>(buf, reader);
     if (count != sizeof(uint16_t))
     {
         return false;
@@ -212,7 +212,7 @@ inline bool TryWriteU16LE(WRITER &writer, uint16_t value)
     }
     std::memcpy(buf, &value, sizeof(uint16_t));
 
-    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
+    const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
     return count == sizeof(uint16_t);
 }
 
@@ -233,7 +233,7 @@ inline bool TryWriteU16BE(WRITER &writer, uint16_t value)
     }
     std::memcpy(buf, &value, sizeof(uint16_t));
 
-    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
+    const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
     return count == sizeof(uint16_t);
 }
 
@@ -304,7 +304,7 @@ template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadU32LE(uint32_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
+    const size_t count = Read<READER>(buf, reader);
     if (count != sizeof(uint32_t))
     {
         return false;
@@ -329,7 +329,7 @@ template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadU32BE(uint32_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
+    const size_t count = Read<READER>(buf, reader);
     if (count != sizeof(uint32_t))
     {
         return false;
@@ -360,7 +360,7 @@ inline bool TryWriteU32LE(WRITER &writer, uint32_t value)
     }
     std::memcpy(buf, &value, sizeof(uint32_t));
 
-    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
+    const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
     return count == sizeof(uint32_t);
 }
 
@@ -381,7 +381,7 @@ inline bool TryWriteU32BE(WRITER &writer, uint32_t value)
     }
     std::memcpy(buf, &value, sizeof(uint32_t));
 
-    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
+    const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
     return count == sizeof(uint32_t);
 }
 
@@ -452,7 +452,7 @@ template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadU64LE(uint64_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
+    const size_t count = Read<READER>(buf, reader);
     if (count != sizeof(uint64_t))
     {
         return false;
@@ -477,7 +477,7 @@ template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline bool TryReadU64BE(uint64_t &out, READER &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(ByteSpanT(buf, sizeof(buf)), reader);
+    const size_t count = Read<READER>(buf, reader);
     if (count != sizeof(uint64_t))
     {
         return false;
@@ -508,7 +508,7 @@ inline bool TryWriteU64LE(WRITER &writer, uint64_t value)
     }
     std::memcpy(buf, &value, sizeof(uint64_t));
 
-    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
+    const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
     return count == sizeof(uint64_t);
 }
 
@@ -529,7 +529,7 @@ inline bool TryWriteU64BE(WRITER &writer, uint64_t value)
     }
     std::memcpy(buf, &value, sizeof(uint64_t));
 
-    const size_t count = Write(writer, ConstByteSpanT(buf, sizeof(buf)));
+    const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
     return count == sizeof(uint64_t);
 }
 

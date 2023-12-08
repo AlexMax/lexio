@@ -21,7 +21,7 @@
 
 struct GoodReader
 {
-    size_t LexRead(LexIO::ByteSpanT) { return 0; }
+    size_t LexRead(uint8_t *, const size_t) { return 0; }
 };
 
 static_assert(LexIO::IsReader<GoodReader>::value, "GoodReader does not fulfill IsReader");
@@ -32,7 +32,7 @@ static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReade
 struct GoodBufferedReader : public GoodReader
 {
     size_t LexGetBufferSize() const { return 0; }
-    LexIO::ConstByteSpanT LexFillBuffer(const size_t) { return LexIO::ConstByteSpanT(); }
+    LexIO::BufferView LexFillBuffer(const size_t) { return LexIO::BufferView(); }
     void LexConsumeBuffer(const size_t size) { (void)size; }
 };
 
@@ -44,7 +44,7 @@ static_assert(LexIO::IsBufferedReaderV<GoodBufferedReader>, "GoodBufferedReader 
 
 struct GoodWriter
 {
-    size_t LexWrite(LexIO::ConstByteSpanT) { return 0; }
+    size_t LexWrite(const uint8_t *, const size_t) { return 0; }
     void LexFlush() {}
 };
 
@@ -71,19 +71,14 @@ static_assert(!LexIO::IsReaderV<BadReaderMissingClass>, "BadReaderMissingClass i
 
 struct BadReaderBadParam
 {
-    size_t LexRead(uint8_t *&buffer, const size_t size)
-    {
-        (void)buffer;
-        (void)size;
-        return 0;
-    }
+    size_t LexRead(uint8_t *&, const size_t) { return 0; }
 };
 
 static_assert(!LexIO::IsReaderV<BadReaderBadParam>, "BadReaderBadParam incorrectly fulfills IsReaderV");
 
 struct BadReaderBadReturn
 {
-    void LexRead(LexIO::ByteSpanT buffer) { (void)buffer; }
+    void LexRead(uint8_t *, const size_t) {}
 };
 
 static_assert(!LexIO::IsReaderV<BadReaderBadReturn>, "BadReaderBadReturn incorrectly fulfills IsReaderV");
@@ -101,15 +96,37 @@ constexpr size_t BUFFER_LENGTH = CountOf(BUFFER_TEXT) - sizeof('\0');
 
 static LexIO::VectorStream GetBuffer()
 {
-    LexIO::ConstByteSpanT textSpan{&BUFFER_TEXT[0], BUFFER_LENGTH};
-
     LexIO::VectorStream rvo;
-    rvo.LexWrite(textSpan);
+    rvo.LexWrite(&BUFFER_TEXT[0], BUFFER_LENGTH);
     rvo.LexSeek(LexIO::SeekPos(0, LexIO::seek::start));
     return rvo;
 }
 
 //******************************************************************************
+
+TEST_CASE("Test Read with ptr/len")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    uint8_t buffer[5] = {0};
+    REQUIRE(LexIO::Read(&buffer[0], sizeof(buffer), basic) == 5);
+}
+
+TEST_CASE("Test Read with C array")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    uint8_t buffer[5] = {0};
+    REQUIRE(LexIO::Read(buffer, basic) == 5);
+}
+
+TEST_CASE("Test Read with std::array")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    std::array<uint8_t, 5> buffer = {0};
+    REQUIRE(LexIO::Read(buffer, basic) == 5);
+}
 
 TEST_CASE("Test ReadAll")
 {
@@ -146,6 +163,30 @@ TEST_CASE("Test ReadUntil")
     REQUIRE(bytes == 20);
     REQUIRE(data.size() == 20);
     REQUIRE(*(data.end() - 1) == '\n');
+}
+
+TEST_CASE("Test Write with ptr/len")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    REQUIRE(LexIO::Write(basic, &data[0], sizeof(data)) == 5);
+}
+
+TEST_CASE("Test Write with C array")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    REQUIRE(LexIO::Write(basic, data) == 5);
+}
+
+TEST_CASE("Test Write with std::array")
+{
+    LexIO::VectorStream basic = GetBuffer();
+
+    const std::array<uint8_t, 5> data = {'X', 'Y', 'Z', 'Z', 'Y'};
+    REQUIRE(LexIO::Write(basic, data) == 5);
 }
 
 TEST_CASE("Test Rewind")

@@ -27,7 +27,7 @@ template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<RE
 inline bool TryReadBytes(IT outBegin, IT outEnd, READER &reader)
 {
     const size_t length = outEnd - outBegin;
-    const size_t count = Read(ByteSpanT(&(*outBegin), length), reader);
+    const size_t count = Read<READER>(&(*outBegin), length, reader);
     if (count != length)
     {
         return false;
@@ -39,7 +39,7 @@ template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WR
 inline bool TryWriteBytes(WRITER &writer, IT begin, IT end)
 {
     const size_t length = end - begin;
-    const size_t count = Write(writer, ConstByteSpanT(&(*begin), length));
+    const size_t count = Write<WRITER>(writer, &(*begin), length);
     if (count != length)
     {
         return false;
@@ -54,7 +54,7 @@ inline bool TryReadData(void *outData, const size_t length, READER &reader)
 {
     uint8_t *castData = Detail::BitCast<uint8_t *>(outData);
 
-    const size_t count = Read(ByteSpanT(castData, length), reader);
+    const size_t count = Read<READER>(castData, length, reader);
     if (count != length)
     {
         return false;
@@ -67,7 +67,7 @@ inline bool TryWriteData(WRITER &writer, const void *data, const size_t length)
 {
     const uint8_t *castData = Detail::BitCast<const uint8_t *>(data);
 
-    const size_t count = Write(writer, ConstByteSpanT(castData, length));
+    const size_t count = Write<WRITER>(writer, castData, length);
     if (count != length)
     {
         return false;
@@ -83,7 +83,7 @@ inline bool TryReadString(IT outBegin, IT outEnd, READER &reader)
     uint8_t *castBegin = Detail::BitCast<uint8_t *>(&(*outBegin));
     const size_t length = outEnd - outBegin;
 
-    const size_t count = Read(ByteSpanT(castBegin, length), reader);
+    const size_t count = Read<READER>(castBegin, length, reader);
     if (count != length)
     {
         return false;
@@ -97,7 +97,7 @@ inline bool TryWriteString(WRITER &writer, IT begin, IT end)
     const uint8_t *castBegin = Detail::BitCast<const uint8_t *>(&(*begin));
     const size_t length = end - begin;
 
-    const size_t count = Write(writer, ConstByteSpanT(castBegin, length));
+    const size_t count = Write<WRITER>(writer, castBegin, length);
     if (count != length)
     {
         return false;

@@ -16,15 +16,10 @@ if [[ -z $CXX_STANDARD ]]; then
     CXX_STANDARD="20"
 fi
 
-if [[ -z $LEXIO_TEST_NONSTD ]]; then
-    LEXIO_TEST_NONSTD="OFF"
-fi
-
 cmake \
     -S "${SCRIPT_DIR}/.." \
     -B "${SCRIPT_DIR}/../build" \
     -G "${GENERATOR}" \
     -D "CMAKE_CXX_STANDARD=${CXX_STANDARD}" \
-    -D "LEXIO_TEST_NONSTD=${LEXIO_TEST_NONSTD}" \
     -D "SANITIZE_ADDRESS=ON" \
     -D "SANITIZE_UNDEFINED=ON"

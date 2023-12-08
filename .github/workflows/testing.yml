@@ -12,16 +12,13 @@ jobs:
           - cc: /usr/bin/gcc
             cxx: /usr/bin/g++
             cxx_standard: 17
-            lexio_test_nonstd: "ON"
           - cc: /usr/bin/gcc
             cxx: /usr/bin/g++
             cxx_standard: 14
-            lexio_test_nonstd: "ON"
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
       CXX_STANDARD: ${{ matrix.cxx_standard }}
-      LEXIO_TEST_NONSTD: ${{ matrix.lexio_test_nonstd }}
     steps:
     - uses: actions/checkout@v3
     - name: Configure
@@ -48,7 +45,6 @@ jobs:
     env:
       CXX_STANDARD: 14
       GENERATOR: Xcode
-      LEXIO_TEST_NONSTD: "ON"
     steps:
     - uses: actions/checkout@v3
     - name: Configure

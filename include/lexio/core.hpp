@@ -73,19 +73,6 @@
 #endif
 #endif
 
-#if !defined(LEXIO_SPAN)
-#include <span>
-#define LEXIO_SPAN(T) std::span<T>
-#endif
-
-#if !defined(LEXIO_SPAN_DATA)
-#define LEXIO_SPAN_DATA(sp) (sp).data()
-#endif
-
-#if !defined(LEXIO_SPAN_SIZE)
-#define LEXIO_SPAN_SIZE(sp) (sp).size()
-#endif
-
 #if (LEXIO_HAS_INLINE_VARS == 1)
 #define LEXIO_INLINE_VAR inline
 #else
@@ -98,8 +85,7 @@
 namespace LexIO
 {
 
-using ByteSpanT = LEXIO_SPAN(uint8_t);
-using ConstByteSpanT = LEXIO_SPAN(const uint8_t);
+using BufferView = std::pair<const uint8_t *, size_t>;
 
 /**
  * @brief Possible seek directions.
@@ -191,7 +177,8 @@ using IsDetected = typename Detector<Nonesuch, void, Op, Args...>::value_t;
  * @brief This type exists if the passed T conforms to Reader.
  */
 template <typename T>
-using ReaderType = decltype(std::declval<size_t &>() = std::declval<T>().LexRead(std::declval<ByteSpanT>()));
+using ReaderType =
+    decltype(std::declval<size_t &>() = std::declval<T>().LexRead(std::declval<uint8_t *>(), std::declval<size_t>()));
 
 /**
  * @brief This type exists if the passed T conforms to BufferedReader.
@@ -199,14 +186,15 @@ using ReaderType = decltype(std::declval<size_t &>() = std::declval<T>().LexRead
 template <typename T>
 using BufferedReaderType =
     decltype(std::declval<size_t &>() = std::declval<T>().LexGetBufferSize(),
-             std::declval<ConstByteSpanT &>() = std::declval<T>().LexFillBuffer(std::declval<size_t>()),
+             std::declval<BufferView &>() = std::declval<T>().LexFillBuffer(std::declval<size_t>()),
              std::declval<T>().LexConsumeBuffer(std::declval<size_t>()));
 
 /**
  * @brief This type exists if the passed T conforms to Writer.
  */
 template <typename T>
-using WriterType = decltype(std::declval<size_t &>() = std::declval<T>().LexWrite(std::declval<ConstByteSpanT>()),
+using WriterType = decltype(std::declval<size_t &>() =
+                                std::declval<T>().LexWrite(std::declval<const uint8_t *>(), std::declval<size_t>()),
                             std::declval<T>().LexFlush());
 
 /**
@@ -316,8 +304,8 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
  * @brief Read data from the current offset, inserting it into the passed
  *        buffer and advancing the offset.
  *
- * @param outBytes A span to read data into, the length of which is the number
- *                 of bytes to read.
+ * @param outDest Pointer to starting byte of output buffer.
+ * @param count Size of output buffer in bytes.
  * @param reader Reader to operate on.
  * @return Actual number of bytes read.  Must be between 0 and the requested
  *         length.  0 can mean EOF or empty buffer.
@@ -325,9 +313,43 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t Read(ByteSpanT outBytes, READER &reader)
+inline size_t Read(uint8_t *outDest, const size_t count, READER &reader)
 {
-    return reader.LexRead(outBytes);
+    return reader.LexRead(outDest, count);
+}
+
+/**
+ * @brief Read data from the current offset, inserting it into the passed
+ *        buffer and advancing the offset.
+ *
+ * @param outArray Output buffer.
+ * @param reader Reader to operate on.
+ * @return Actual number of bytes read.  Must be between 0 and the requested
+ *         length.  0 can mean EOF or empty buffer.
+ * @throws std::runtime_error if an error with the read operation was
+ *         encountered.  EOF is _not_ considered an error.
+ */
+template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
+inline size_t Read(uint8_t (&outArray)[N], READER &reader)
+{
+    return reader.LexRead(&outArray[0], N);
+}
+
+/**
+ * @brief Read data from the current offset, inserting it into the passed
+ *        buffer and advancing the offset.
+ *
+ * @param outArray Output buffer.
+ * @param reader Reader to operate on.
+ * @return Actual number of bytes read.  Must be between 0 and the requested
+ *         length.  0 can mean EOF or empty buffer.
+ * @throws std::runtime_error if an error with the read operation was
+ *         encountered.  EOF is _not_ considered an error.
+ */
+template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
+inline size_t Read(std::array<uint8_t, N> &outArray, READER &reader)
+{
+    return reader.LexRead(&outArray[0], outArray.size());
 }
 
 /**
@@ -358,7 +380,7 @@ inline size_t GetBufferSize(BUFFERED_READER &bufReader)
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline ConstByteSpanT FillBuffer(BUFFERED_READER &bufReader, const size_t size)
+inline BufferView FillBuffer(BUFFERED_READER &bufReader, const size_t size)
 {
     return bufReader.LexFillBuffer(size);
 }
@@ -384,15 +406,48 @@ inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
  *        existing data.
  *
  * @param writer Writer to operate on.
- * @param bytes Bytes to write into the data stream.
+ * @param src Pointer to starting byte of input buffer.
+ * @param count Size of input buffer in bytes.
  * @return Actual number of bytes written.
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, ConstByteSpanT bytes)
+inline size_t Write(WRITER &writer, const uint8_t *src, const size_t count)
 {
-    return writer.LexWrite(bytes);
+    return writer.LexWrite(src, count);
+}
+
+/**
+ * @brief Write a span of data at the current offset, overwriting any
+ *        existing data.
+ *
+ * @param writer Writer to operate on.
+ * @param array Input buffer.
+ * @return Actual number of bytes written.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.  A partial write is _not_ considered an error.
+ */
+template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline size_t Write(WRITER &writer, const uint8_t (&array)[N])
+{
+    return writer.LexWrite(&array[0], N);
+}
+
+/**
+ * @brief Write a span of data at the current offset, overwriting any
+ *        existing data.
+ *
+ * @param writer Writer to operate on.
+ * @param array Input buffer.
+ * @return Actual number of bytes written.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.  A partial write is _not_ considered an error.
+ */
+template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline size_t Write(WRITER &writer, const std::array<uint8_t, N> &array)
+{
+    return writer.LexWrite(&array[0], array.size());
 }
 
 /**
@@ -452,7 +507,7 @@ inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const seek whence
  * @return Span view of the internal buffer.
  */
 template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline ConstByteSpanT GetBuffer(BUFFERED_READER &bufReader)
+inline BufferView GetBuffer(BUFFERED_READER &bufReader)
 {
     return FillBuffer(bufReader, 0);
 }
@@ -470,19 +525,19 @@ inline size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
     size_t size = 0;
     for (;;)
     {
-        ConstByteSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
-        if (LEXIO_SPAN_SIZE(buf) == 0)
+        BufferView buf = FillBuffer(bufReader, GetBufferSize(bufReader));
+        if (buf.second == 0)
         {
             // Read all data there was to read.
             return size;
         }
 
         // Copy the buffered data into the vector.
-        std::copy(buf.begin(), buf.end(), outIt);
+        std::copy(buf.first, buf.first + buf.second, outIt);
 
         // Consume what we've read.
-        ConsumeBuffer(bufReader, LEXIO_SPAN_SIZE(buf));
-        size += LEXIO_SPAN_SIZE(buf);
+        ConsumeBuffer(bufReader, buf.second);
+        size += buf.second;
     }
 }
 
@@ -502,16 +557,16 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
     size_t size = 0;
     for (;;)
     {
-        ConstByteSpanT buf = FillBuffer(bufReader, GetBufferSize(bufReader));
-        if (LEXIO_SPAN_SIZE(buf) == 0)
+        BufferView buf = FillBuffer(bufReader, GetBufferSize(bufReader));
+        if (buf.second == 0)
         {
             // Read all data there was to read.
             return size;
         }
 
         // Copy the buffered data into the vector until we hit the passed byte.
-        auto it = buf.begin();
-        while (it != buf.end())
+        const uint8_t *it = buf.first;
+        for (size_t i = 0; i < buf.second; i++)
         {
             if (*it == term)
             {
@@ -523,7 +578,7 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
         }
 
         // Consume what we've read.
-        const size_t count = static_cast<size_t>(it - buf.begin());
+        const size_t count = static_cast<size_t>(it - buf.first);
         ConsumeBuffer(bufReader, count);
         size += count;
     }

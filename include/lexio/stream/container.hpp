@@ -65,22 +65,22 @@ class ContainerBase
      */
     const T &Container() const { return m_container; }
 
-    virtual size_t LexRead(ByteSpanT buffer)
+    virtual size_t LexRead(uint8_t *outDest, const size_t count)
     {
-        const size_t wantedOffset = m_offset + buffer.size();
+        const size_t wantedOffset = m_offset + count;
         const size_t destOffset = std::min(wantedOffset, m_container.size());
         const size_t actualLength = destOffset - m_offset;
-        std::copy(m_container.begin() + m_offset, m_container.begin() + m_offset + actualLength, buffer.begin());
+        std::copy(m_container.begin() + m_offset, m_container.begin() + m_offset + actualLength, outDest);
         m_offset += actualLength;
         return actualLength;
     }
 
-    virtual size_t LexWrite(ConstByteSpanT buffer)
+    virtual size_t LexWrite(const uint8_t *src, const size_t count)
     {
-        const size_t wantedOffset = m_offset + buffer.size();
+        const size_t wantedOffset = m_offset + count;
         const size_t destOffset = std::min(wantedOffset, m_container.size());
         const size_t actualLength = destOffset - m_offset;
-        std::copy(buffer.begin(), buffer.begin() + actualLength, m_container.begin() + m_offset);
+        std::copy(src, src + actualLength, m_container.begin() + m_offset);
         m_offset += actualLength;
         return actualLength;
     }
@@ -166,14 +166,14 @@ class ContainerDynamic : public ContainerBase<T>
         std::copy(list.begin(), list.end(), this->Container().begin());
     }
 
-    size_t LexWrite(ConstByteSpanT buffer) override
+    size_t LexWrite(const uint8_t *src, const size_t count) override
     {
         // Writes off the end of the burffer grow the buffer to fit.
-        const size_t wantedOffset = this->Offset() + buffer.size();
+        const size_t wantedOffset = this->Offset() + count;
         this->Container().resize(std::max(wantedOffset, this->Container().size()));
-        std::copy(buffer.begin(), buffer.end(), this->Container().begin() + this->Offset());
-        this->Offset() += buffer.size();
-        return buffer.size();
+        std::copy(src, src + count, this->Container().begin() + this->Offset());
+        this->Offset() += count;
+        return count;
     }
 };
 

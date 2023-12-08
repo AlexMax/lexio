@@ -25,11 +25,11 @@ namespace LexIO
 
 namespace Detail
 {
-using lexRead_t = size_t (*)(void *, ByteSpanT);
+using lexRead_t = size_t (*)(void *, uint8_t *, const size_t);
 using lexGetBufferSize_t = size_t (*)(void *);
-using lexFillBuffer_t = ConstByteSpanT (*)(void *, const size_t);
+using lexFillBuffer_t = BufferView (*)(void *, const size_t);
 using lexConsumeBuffer_t = void (*)(void *, const size_t);
-using lexWrite_t = size_t (*)(void *, ConstByteSpanT);
+using lexWrite_t = size_t (*)(void *, const uint8_t *, const size_t);
 using lexFlush_t = void (*)(void *);
 using lexSeek_t = size_t (*)(void *, const SeekPos);
 } // namespace Detail
@@ -45,13 +45,13 @@ class ReaderRef
   public:
     template <typename READER>
     ReaderRef(READER &reader)
-        : m_ptr(&reader), m_lexRead([](void *ptr, ByteSpanT outBytes) -> size_t {
-              return static_cast<READER *>(ptr)->LexRead(outBytes);
+        : m_ptr(&reader), m_lexRead([](void *ptr, uint8_t *outDest, const size_t count) -> size_t {
+              return static_cast<READER *>(ptr)->LexRead(outDest, count);
           })
     {
     }
 
-    size_t LexRead(ByteSpanT outBytes) const { return m_lexRead(m_ptr, outBytes); }
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
 };
 
 class BufferedReaderRef : public ReaderRef
@@ -75,7 +75,7 @@ class BufferedReaderRef : public ReaderRef
         : ReaderRef(bufReader), m_ptr(&bufReader), m_lexGetBufferSize([](void *ptr) -> size_t { //
               return static_cast<BUFFERED_READER *>(ptr)->LexGetBufferSize();
           }),
-          m_lexFillBuffer([](void *ptr, const size_t size) -> ConstByteSpanT { //
+          m_lexFillBuffer([](void *ptr, const size_t size) -> BufferView { //
               return static_cast<BUFFERED_READER *>(ptr)->LexFillBuffer(size);
           }),
           m_lexConsumeBuffer([](void *ptr, const size_t size) -> void { //
@@ -85,7 +85,7 @@ class BufferedReaderRef : public ReaderRef
     }
 
     size_t LexGetBufferSize() const { return m_lexGetBufferSize(m_ptr); }
-    ConstByteSpanT LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
     void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
 };
 
@@ -104,8 +104,8 @@ class WriterRef
   public:
     template <typename WRITER>
     WriterRef(WRITER &writer)
-        : m_ptr(&writer), m_lexWrite([](void *ptr, ConstByteSpanT bytes) -> size_t { //
-              return static_cast<WRITER *>(ptr)->LexWrite(bytes);
+        : m_ptr(&writer), m_lexWrite([](void *ptr, const uint8_t *src, const size_t count) -> size_t { //
+              return static_cast<WRITER *>(ptr)->LexWrite(src, count);
           }),
           m_lexFlush([](void *ptr) -> void { //
               static_cast<WRITER *>(ptr)->LexFlush();
@@ -113,7 +113,7 @@ class WriterRef
     {
     }
 
-    size_t LexWrite(ConstByteSpanT bytes) const { return m_lexWrite(m_ptr, bytes); }
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
     void LexFlush() const { m_lexFlush(m_ptr); }
 };
 

@@ -56,7 +56,3 @@ if(MSVC)
 else()
     target_compile_options(test PUBLIC -Wall -Wextra -Wno-unknown-pragmas)
 endif()
-
-if(NOT LEXIO_TEST_NONSTD)
-    set(LEXIO_TEST_NONSTD OFF)
-endif()

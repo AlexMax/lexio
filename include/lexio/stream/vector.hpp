@@ -68,23 +68,23 @@ class VectorBufReader
         return VectorBufReader{std::move(reader), startSize};
     }
 
-    size_t LexRead(ByteSpanT buffer)
+    size_t LexRead(uint8_t *outDest, const size_t count)
     {
-        ConstByteSpanT peek = LexFillBuffer(buffer.size());
-        std::copy(peek.begin(), peek.end(), buffer.begin());
+        ConstByteSpanT peek = LexFillBuffer(count);
+        std::copy(peek.begin(), peek.end(), outStart);
         LexConsumeBuffer(peek.size());
         return peek.size();
     }
 
     size_t LexGetBufferSize() noexcept { return m_buffer.size(); }
 
-    ConstByteSpanT LexFillBuffer(const size_t size)
+    BufferView LexFillBuffer(const size_t size)
     {
         size_t wantedEnd = m_start + size;
         if (wantedEnd < m_end)
         {
             // We have enough data in the buffer, return the entire buffer.
-            return ConstByteSpanT(&m_buffer[m_start], &m_buffer[m_end]);
+            return BufferView(&m_buffer[m_start], m_end - m_start);
         }
         else if (m_buffer.empty())
         {
@@ -107,10 +107,9 @@ class VectorBufReader
 
         // We don't have enough data buffered, read to make up the difference
         // and set the new end index appropriately.
-        ByteSpanT target(m_buffer.begin() + m_start, m_buffer.begin() + static_cast<ptrdiff_t>(size));
-        const size_t actualSize = m_reader.LexRead(target);
+        const size_t actualSize = m_reader.LexRead(&m_buffer[0] + m_start, size);
         m_end = m_start + actualSize;
-        return ConstByteSpanT(m_buffer.begin() + m_start, m_buffer.begin() + m_end);
+        return BufferView(&m_buffer[0] + m_start, actualSize);
     }
 
     void LexConsumeBuffer(const size_t size)

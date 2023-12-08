@@ -28,10 +28,9 @@ constexpr std::size_t CountOf(T const (&)[N]) noexcept
 static LexIO::VectorStream GetBuffer()
 {
     const uint8_t text[] = "The quick brown fox\njumps over the lazy dog.\n";
-    LexIO::ConstByteSpanT textSpan{&text[0], CountOf(text) - 1};
 
     LexIO::VectorStream rvo;
-    rvo.LexWrite(textSpan);
+    rvo.LexWrite(&text[0], CountOf(text) - 1);
     rvo.LexSeek(LexIO::SeekPos(0, LexIO::seek::start));
     return rvo;
 }

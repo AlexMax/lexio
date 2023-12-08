@@ -18,7 +18,6 @@
 
 #include "./core.hpp"
 
-#include "./bufreader.hpp"
 #include "./ref.hpp"
 #include "./serialize.hpp"
 #include "./stream.hpp"
