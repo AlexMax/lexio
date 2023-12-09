@@ -48,7 +48,6 @@ TEST_CASE("Test LexIO::BufferedReaderRef")
     struct GoodBR
     {
         size_t LexRead(uint8_t *, const size_t) { return 0; }
-        size_t LexGetBufferSize() const { return 0; }
         LexIO::BufferView LexFillBuffer(const size_t) { return LexIO::BufferView{}; }
         void LexConsumeBuffer(const size_t) {}
     };
@@ -58,7 +57,6 @@ TEST_CASE("Test LexIO::BufferedReaderRef")
     LexIO::BufferedReaderRef ref(test);
 
     CHECK(LexIO::Read(buffer, ref) == 0);
-    CHECK(LexIO::GetBufferSize(ref) == 0);
     CHECK(LexIO::FillBuffer(ref, 0).second == 0);
     LexIO::ConsumeBuffer(ref, 0);
 
@@ -110,7 +108,6 @@ TEST_CASE("Test LexIO::BufferedReaderWriterRef")
     struct GoodBRW
     {
         size_t LexRead(uint8_t *, const size_t) { return 0; }
-        size_t LexGetBufferSize() const { return 0; }
         LexIO::BufferView LexFillBuffer(const size_t) { return LexIO::BufferView{}; }
         void LexConsumeBuffer(const size_t) {}
         size_t LexWrite(const uint8_t *, const size_t) { return 0; }
@@ -122,7 +119,6 @@ TEST_CASE("Test LexIO::BufferedReaderWriterRef")
     LexIO::BufferedReaderWriterRef ref(test);
 
     CHECK(LexIO::Read(buffer, ref) == 0);
-    CHECK(LexIO::GetBufferSize(ref) == 0);
     CHECK(LexIO::FillBuffer(ref, 0).second == 0);
     LexIO::ConsumeBuffer(ref, 0);
     CHECK(LexIO::Write(ref, buffer) == 0);
@@ -158,7 +154,6 @@ TEST_CASE("Test LexIO::BufferedReaderSeekableRef")
     struct GoodBRS
     {
         size_t LexRead(uint8_t *, const size_t) { return 0; }
-        size_t LexGetBufferSize() const { return 0; }
         LexIO::BufferView LexFillBuffer(const size_t) { return LexIO::BufferView{}; }
         void LexConsumeBuffer(const size_t) {}
         size_t LexSeek(const LexIO::SeekPos) { return 0; }
@@ -169,7 +164,6 @@ TEST_CASE("Test LexIO::BufferedReaderSeekableRef")
     LexIO::BufferedReaderSeekableRef ref(test);
 
     CHECK(LexIO::Read(buffer, ref) == 0);
-    CHECK(LexIO::GetBufferSize(ref) == 0);
     CHECK(LexIO::FillBuffer(ref, 0).second == 0);
     LexIO::ConsumeBuffer(ref, 0);
     CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
@@ -210,7 +204,6 @@ TEST_CASE("Test LexIO::BufferedReaderWriterSeekableRef")
     struct GoodBRWS
     {
         size_t LexRead(uint8_t *, const size_t) { return 0; }
-        size_t LexGetBufferSize() const { return 0; }
         LexIO::BufferView LexFillBuffer(const size_t) { return LexIO::BufferView{}; }
         void LexConsumeBuffer(const size_t) {}
         size_t LexWrite(const uint8_t *, const size_t) { return 0; }
@@ -223,7 +216,6 @@ TEST_CASE("Test LexIO::BufferedReaderWriterSeekableRef")
     LexIO::BufferedReaderWriterSeekableRef ref(test);
 
     CHECK(LexIO::Read(buffer, ref) == 0);
-    CHECK(LexIO::GetBufferSize(ref) == 0);
     CHECK(LexIO::FillBuffer(ref, 0).second == 0);
     LexIO::ConsumeBuffer(ref, 0);
     CHECK(LexIO::Write(ref, buffer) == 0);

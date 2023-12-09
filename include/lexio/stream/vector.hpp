@@ -76,8 +76,6 @@ class VectorBufReader
         return peek.second;
     }
 
-    size_t LexGetBufferSize() noexcept { return m_buffer.size(); }
-
     BufferView LexFillBuffer(const size_t size)
     {
         size_t wantedEnd = m_start + size;

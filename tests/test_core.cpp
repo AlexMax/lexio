@@ -31,7 +31,6 @@ static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReade
 
 struct GoodBufferedReader : public GoodReader
 {
-    size_t LexGetBufferSize() const { return 0; }
     LexIO::BufferView LexFillBuffer(const size_t) { return LexIO::BufferView(); }
     void LexConsumeBuffer(const size_t size) { (void)size; }
 };
@@ -146,7 +145,7 @@ TEST_CASE("Test ReadAll with a small buffer")
     auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
+    const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer, 4);
     REQUIRE(data[4] == 'q'); // Check the buffer boundary.
     REQUIRE(data[8] == 'k');
     REQUIRE(bytes == 45);

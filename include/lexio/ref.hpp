@@ -26,7 +26,6 @@ namespace LexIO
 namespace Detail
 {
 using lexRead_t = size_t (*)(void *, uint8_t *, const size_t);
-using lexGetBufferSize_t = size_t (*)(void *);
 using lexFillBuffer_t = BufferView (*)(void *, const size_t);
 using lexConsumeBuffer_t = void (*)(void *, const size_t);
 using lexWrite_t = size_t (*)(void *, const uint8_t *, const size_t);
@@ -58,24 +57,19 @@ class BufferedReaderRef : public ReaderRef
 {
   protected:
     void *m_ptr;
-    Detail::lexGetBufferSize_t m_lexGetBufferSize;
     Detail::lexFillBuffer_t m_lexFillBuffer;
     Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
 
-    BufferedReaderRef(void *ptr, Detail::lexRead_t lexRead, Detail::lexGetBufferSize_t lexGetBufferSize,
-                      Detail::lexFillBuffer_t lexFillBuffer, Detail::lexConsumeBuffer_t lexConsumeBuffer)
-        : ReaderRef(ptr, lexRead), m_ptr(ptr), m_lexGetBufferSize(lexGetBufferSize), m_lexFillBuffer(lexFillBuffer),
-          m_lexConsumeBuffer(lexConsumeBuffer)
+    BufferedReaderRef(void *ptr, Detail::lexRead_t lexRead, Detail::lexFillBuffer_t lexFillBuffer,
+                      Detail::lexConsumeBuffer_t lexConsumeBuffer)
+        : ReaderRef(ptr, lexRead), m_ptr(ptr), m_lexFillBuffer(lexFillBuffer), m_lexConsumeBuffer(lexConsumeBuffer)
     {
     }
 
   public:
     template <typename BUFFERED_READER>
     BufferedReaderRef(BUFFERED_READER &bufReader)
-        : ReaderRef(bufReader), m_ptr(&bufReader), m_lexGetBufferSize([](void *ptr) -> size_t { //
-              return static_cast<BUFFERED_READER *>(ptr)->LexGetBufferSize();
-          }),
-          m_lexFillBuffer([](void *ptr, const size_t size) -> BufferView { //
+        : ReaderRef(bufReader), m_ptr(&bufReader), m_lexFillBuffer([](void *ptr, const size_t size) -> BufferView { //
               return static_cast<BUFFERED_READER *>(ptr)->LexFillBuffer(size);
           }),
           m_lexConsumeBuffer([](void *ptr, const size_t size) -> void { //
@@ -84,7 +78,6 @@ class BufferedReaderRef : public ReaderRef
     {
     }
 
-    size_t LexGetBufferSize() const { return m_lexGetBufferSize(m_ptr); }
     BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
     void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
 };

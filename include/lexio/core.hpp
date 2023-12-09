@@ -185,8 +185,7 @@ using ReaderType =
  */
 template <typename T>
 using BufferedReaderType =
-    decltype(std::declval<size_t &>() = std::declval<T>().LexGetBufferSize(),
-             std::declval<BufferView &>() = std::declval<T>().LexFillBuffer(std::declval<size_t>()),
+    decltype(std::declval<BufferView &>() = std::declval<T>().LexFillBuffer(std::declval<size_t>()),
              std::declval<T>().LexConsumeBuffer(std::declval<size_t>()));
 
 /**
@@ -320,7 +319,7 @@ inline size_t Read(uint8_t *outDest, const size_t count, READER &reader)
 
 /**
  * @brief Read data from the current offset, inserting it into the passed
- *        buffer and advancing the offset.
+ *        array and advancing the offset.
  *
  * @param outArray Output buffer.
  * @param reader Reader to operate on.
@@ -333,37 +332,6 @@ template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READE
 inline size_t Read(uint8_t (&outArray)[N], READER &reader)
 {
     return reader.LexRead(&outArray[0], N);
-}
-
-/**
- * @brief Read data from the current offset, inserting it into the passed
- *        buffer and advancing the offset.
- *
- * @param outArray Output buffer.
- * @param reader Reader to operate on.
- * @return Actual number of bytes read.  Must be between 0 and the requested
- *         length.  0 can mean EOF or empty buffer.
- * @throws std::runtime_error if an error with the read operation was
- *         encountered.  EOF is _not_ considered an error.
- */
-template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t Read(std::array<uint8_t, N> &outArray, READER &reader)
-{
-    return reader.LexRead(&outArray[0], outArray.size());
-}
-
-/**
- * @brief Returns the size of the internal buffer.  This tells you how much
- *        data the buffer is currently capable of holding, regardless of
- *        how much data is actually buffered.
- *
- * @param bufReader BufferedReader to examine.
- * @return Size of internal buffer.
- */
-template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline size_t GetBufferSize(BUFFERED_READER &bufReader)
-{
-    return bufReader.LexGetBufferSize();
 }
 
 /**
@@ -416,38 +384,6 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline size_t Write(WRITER &writer, const uint8_t *src, const size_t count)
 {
     return writer.LexWrite(src, count);
-}
-
-/**
- * @brief Write a span of data at the current offset, overwriting any
- *        existing data.
- *
- * @param writer Writer to operate on.
- * @param array Input buffer.
- * @return Actual number of bytes written.
- * @throws std::runtime_error if an error with the write operation was
- *         encountered.  A partial write is _not_ considered an error.
- */
-template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, const uint8_t (&array)[N])
-{
-    return writer.LexWrite(&array[0], N);
-}
-
-/**
- * @brief Write a span of data at the current offset, overwriting any
- *        existing data.
- *
- * @param writer Writer to operate on.
- * @param array Input buffer.
- * @return Actual number of bytes written.
- * @throws std::runtime_error if an error with the write operation was
- *         encountered.  A partial write is _not_ considered an error.
- */
-template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, const std::array<uint8_t, N> &array)
-{
-    return writer.LexWrite(&array[0], array.size());
 }
 
 /**
@@ -517,19 +453,20 @@ inline BufferView GetBuffer(BUFFERED_READER &bufReader)
  *
  * @param outIt Output iterator to write result into.
  * @param bufReader BufferedReader to operate on.
+ * @param bufSize Number of bytes to buffer at a time.
  * @return Total number of bytes read.
  */
-template <typename OUT_ITER, typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
+template <typename BUFFERED_READER, typename OUT_ITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
+inline size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader, const size_t bufSize = 8192)
 {
-    size_t size = 0;
+    size_t total = 0;
     for (;;)
     {
-        BufferView buf = FillBuffer(bufReader, GetBufferSize(bufReader));
+        BufferView buf = FillBuffer(bufReader, bufSize);
         if (buf.second == 0)
         {
             // Read all data there was to read.
-            return size;
+            return total;
         }
 
         // Copy the buffered data into the vector.
@@ -537,7 +474,7 @@ inline size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
 
         // Consume what we've read.
         ConsumeBuffer(bufReader, buf.second);
-        size += buf.second;
+        total += buf.second;
     }
 }
 
@@ -549,15 +486,16 @@ inline size_t ReadAll(OUT_ITER outIt, BUFFERED_READER &bufReader)
  * @param outIt Output iterator to write result into.
  * @param bufReader BufferedReader to operate on.
  * @param term Byte to stop at.
+ * @param bufSize Number of bytes to buffer at a time.
  * @return Total number of bytes read.
  */
-template <typename OUT_ITER, typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
+template <typename BUFFERED_READER, typename OUT_ITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
+inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term, const size_t bufSize = 8192)
 {
     size_t size = 0;
     for (;;)
     {
-        BufferView buf = FillBuffer(bufReader, GetBufferSize(bufReader));
+        BufferView buf = FillBuffer(bufReader, bufSize);
         if (buf.second == 0)
         {
             // Read all data there was to read.
