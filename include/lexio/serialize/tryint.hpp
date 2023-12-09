@@ -32,28 +32,28 @@ namespace LexIO
 namespace Detail
 {
 
-#if defined(_MSC_VER) && !defined(__clang__)
-#define LEXIO_BSWAP16_(v) _byteswap_ushort(v)
-#define LEXIO_BSWAP32_(v) _byteswap_ulong(v)
-#define LEXIO_BSWAP64_(v) _byteswap_uint64(v)
+#if defined(_MSC_VER) && !defined(__clang__) // MSVC only supports LE.
+#define LEXIO_IF_LE_BSWAP16_(v) _byteswap_ushort(v)
+#define LEXIO_IF_LE_BSWAP32_(v) _byteswap_ulong(v)
+#define LEXIO_IF_LE_BSWAP64_(v) _byteswap_uint64(v)
+#define LEXIO_IF_BE_BSWAP16_(v) (v)
+#define LEXIO_IF_BE_BSWAP32_(v) (v)
+#define LEXIO_IF_BE_BSWAP64_(v) (v)
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define LEXIO_IF_LE_BSWAP16_(v) __builtin_bswap16(v)
+#define LEXIO_IF_LE_BSWAP32_(v) __builtin_bswap32(v)
+#define LEXIO_IF_LE_BSWAP64_(v) __builtin_bswap64(v)
+#define LEXIO_IF_BE_BSWAP16_(v) (v)
+#define LEXIO_IF_BE_BSWAP32_(v) (v)
+#define LEXIO_IF_BE_BSWAP64_(v) (v)
 #else
-#define LEXIO_BSWAP16_(v) __builtin_bswap16(v)
-#define LEXIO_BSWAP32_(v) __builtin_bswap32(v)
-#define LEXIO_BSWAP64_(v) __builtin_bswap64(v)
+#define LEXIO_IF_LE_BSWAP16_(v) (v)
+#define LEXIO_IF_LE_BSWAP32_(v) (v)
+#define LEXIO_IF_LE_BSWAP64_(v) (v)
+#define LEXIO_IF_BE_BSWAP16_(v) __builtin_bswap16(v)
+#define LEXIO_IF_BE_BSWAP32_(v) __builtin_bswap32(v)
+#define LEXIO_IF_BE_BSWAP64_(v) __builtin_bswap64(v)
 #endif
-
-enum class endian
-{
-#if defined(_MSC_VER) && !defined(__clang__)
-    little = 0,
-    big = 1,
-    native = little
-#else
-    little = __ORDER_LITTLE_ENDIAN__,
-    big = __ORDER_BIG_ENDIAN__,
-    native = __BYTE_ORDER__
-#endif
-};
 
 //******************************************************************************
 
@@ -163,10 +163,7 @@ inline bool TryReadU16LE(uint16_t &out, READER &reader)
     }
 
     std::memcpy(&out, buf, sizeof(uint16_t));
-    if constexpr (Detail::endian::native == Detail::endian::big)
-    {
-        out = LEXIO_BSWAP16_(out);
-    }
+    out = LEXIO_IF_BE_BSWAP16_(out);
     return true;
 }
 
@@ -188,10 +185,7 @@ inline bool TryReadU16BE(uint16_t &out, READER &reader)
     }
 
     std::memcpy(&out, buf, sizeof(uint16_t));
-    if constexpr (Detail::endian::native == Detail::endian::little)
-    {
-        out = LEXIO_BSWAP16_(out);
-    }
+    out = LEXIO_IF_LE_BSWAP16_(out);
     return true;
 }
 
@@ -206,10 +200,7 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU16LE(WRITER &writer, uint16_t value)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    if constexpr (Detail::endian::native == Detail::endian::big)
-    {
-        value = LEXIO_BSWAP16_(value);
-    }
+    value = LEXIO_IF_BE_BSWAP16_(value);
     std::memcpy(buf, &value, sizeof(uint16_t));
 
     const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
@@ -227,10 +218,7 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU16BE(WRITER &writer, uint16_t value)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    if constexpr (Detail::endian::native == Detail::endian::little)
-    {
-        value = LEXIO_BSWAP16_(value);
-    }
+    value = LEXIO_IF_LE_BSWAP16_(value);
     std::memcpy(buf, &value, sizeof(uint16_t));
 
     const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
@@ -311,10 +299,7 @@ inline bool TryReadU32LE(uint32_t &out, READER &reader)
     }
 
     std::memcpy(&out, buf, sizeof(uint32_t));
-    if constexpr (Detail::endian::native == Detail::endian::big)
-    {
-        out = LEXIO_BSWAP32_(out);
-    }
+    out = LEXIO_IF_BE_BSWAP32_(out);
     return true;
 }
 
@@ -336,10 +321,7 @@ inline bool TryReadU32BE(uint32_t &out, READER &reader)
     }
 
     std::memcpy(&out, buf, sizeof(uint32_t));
-    if constexpr (Detail::endian::native == Detail::endian::little)
-    {
-        out = LEXIO_BSWAP32_(out);
-    }
+    out = LEXIO_IF_LE_BSWAP32_(out);
     return true;
 }
 
@@ -354,10 +336,7 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU32LE(WRITER &writer, uint32_t value)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    if constexpr (Detail::endian::native == Detail::endian::big)
-    {
-        value = LEXIO_BSWAP32_(value);
-    }
+    value = LEXIO_IF_BE_BSWAP32_(value);
     std::memcpy(buf, &value, sizeof(uint32_t));
 
     const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
@@ -375,10 +354,7 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU32BE(WRITER &writer, uint32_t value)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    if constexpr (Detail::endian::native == Detail::endian::little)
-    {
-        value = LEXIO_BSWAP32_(value);
-    }
+    value = LEXIO_IF_LE_BSWAP32_(value);
     std::memcpy(buf, &value, sizeof(uint32_t));
 
     const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
@@ -459,10 +435,7 @@ inline bool TryReadU64LE(uint64_t &out, READER &reader)
     }
 
     std::memcpy(&out, buf, sizeof(uint64_t));
-    if constexpr (Detail::endian::native == Detail::endian::big)
-    {
-        out = LEXIO_BSWAP64_(out);
-    }
+    out = LEXIO_IF_BE_BSWAP64_(out);
     return true;
 }
 
@@ -484,10 +457,7 @@ inline bool TryReadU64BE(uint64_t &out, READER &reader)
     }
 
     std::memcpy(&out, buf, sizeof(uint64_t));
-    if constexpr (Detail::endian::native == Detail::endian::little)
-    {
-        out = LEXIO_BSWAP64_(out);
-    }
+    out = LEXIO_IF_LE_BSWAP64_(out);
     return true;
 }
 
@@ -502,10 +472,7 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU64LE(WRITER &writer, uint64_t value)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    if constexpr (Detail::endian::native == Detail::endian::big)
-    {
-        value = LEXIO_BSWAP64_(value);
-    }
+    value = LEXIO_IF_BE_BSWAP64_(value);
     std::memcpy(buf, &value, sizeof(uint64_t));
 
     const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
@@ -523,10 +490,7 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline bool TryWriteU64BE(WRITER &writer, uint64_t value)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    if constexpr (Detail::endian::native == Detail::endian::little)
-    {
-        value = LEXIO_BSWAP64_(value);
-    }
+    value = LEXIO_IF_LE_BSWAP64_(value);
     std::memcpy(buf, &value, sizeof(uint64_t));
 
     const size_t count = Write<WRITER>(writer, buf, sizeof(buf));
@@ -589,6 +553,9 @@ inline bool TryWrite64BE(WRITER &writer, const int64_t value)
 
 } // namespace LexIO
 
-#undef LEXIO_BSWAP16_
-#undef LEXIO_BSWAP32_
-#undef LEXIO_BSWAP64_
+#undef LEXIO_IF_LE_BSWAP16_
+#undef LEXIO_IF_LE_BSWAP32_
+#undef LEXIO_IF_LE_BSWAP64_
+#undef LEXIO_IF_BE_BSWAP16_
+#undef LEXIO_IF_BE_BSWAP32_
+#undef LEXIO_IF_BE_BSWAP64_

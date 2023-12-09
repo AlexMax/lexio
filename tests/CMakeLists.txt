@@ -45,6 +45,16 @@ if(W_MOST)
     target_compile_options(test PRIVATE "-Wmost")
 endif()
 
+check_compiler_flag(CXX -Werror=c++17-extensions WERROR_CXX17_EXTENSIONS)
+if(WERROR_CXX17_EXTENSIONS)
+    target_compile_options(test PRIVATE "-Werror=c++17-extensions")
+endif()
+
+check_compiler_flag(CXX -Werror=c++20-extensions WERROR_CXX20_EXTENSIONS)
+if(WERROR_CXX20_EXTENSIONS)
+    target_compile_options(test PRIVATE "-Werror=c++20-extensions")
+endif()
+
 add_sanitizers(Catch2)
 if(MSVC AND SANITIZE_ADDRESS)
     target_compile_definitions(Catch2 PUBLIC "_DISABLE_VECTOR_ANNOTATION")
