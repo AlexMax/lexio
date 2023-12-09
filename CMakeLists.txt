@@ -12,16 +12,15 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 project(lexio LANGUAGES CXX)
 
 set(LEXIO_HEADERS
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bytes.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/ref.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream.hpp"
 
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/bytes.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/float.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/int.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/trybytes.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/tryfloat.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/tryint.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/tryvarint.hpp"

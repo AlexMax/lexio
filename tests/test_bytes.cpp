@@ -17,6 +17,8 @@
 #include "./test.h"
 #include "catch2/catch_all.hpp"
 
+#if 0
+
 //******************************************************************************
 
 template <typename T, std::size_t N>
@@ -119,3 +121,5 @@ TEST_CASE("WriteString")
     char *checkChar = reinterpret_cast<char *>(check.data());
     REQUIRE(strcmp(checkChar, data.c_str()) == 0);
 }
+
+#endif

@@ -33,8 +33,8 @@ TEST_CASE("Test file opened in read mode")
     REQUIRE(!strcmp(reinterpret_cast<const char *>(&readBuffer[0]), firstLine)); // NOLINT
 
     // Test writing.
-    const uint8_t writeBuffer[32] = {0x00};
-    REQUIRE_THROWS(LexIO::Write(file, writeBuffer));
+    uint8_t writeBuffer[32] = {0x00};
+    REQUIRE_THROWS(LexIO::WriteBytes(file, writeBuffer));
 
     // Test seeking.
     size_t pos = LexIO::Seek(file, 2, LexIO::seek::start);

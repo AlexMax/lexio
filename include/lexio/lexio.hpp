@@ -18,6 +18,7 @@
 
 #include "./core.hpp"
 
+#include "./bytes.hpp"
 #include "./ref.hpp"
 #include "./serialize.hpp"
 #include "./stream.hpp"

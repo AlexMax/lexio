@@ -34,11 +34,11 @@ TEST_CASE("Test LexIO::ReaderRef")
         size_t LexRead(uint8_t *, const size_t) { return 0; }
     };
 
-    std::array<uint8_t, 4> buffer{};
+    uint8_t buffer[4];
     auto test = GoodR{};
     LexIO::ReaderRef ref(test);
 
-    CHECK(LexIO::Read(buffer, ref) == 0);
+    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
 
     AcceptReader(ref);
 }
@@ -52,11 +52,11 @@ TEST_CASE("Test LexIO::BufferedReaderRef")
         void LexConsumeBuffer(const size_t) {}
     };
 
-    std::array<uint8_t, 4> buffer{};
+    uint8_t buffer[4];
     auto test = GoodBR{};
     LexIO::BufferedReaderRef ref(test);
 
-    CHECK(LexIO::Read(buffer, ref) == 0);
+    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
     CHECK(LexIO::FillBuffer(ref, 0).second == 0);
     LexIO::ConsumeBuffer(ref, 0);
 
@@ -72,11 +72,11 @@ TEST_CASE("Test LexIO::WriterRef")
         void LexFlush() {}
     };
 
-    std::array<uint8_t, 4> buffer{};
+    uint8_t buffer[4];
     auto test = GoodW{};
     LexIO::WriterRef ref(test);
 
-    CHECK(LexIO::Write(ref, buffer) == 0);
+    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
     LexIO::Flush(ref);
 
     AcceptWriter(ref);
@@ -91,12 +91,12 @@ TEST_CASE("Test LexIO::ReaderWriterRef")
         void LexFlush() {}
     };
 
-    std::array<uint8_t, 4> buffer{};
+    uint8_t buffer[4];
     auto test = GoodRW{};
     LexIO::ReaderWriterRef ref(test);
 
-    CHECK(LexIO::Read(buffer, ref) == 0);
-    CHECK(LexIO::Write(ref, buffer) == 0);
+    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
+    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
     LexIO::Flush(ref);
 
     AcceptReader(ref);
@@ -114,14 +114,14 @@ TEST_CASE("Test LexIO::BufferedReaderWriterRef")
         void LexFlush() {}
     };
 
-    std::array<uint8_t, 4> buffer{};
+    uint8_t buffer[4];
     auto test = GoodBRW{};
     LexIO::BufferedReaderWriterRef ref(test);
 
-    CHECK(LexIO::Read(buffer, ref) == 0);
+    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
     CHECK(LexIO::FillBuffer(ref, 0).second == 0);
     LexIO::ConsumeBuffer(ref, 0);
-    CHECK(LexIO::Write(ref, buffer) == 0);
+    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
     LexIO::Flush(ref);
 
     AcceptReader(ref);
@@ -137,11 +137,11 @@ TEST_CASE("Test LexIO::ReaderSeekableRef")
         size_t LexSeek(const LexIO::SeekPos) { return 0; }
     };
 
-    std::array<uint8_t, 4> buffer{};
+    uint8_t buffer[4];
     auto test = GoodRS{};
     LexIO::ReaderSeekableRef ref(test);
 
-    CHECK(LexIO::Read(buffer, ref) == 0);
+    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
     CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
 
     AcceptReader(ref);
@@ -159,11 +159,11 @@ TEST_CASE("Test LexIO::BufferedReaderSeekableRef")
         size_t LexSeek(const LexIO::SeekPos) { return 0; }
     };
 
-    std::array<uint8_t, 4> buffer{};
+    uint8_t buffer[4];
     auto test = GoodBRS{};
     LexIO::BufferedReaderSeekableRef ref(test);
 
-    CHECK(LexIO::Read(buffer, ref) == 0);
+    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
     CHECK(LexIO::FillBuffer(ref, 0).second == 0);
     LexIO::ConsumeBuffer(ref, 0);
     CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
@@ -184,12 +184,12 @@ TEST_CASE("Test LexIO::ReaderWriterSeekableRef")
         size_t LexSeek(const LexIO::SeekPos) { return 0; }
     };
 
-    std::array<uint8_t, 4> buffer{};
+    uint8_t buffer[4];
     auto test = GoodRWS{};
     LexIO::ReaderWriterSeekableRef ref(test);
 
-    CHECK(LexIO::Read(buffer, ref) == 0);
-    CHECK(LexIO::Write(ref, buffer) == 0);
+    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
+    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
     LexIO::Flush(ref);
     CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
 
@@ -211,14 +211,14 @@ TEST_CASE("Test LexIO::BufferedReaderWriterSeekableRef")
         size_t LexSeek(const LexIO::SeekPos) { return 0; }
     };
 
-    std::array<uint8_t, 4> buffer{};
+    uint8_t buffer[4];
     auto test = GoodBRWS{};
     LexIO::BufferedReaderWriterSeekableRef ref(test);
 
-    CHECK(LexIO::Read(buffer, ref) == 0);
+    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
     CHECK(LexIO::FillBuffer(ref, 0).second == 0);
     LexIO::ConsumeBuffer(ref, 0);
-    CHECK(LexIO::Write(ref, buffer) == 0);
+    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
     LexIO::Flush(ref);
     CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
 

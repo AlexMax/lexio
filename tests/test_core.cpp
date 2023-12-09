@@ -111,22 +111,6 @@ TEST_CASE("Test Read with ptr/len")
     REQUIRE(LexIO::Read(&buffer[0], sizeof(buffer), basic) == 5);
 }
 
-TEST_CASE("Test Read with C array")
-{
-    LexIO::VectorStream basic = GetBuffer();
-
-    uint8_t buffer[5] = {0};
-    REQUIRE(LexIO::Read(buffer, basic) == 5);
-}
-
-TEST_CASE("Test Read with std::array")
-{
-    LexIO::VectorStream basic = GetBuffer();
-
-    std::array<uint8_t, 5> buffer = {0};
-    REQUIRE(LexIO::Read(buffer, basic) == 5);
-}
-
 TEST_CASE("Test ReadAll")
 {
     LexIO::VectorStream basic = GetBuffer();
@@ -170,22 +154,6 @@ TEST_CASE("Test Write with ptr/len")
 
     const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     REQUIRE(LexIO::Write(basic, &data[0], sizeof(data)) == 5);
-}
-
-TEST_CASE("Test Write with C array")
-{
-    LexIO::VectorStream basic = GetBuffer();
-
-    const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    REQUIRE(LexIO::Write(basic, data) == 5);
-}
-
-TEST_CASE("Test Write with std::array")
-{
-    LexIO::VectorStream basic = GetBuffer();
-
-    const std::array<uint8_t, 5> data = {'X', 'Y', 'Z', 'Z', 'Y'};
-    REQUIRE(LexIO::Write(basic, data) == 5);
 }
 
 TEST_CASE("Test Rewind")
