@@ -12,6 +12,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 project(lexio LANGUAGES CXX)
 
 set(LEXIO_HEADERS
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bufreader.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bytes.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.hpp"

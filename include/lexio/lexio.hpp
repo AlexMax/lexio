@@ -18,6 +18,7 @@
 
 #include "./core.hpp"
 
+#include "./bufreader.hpp"
 #include "./bytes.hpp"
 #include "./ref.hpp"
 #include "./serialize.hpp"
