@@ -31,8 +31,48 @@ class GenericBufReader
 
   public:
     GenericBufReader() = delete;
+
+    GenericBufReader(const GenericBufReader &other)
+        : m_wrapped(other.m_wrapped), m_buffer(new uint8_t[other.m_allocSize]), m_allocSize(other.m_allocSize),
+          m_size(other.m_size)
+    {
+        std::copy(&other.m_buffer[0], &other.m_buffer[m_size], m_buffer);
+    }
+
+    GenericBufReader(GenericBufReader &&other)
+        : m_wrapped(std::move(other.m_wrapped)), m_buffer(other.m_buffer), m_allocSize(other.m_allocSize),
+          m_size(other.m_size)
+    {
+        other.m_buffer = nullptr;
+    }
+
     GenericBufReader(T &&wrapped) : m_wrapped(wrapped) {}
     ~GenericBufReader() { delete[] m_buffer; }
+
+    GenericBufReader &operator=(const GenericBufReader &other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        GenericBufReader copy{other};
+        std::swap(m_wrapped, copy.m_wrapped);
+        std::swap(m_buffer, copy.m_buffer);
+        std::swap(m_allocSize, copy.m_allocSize);
+        std::swap(m_size, copy.m_size);
+        return *this;
+    }
+
+    GenericBufReader &operator=(GenericBufReader &&other) noexcept
+    {
+        m_wrapped = std::move(other.m_wrapped);
+        m_buffer = other.m_buffer;
+        m_allocSize = other.m_allocSize;
+        m_size = other.m_size;
+        other.m_buffer = nullptr;
+        return *this;
+    }
 
     size_t LexRead(uint8_t *outDest, const size_t count)
     {

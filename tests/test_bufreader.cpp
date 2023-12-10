@@ -177,3 +177,52 @@ TEST_CASE("ConsumeBuffer, EOF")
     test = LexIO::GetBuffer(bufReader);
     REQUIRE(test.second == 0);
 }
+
+TEST_CASE("Copy constructor/Copy assignment")
+{
+    auto stream = GetStream();
+    auto bufReader = VectorBufReader(std::move(stream));
+    auto bufTest = LexIO::FillBuffer(bufReader, 8);
+    VectorBufReader copyReader{bufReader};
+    auto copyTest = LexIO::FillBuffer(copyReader, 8);
+
+    REQUIRE(copyTest.first[0] == bufTest.first[0]);
+    REQUIRE(copyTest.first[7] == bufTest.first[7]);
+    REQUIRE(copyTest.second == bufTest.second);
+
+    LexIO::FillBuffer(copyReader, 12);
+    copyReader = bufReader;
+    copyTest = LexIO::FillBuffer(copyReader, 8);
+
+    REQUIRE(copyTest.first[0] == bufTest.first[0]);
+    REQUIRE(copyTest.first[7] == bufTest.first[7]);
+    REQUIRE(copyTest.second == bufTest.second);
+}
+
+TEST_CASE("Move constructor")
+{
+    auto stream = GetStream();
+    auto bufReader = VectorBufReader(std::move(stream));
+    LexIO::FillBuffer(bufReader, 8);
+    VectorBufReader moveReader{std::move(bufReader)};
+    auto moveTest = LexIO::FillBuffer(moveReader, 8);
+
+    REQUIRE(moveTest.first[0] == 'T');
+    REQUIRE(moveTest.first[7] == 'c');
+    REQUIRE(moveTest.second == 8);
+}
+
+TEST_CASE("Move assignment")
+{
+    auto stream = GetStream();
+    auto bufReader = VectorBufReader(std::move(stream));
+    auto moveReader = bufReader;
+
+    LexIO::FillBuffer(bufReader, 8);
+    moveReader = std::move(bufReader);
+    auto moveTest = LexIO::FillBuffer(moveReader, 8);
+
+    REQUIRE(moveTest.first[0] == 'T');
+    REQUIRE(moveTest.first[7] == 'c');
+    REQUIRE(moveTest.second == 8);
+}
