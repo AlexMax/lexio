@@ -21,10 +21,16 @@
 namespace LexIO
 {
 
-template <typename T>
+/**
+ * @brief Turn any Reader into a BufferedReader, backed by a buffer allocated
+ *        with ::new[] and ::delete[].
+ *
+ * @tparam READER Reader type to wrap
+ */
+template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 class GenericBufReader
 {
-    T m_wrapped;
+    READER m_wrapped;
     uint8_t *m_buffer = nullptr;
     size_t m_allocSize = 0;
     size_t m_size = 0;
@@ -33,7 +39,7 @@ class GenericBufReader
     GenericBufReader() = delete;
 
     GenericBufReader(const GenericBufReader &other)
-        : m_wrapped(other.m_wrapped), m_buffer(new uint8_t[other.m_allocSize]), m_allocSize(other.m_allocSize),
+        : m_wrapped(other.m_wrapped), m_buffer(::new uint8_t[other.m_allocSize]), m_allocSize(other.m_allocSize),
           m_size(other.m_size)
     {
         std::copy(&other.m_buffer[0], &other.m_buffer[m_size], m_buffer);
@@ -46,8 +52,8 @@ class GenericBufReader
         other.m_buffer = nullptr;
     }
 
-    GenericBufReader(T &&wrapped) : m_wrapped(wrapped) {}
-    ~GenericBufReader() { delete[] m_buffer; }
+    GenericBufReader(READER &&wrapped) : m_wrapped(wrapped) {}
+    ~GenericBufReader() { ::delete[] m_buffer; }
 
     GenericBufReader &operator=(const GenericBufReader &other)
     {
@@ -102,7 +108,7 @@ class GenericBufReader
 
         // Read into the buffer.
         const size_t wanted = count - m_size;
-        const size_t actual = LexIO::Read<T>(&m_buffer[m_size], wanted, m_wrapped);
+        const size_t actual = Read<READER>(&m_buffer[m_size], wanted, m_wrapped);
         m_size += actual;
         return BufferView{m_buffer, m_size};
     }
@@ -115,6 +121,24 @@ class GenericBufReader
         }
         std::copy(&m_buffer[count], &m_buffer[m_size], &m_buffer[0]);
         m_size -= count;
+    }
+
+    template <typename = std::enable_if_t<IsWriterV<READER>>>
+    size_t LexWrite(const uint8_t *src, const size_t count)
+    {
+        return Write<READER>(m_wrapped, src, count);
+    }
+
+    template <typename = std::enable_if_t<IsWriterV<READER>>>
+    void LexFlush()
+    {
+        Flush<READER>(m_wrapped);
+    }
+
+    template <typename = std::enable_if_t<IsSeekableV<READER>>>
+    size_t LexSeek(const SeekPos pos)
+    {
+        return Seek<READER>(m_wrapped, pos);
     }
 };
 

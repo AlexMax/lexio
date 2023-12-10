@@ -38,6 +38,10 @@ static LexIO::VectorStream GetStream()
 
 using VectorBufReader = LexIO::GenericBufReader<LexIO::VectorStream>;
 
+static_assert(LexIO::IsBufferedReaderV<VectorBufReader>, "VectorBufReader is not a BufferedReader");
+static_assert(LexIO::IsWriterV<VectorBufReader>, "VectorBufReader is not a Writer");
+static_assert(LexIO::IsSeekableV<VectorBufReader>, "VectorBufReader is not a Seekable");
+
 TEST_CASE("FillBuffer, single call")
 {
     auto stream = GetStream();
