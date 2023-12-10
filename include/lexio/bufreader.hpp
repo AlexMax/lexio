@@ -30,7 +30,9 @@ class GenericBufReader
     size_t m_size = 0;
 
   public:
+    GenericBufReader() = delete;
     GenericBufReader(T &&wrapped) : m_wrapped(wrapped) {}
+    ~GenericBufReader() { delete[] m_buffer; }
 
     size_t LexRead(uint8_t *outDest, const size_t count)
     {
