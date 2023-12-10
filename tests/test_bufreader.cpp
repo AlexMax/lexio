@@ -36,10 +36,12 @@ static LexIO::VectorStream GetStream()
     return rvo;
 }
 
+using VectorBufReader = LexIO::GenericBufReader<LexIO::VectorStream>;
+
 TEST_CASE("FillBuffer, single call")
 {
     auto stream = GetStream();
-    auto bufReader = LexIO::GenericBufReader(std::move(stream));
+    auto bufReader = VectorBufReader(std::move(stream));
 
     auto test = LexIO::FillBuffer(bufReader, 8);
     REQUIRE(test.first[0] == 'T');
@@ -50,7 +52,7 @@ TEST_CASE("FillBuffer, single call")
 TEST_CASE("FillBuffer, multiple calls")
 {
     auto stream = GetStream();
-    auto bufReader = LexIO::GenericBufReader(std::move(stream));
+    auto bufReader = VectorBufReader(std::move(stream));
 
     // Buffer initial four bytes.
     auto test = LexIO::FillBuffer(bufReader, 4);
@@ -76,7 +78,7 @@ TEST_CASE("FillBuffer, multiple calls")
 TEST_CASE("FillBuffer, EOF")
 {
     auto stream = GetStream();
-    auto bufReader = LexIO::GenericBufReader(std::move(stream));
+    auto bufReader = VectorBufReader(std::move(stream));
 
     // Buffer everything.
     auto test = LexIO::FillBuffer(bufReader, 64);
@@ -94,7 +96,7 @@ TEST_CASE("FillBuffer, EOF")
 TEST_CASE("FillBuffer, EOF with initial buffer")
 {
     auto stream = GetStream();
-    auto bufReader = LexIO::GenericBufReader(std::move(stream));
+    auto bufReader = VectorBufReader(std::move(stream));
 
     auto test = LexIO::FillBuffer(bufReader, 4);
     REQUIRE(test.first[0] == 'T');
@@ -113,7 +115,7 @@ TEST_CASE("FillBuffer, EOF with initial buffer")
 TEST_CASE("FillBuffer, zero sized read")
 {
     auto stream = GetStream();
-    auto bufReader = LexIO::GenericBufReader(std::move(stream));
+    auto bufReader = VectorBufReader(std::move(stream));
 
     auto test = LexIO::FillBuffer(bufReader, 0);
     REQUIRE(test.second == 0);
@@ -122,7 +124,7 @@ TEST_CASE("FillBuffer, zero sized read")
 TEST_CASE("ConsumeBuffer, single call")
 {
     auto stream = GetStream();
-    auto bufReader = LexIO::GenericBufReader(std::move(stream));
+    auto bufReader = VectorBufReader(std::move(stream));
 
     // Fill, then consume whole buffer.
     LexIO::FillBuffer(bufReader, 8);
@@ -141,7 +143,7 @@ TEST_CASE("ConsumeBuffer, single call")
 TEST_CASE("ConsumeBuffer, multiple calls")
 {
     auto stream = GetStream();
-    auto bufReader = LexIO::GenericBufReader(std::move(stream));
+    auto bufReader = VectorBufReader(std::move(stream));
 
     // Consume half the buffer.
     LexIO::FillBuffer(bufReader, 8);
@@ -160,7 +162,7 @@ TEST_CASE("ConsumeBuffer, multiple calls")
 TEST_CASE("ConsumeBuffer, EOF")
 {
     auto stream = GetStream();
-    auto bufReader = LexIO::GenericBufReader(std::move(stream));
+    auto bufReader = VectorBufReader(std::move(stream));
 
     // Fill to EOF, consume part of it.
     auto test = LexIO::FillBuffer(bufReader, 64);
