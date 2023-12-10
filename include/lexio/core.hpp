@@ -91,7 +91,7 @@ using BufferView = std::pair<const uint8_t *, size_t>;
 /**
  * @brief Possible seek directions.
  */
-enum class seek
+enum class Whence
 {
     start,   // Relative to start of stream.
     current, // Relative to current stream position.
@@ -104,11 +104,11 @@ enum class seek
 struct SeekPos
 {
     ptrdiff_t offset = 0;
-    seek whence = seek::start;
+    Whence whence = Whence::start;
 
     SeekPos() = default;
     SeekPos(ptrdiff_t offset_) : offset(offset_) {}
-    SeekPos(ptrdiff_t offset_, seek whence_) : offset(offset_), whence(whence_) {}
+    SeekPos(ptrdiff_t offset_, Whence whence_) : offset(offset_), whence(whence_) {}
 };
 
 namespace Detail
@@ -424,7 +424,7 @@ inline size_t Seek(SEEKABLE &seekable, const SeekPos pos)
  *         of data, or has some other error condition.
  */
 template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const seek whence)
+inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const Whence whence)
 {
     return seekable.LexSeek(SeekPos(offset, whence));
 }
@@ -534,7 +534,7 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
 template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
 inline size_t Tell(SEEKABLE &seekable)
 {
-    return Seek(seekable, 0, seek::current);
+    return Seek(seekable, 0, Whence::current);
 }
 
 /**
@@ -548,7 +548,7 @@ inline size_t Tell(SEEKABLE &seekable)
 template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
 inline size_t Rewind(SEEKABLE &seekable)
 {
-    return Seek(seekable, 0, seek::start);
+    return Seek(seekable, 0, Whence::start);
 }
 
 /**
@@ -562,9 +562,9 @@ inline size_t Rewind(SEEKABLE &seekable)
 template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
 inline size_t Length(SEEKABLE &seekable)
 {
-    const size_t old = Seek(seekable, 0, seek::current);
-    const size_t len = Seek(seekable, 0, seek::end);
-    Seek(seekable, ptrdiff_t(old), seek::start);
+    const size_t old = Seek(seekable, 0, Whence::current);
+    const size_t len = Seek(seekable, 0, Whence::end);
+    Seek(seekable, ptrdiff_t(old), Whence::start);
     return len;
 }
 

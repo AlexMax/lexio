@@ -198,13 +198,13 @@ class FileWin32
 
         switch (pos.whence)
         {
-        case LexIO::seek::start:
+        case LexIO::Whence::start:
             whence = FILE_BEGIN;
             break;
-        case LexIO::seek::current:
+        case LexIO::Whence::current:
             whence = FILE_CURRENT;
             break;
-        case LexIO::seek::end:
+        case LexIO::Whence::end:
             whence = FILE_END;
             break;
         }
@@ -365,13 +365,13 @@ class FilePOSIX
 
         switch (pos.whence)
         {
-        case LexIO::seek::start:
+        case LexIO::Whence::start:
             whence = SEEK_SET;
             break;
-        case LexIO::seek::current:
+        case LexIO::Whence::current:
             whence = SEEK_CUR;
             break;
-        case LexIO::seek::end:
+        case LexIO::Whence::end:
             whence = SEEK_END;
             break;
         }

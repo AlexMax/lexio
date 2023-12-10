@@ -32,7 +32,7 @@ static LexIO::VectorStream GetStream()
 {
     LexIO::VectorStream rvo;
     rvo.LexWrite(&TEXT_BUFFER[0], TEXT_BUFFER_SIZE);
-    rvo.LexSeek(LexIO::SeekPos(0, LexIO::seek::start));
+    rvo.LexSeek(LexIO::SeekPos(0, LexIO::Whence::start));
     return rvo;
 }
 

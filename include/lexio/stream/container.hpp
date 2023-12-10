@@ -92,13 +92,13 @@ class ContainerBase
         ptrdiff_t offset = 0;
         switch (pos.whence)
         {
-        case LexIO::seek::start:
+        case LexIO::Whence::start:
             offset = pos.offset;
             break;
-        case LexIO::seek::current:
+        case LexIO::Whence::current:
             offset = static_cast<ptrdiff_t>(m_offset) + pos.offset;
             break;
-        case LexIO::seek::end:
+        case LexIO::Whence::end:
             offset = static_cast<ptrdiff_t>(m_container.size()) - pos.offset;
             break;
         }

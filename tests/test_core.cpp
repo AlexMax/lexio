@@ -97,7 +97,7 @@ static LexIO::VectorStream GetBuffer()
 {
     LexIO::VectorStream rvo;
     rvo.LexWrite(&BUFFER_TEXT[0], BUFFER_LENGTH);
-    rvo.LexSeek(LexIO::SeekPos(0, LexIO::seek::start));
+    rvo.LexSeek(LexIO::SeekPos(0, LexIO::Whence::start));
     return rvo;
 }
 
@@ -170,13 +170,13 @@ TEST_CASE("Test Seek/Tell")
 {
     LexIO::VectorStream basic = GetBuffer();
 
-    LexIO::Seek(basic, 5, LexIO::seek::start);
+    LexIO::Seek(basic, 5, LexIO::Whence::start);
     REQUIRE(LexIO::Tell(basic) == 5);
 
-    LexIO::Seek(basic, 5, LexIO::seek::current);
+    LexIO::Seek(basic, 5, LexIO::Whence::current);
     REQUIRE(LexIO::Tell(basic) == 10);
 
-    LexIO::Seek(basic, 5, LexIO::seek::end);
+    LexIO::Seek(basic, 5, LexIO::Whence::end);
     REQUIRE(LexIO::Tell(basic) == BUFFER_LENGTH - 5);
 }
 
@@ -184,13 +184,13 @@ TEST_CASE("Test Seek/Tell with SeekPos")
 {
     LexIO::VectorStream basic = GetBuffer();
 
-    LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::seek::start));
+    LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::Whence::start));
     REQUIRE(LexIO::Tell(basic) == 5);
 
-    LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::seek::current));
+    LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::Whence::current));
     REQUIRE(LexIO::Tell(basic) == 10);
 
-    LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::seek::end));
+    LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::Whence::end));
     REQUIRE(LexIO::Tell(basic) == BUFFER_LENGTH - 5);
 }
 
@@ -198,7 +198,7 @@ TEST_CASE("Test Tell after Rewind")
 {
     LexIO::VectorStream basic = GetBuffer();
 
-    LexIO::Seek(basic, 5, LexIO::seek::start);
+    LexIO::Seek(basic, 5, LexIO::Whence::start);
     REQUIRE(LexIO::Rewind(basic) == 0);
     REQUIRE(LexIO::Tell(basic) == 0);
 }
