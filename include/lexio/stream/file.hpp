@@ -305,7 +305,12 @@ class FilePOSIX
      */
     static FilePOSIX Open(const char *path, const int flags, mode_t mode)
     {
-        const int fd = open(path, flags, mode);
+        int fd = 0;
+        do
+        {
+            fd = open(path, flags, mode);
+        } while (fd == -1 && errno == EINTR);
+
         if (fd == -1)
         {
             throw POSIXError("Could not open file.", errno);
@@ -321,7 +326,12 @@ class FilePOSIX
     {
         if (m_fd != -1)
         {
-            const int ok = close(m_fd);
+            int ok = 0;
+            do
+            {
+                ok = close(m_fd);
+            } while (ok == -1 && errno == EINTR);
+
             if (ok == -1)
             {
                 throw POSIXError("Could not close file.", errno);
@@ -332,7 +342,12 @@ class FilePOSIX
 
     size_t LexRead(uint8_t *outDest, const size_t count)
     {
-        const ssize_t bytesRead = read(m_fd, outDest, count);
+        ssize_t bytesRead = 0;
+        do
+        {
+            bytesRead = read(m_fd, outDest, count);
+        } while (bytesRead == -1 && errno == EINTR);
+
         if (bytesRead == -1)
         {
             throw POSIXError("Could not read file.", errno);
@@ -342,12 +357,17 @@ class FilePOSIX
 
     size_t LexWrite(const uint8_t *src, const size_t count)
     {
-        const ssize_t bytesRead = write(m_fd, src, count);
-        if (bytesRead == -1)
+        ssize_t bytesWritten = 0;
+        do
+        {
+            bytesWritten = write(m_fd, src, count);
+        } while (bytesWritten == -1 && errno == EINTR);
+
+        if (bytesWritten == -1)
         {
             throw POSIXError("Could not write file.", errno);
         }
-        return static_cast<size_t>(bytesRead);
+        return static_cast<size_t>(bytesWritten);
     }
 
     void LexFlush()
