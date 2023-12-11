@@ -56,15 +56,21 @@ The implementation is allowed to buffer more data than is requested by this read
 
 #### LexFillBuffer
 
+This method fills the internal buffer to at most `count` bytes.
+
 The return value of this method is always a `LexIO::BufferView` that contains a pointer to start of the internal buffer, as well as the current size of the buffer.  The pointer returned by the view should be assumed to be valid until `LexFillBuffer` grows the size of the buffer or `LexConsumeBuffer` shrinks it.
 
-If `count` is less than or equal to the current size of the buffer, this method should immediately return a view of the buffer, including its current size.  Otherwise, the method should read and append data to the internal buffer until it is at most `count` bytes or EOF is hit, and then return the buffer view.
+If `count` is less than or equal to the current size of the buffer, this method should immediately return a view of the buffer, including its current size.  0 is considered an acceptable `count` for this purpose, and is in fact how `LexIO::GetBuffer()` is implemented.
+
+Otherwise, the method should read and append data to the internal buffer until it is at most `count` bytes or EOF is hit, and then return the buffer view.  For example, if the buffer size was previously 2 and this method is called with a `count` is 8, 6 bytes are read and appended to the original 2, and a view of the resulting buffer of size 8 is returned.
 
 Note that the size of the buffer has no bearing on the allocated size of the buffer itself - that detail is left to the implementation's discretion.
 
 #### LexConsumeBuffer
 
-This method removes data from the current buffer.  If `count` is equal to the current size of the buffer, then the buffer is cleared.  If `count` is less than the current size of the buffer, `count` bytes should be removed from the buffer, and the remaining contents should be shifted until the buffer points to first byte of the remaining contents.
+This method removes the first `count` bytes from the current buffer.
+
+If `count` is equal to the current size of the buffer, then the buffer is cleared.  If `count` is less than the current size of the buffer, `count` bytes should be removed from the buffer, and the remaining contents should be shifted until the buffer points to first byte of the remaining contents.
 
 An exception should be thrown if `count` is greater than the current size of the buffer.
 
@@ -75,16 +81,32 @@ Note that the means of how the buffer is cleared or points to any remaining data
 ```cpp
 struct Writer
 {
-    size_t LexWrite(const uint8_t *, const size_t);
+    size_t LexWrite(const uint8_t *src, const size_t count);
     void LexFlush();
 };
 ```
+
+#### LexWrite
+
+This method should write `count` bytes from the buffer pointed to by `src`.
+
+If the write operation encounters a temporary error that implies the operation can be retried - such as `EINTR` - the operation shuold be retried until a result is returned.  If the write operation is successful, return the number of bytes that were actually written.  If an error was encountered, throw an exception.
+
+#### LexFlush
+
+This method should flush any data held in any buffers.  If the implementation has no flush behavior, a no-op is a valid implementation of this method.  For example, POSIX uses `fsync` for file descriptiors.
 
 ### Seekable
 
 ```cpp
 struct Seekable
 {
-    size_t LexSeek(const LexIO::SeekPos);
+    size_t LexSeek(const LexIO::SeekPos pos);
 };
 ```
+
+This method should seek to a position in the implementation based on the `pos` parameters.  A `LexIO::SeekPos` contains a desired seek destination with semantics similar to POSIX `lseek`.
+
+The return value of this method should be the absolute stream position in the implementation where the seek operation ended up.  A value of 0 for the offset and `current` for the whence is an acceptable way to get the current stream position from the implementation, and is in fact how `LexIO::Tell()` is implemented.
+
+Seeking past the start of the stream implementation should throw an exception.  Seeking past the end of the stream is fine.
