@@ -72,6 +72,8 @@ class GenericBufReader
 
     GenericBufReader &operator=(GenericBufReader &&other) noexcept
     {
+        ::delete[] m_buffer;
+
         m_wrapped = std::move(other.m_wrapped);
         m_buffer = other.m_buffer;
         m_allocSize = other.m_allocSize;
