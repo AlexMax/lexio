@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD "20" CACHE STRING "C++ Standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-project(lexio LANGUAGES CXX)
+project(lexio LANGUAGES C CXX)
 
 set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bufreader.hpp"

@@ -30,7 +30,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY
 # Test suite.
 add_executable(test ${TEST_SOURCES})
 target_include_directories(test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
-target_link_libraries(test lexio Catch2::Catch2WithMain)
+target_link_libraries(test PRIVATE lexio Catch2::Catch2WithMain)
 catch_discover_tests(test)
 
 # Only use clang-tidy with Clang.
@@ -66,4 +66,14 @@ if(MSVC)
     target_compile_options(test PUBLIC /W4 /D_DISABLE_VECTOR_ANNOTATION)
 else()
     target_compile_options(test PUBLIC -Wall -Wextra -Wno-unknown-pragmas)
+endif()
+
+option(CODE_COVERAGE "Enable code coverage on test suite" OFF)
+if(CODE_COVERAGE)
+    include(CodeCoverage)
+    append_coverage_compiler_flags_to_target(test)
+    setup_target_for_coverage_lcov(
+        NAME test_coverage
+        EXECUTABLE test
+        DEPENDENCIES test)
 endif()
