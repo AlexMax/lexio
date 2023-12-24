@@ -75,5 +75,6 @@ if(CODE_COVERAGE)
     setup_target_for_coverage_lcov(
         NAME test_coverage
         EXECUTABLE test
-        DEPENDENCIES test)
+        DEPENDENCIES test
+        EXCLUDE "build/*" "tests" "/usr/include/*")
 endif()

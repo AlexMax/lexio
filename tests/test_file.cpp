@@ -19,6 +19,42 @@
 
 //******************************************************************************
 
+#if defined(_WIN32)
+
+TEST_CASE("FileWin32 must be a Reader")
+{
+    REQUIRE(LexIO::IsReaderV<LexIO::FileWin32>);
+}
+
+TEST_CASE("FileWin32 must be a Writer")
+{
+    REQUIRE(LexIO::IsWriterV<LexIO::FileWin32>);
+}
+
+TEST_CASE("FileWin32 must be a Seekable")
+{
+    REQUIRE(LexIO::IsSeekableV<LexIO::FileWin32>);
+}
+
+#else
+
+TEST_CASE("FilePOSIX must be a Reader")
+{
+    REQUIRE(LexIO::IsReaderV<LexIO::FilePOSIX>);
+}
+
+TEST_CASE("FilePOSIX must be a Writer")
+{
+    REQUIRE(LexIO::IsWriterV<LexIO::FilePOSIX>);
+}
+
+TEST_CASE("FilePOSIX must be a Seekable")
+{
+    REQUIRE(LexIO::IsSeekableV<LexIO::FilePOSIX>);
+}
+
+#endif
+
 TEST_CASE("Test file opened in read mode")
 {
     constexpr const char *firstLine = "The quick brown fox";

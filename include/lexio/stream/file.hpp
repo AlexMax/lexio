@@ -218,10 +218,6 @@ class FileWin32
     }
 };
 
-static_assert(IsReaderV<FileWin32>, "FileWin32 is not a Reader");
-static_assert(IsWriterV<FileWin32>, "FileWin32 is not a Writer");
-static_assert(IsSeekableV<FileWin32>, "FileWin32 is not a Seekable");
-
 using File = FileWin32;
 
 inline File Open(const char *path, const OpenMode mode)
@@ -404,10 +400,6 @@ class FilePOSIX
         return static_cast<size_t>(newOffset);
     }
 };
-
-static_assert(IsReaderV<FilePOSIX>, "FilePOSIX is not a Reader");
-static_assert(IsWriterV<FilePOSIX>, "FilePOSIX is not a Writer");
-static_assert(IsSeekableV<FilePOSIX>, "FilePOSIX is not a Seekable");
 
 using File = FilePOSIX;
 

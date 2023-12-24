@@ -24,8 +24,15 @@ struct GoodReader
     size_t LexRead(uint8_t *, const size_t) { return 0; }
 };
 
-static_assert(LexIO::IsReader<GoodReader>::value, "GoodReader does not fulfill IsReader");
-static_assert(LexIO::IsReaderV<GoodReader>, "GoodReader does not fulfill IsReaderV");
+TEST_CASE("GoodReader must fulfill IsReader")
+{
+    REQUIRE(LexIO::IsReader<GoodReader>::value);
+}
+
+TEST_CASE("GoodReader must fulfill IsReaderV")
+{
+    REQUIRE(LexIO::IsReaderV<GoodReader>);
+}
 
 //******************************************************************************
 
@@ -35,9 +42,15 @@ struct GoodBufferedReader : public GoodReader
     void LexConsumeBuffer(const size_t size) { (void)size; }
 };
 
-static_assert(LexIO::IsBufferedReader<GoodBufferedReader>::value,
-              "GoodBufferedReader does not fulfill IsBufferedReader");
-static_assert(LexIO::IsBufferedReaderV<GoodBufferedReader>, "GoodBufferedReader does not fulfill IsBufferedReaderV");
+TEST_CASE("GoodBufferedReader must fulfill IsBufferedReader")
+{
+    REQUIRE(LexIO::IsBufferedReader<GoodBufferedReader>::value);
+}
+
+TEST_CASE("GoodBufferedReader must fulfill IsBufferedReaderV")
+{
+    REQUIRE(LexIO::IsBufferedReaderV<GoodBufferedReader>);
+}
 
 //******************************************************************************
 
@@ -47,8 +60,15 @@ struct GoodWriter
     void LexFlush() {}
 };
 
-static_assert(LexIO::IsWriter<GoodWriter>::value, "GoodWriter does not fulfill IsWriter");
-static_assert(LexIO::IsWriterV<GoodWriter>, "GoodWriter does not fulfill IsWriterV");
+TEST_CASE("GoodWriter must fulfill IsWriter")
+{
+    REQUIRE(LexIO::IsWriter<GoodWriter>::value);
+}
+
+TEST_CASE("GoodWriter must fulfill IsWriterV")
+{
+    REQUIRE(LexIO::IsWriterV<GoodWriter>);
+}
 
 //******************************************************************************
 
@@ -57,8 +77,15 @@ struct GoodSeekable
     size_t LexSeek(const LexIO::SeekPos) { return 0; }
 };
 
-static_assert(LexIO::IsSeekable<GoodSeekable>::value, "GoodSeekable does not fulfill IsSeekable");
-static_assert(LexIO::IsSeekableV<GoodSeekable>, "GoodSeekable does not fulfill IsSeekableV");
+TEST_CASE("GoodSeekable must fulfill IsSeekable")
+{
+    REQUIRE(LexIO::IsSeekable<GoodSeekable>::value);
+}
+
+TEST_CASE("GoodSeekable must fulfill IsSeekableV")
+{
+    REQUIRE(LexIO::IsSeekableV<GoodSeekable>);
+}
 
 //******************************************************************************
 
@@ -66,21 +93,30 @@ struct BadReaderMissingClass
 {
 };
 
-static_assert(!LexIO::IsReaderV<BadReaderMissingClass>, "BadReaderMissingClass incorrectly fulfills IsReaderV");
+TEST_CASE("BadReaderMissingClass must not fulfill IsReaderV")
+{
+    REQUIRE_FALSE(LexIO::IsReaderV<BadReaderMissingClass>);
+}
 
 struct BadReaderBadParam
 {
     size_t LexRead(uint8_t *&, const size_t) { return 0; }
 };
 
-static_assert(!LexIO::IsReaderV<BadReaderBadParam>, "BadReaderBadParam incorrectly fulfills IsReaderV");
+TEST_CASE("BadReaderBadParam must not fulfill IsReaderV")
+{
+    REQUIRE_FALSE(LexIO::IsReaderV<BadReaderBadParam>);
+}
 
 struct BadReaderBadReturn
 {
     void LexRead(uint8_t *, const size_t) {}
 };
 
-static_assert(!LexIO::IsReaderV<BadReaderBadReturn>, "BadReaderBadReturn incorrectly fulfills IsReaderV");
+TEST_CASE("BadReaderBadReturn must not fulfill IsReaderV")
+{
+    REQUIRE_FALSE(LexIO::IsReaderV<BadReaderBadReturn>);
+}
 
 //******************************************************************************
 
