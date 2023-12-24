@@ -35,6 +35,32 @@ class GenericBufReader
     size_t m_allocSize = 0;
     size_t m_size = 0;
 
+    /**
+     * @brief Calculate size of allocated buffer.
+     *
+     * @param wantSize Wanted capacity of buffer.
+     * @return Calculated capacity of allocation.
+     */
+    size_t CalcGrowth(const size_t wantSize)
+    {
+        const size_t oldSize = m_allocSize;
+        if (oldSize > SIZE_MAX - (oldSize / 2))
+        {
+            // Would overflow.
+            return SIZE_MAX;
+        }
+
+        const size_t nextSize = oldSize + (oldSize / 2);
+        if (wantSize <= nextSize)
+        {
+            // 1.5x growth factor is OK.
+            return nextSize;
+        }
+
+        // Grow to exact size.
+        return wantSize;
+    }
+
   public:
     GenericBufReader() = delete;
 
@@ -101,11 +127,12 @@ class GenericBufReader
         if (count > m_allocSize)
         {
             // Reallocate our buffer with any existing data.
-            uint8_t *buffer = ::new uint8_t[count];
+            const size_t newAllocSize = CalcGrowth(count);
+            uint8_t *buffer = ::new uint8_t[newAllocSize];
             std::copy(&m_buffer[0], &m_buffer[m_size], buffer);
             ::delete[] m_buffer;
             m_buffer = buffer;
-            m_allocSize = count;
+            m_allocSize = newAllocSize;
         }
 
         // Read into the buffer.
