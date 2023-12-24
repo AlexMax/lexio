@@ -19,23 +19,6 @@
 
 //******************************************************************************
 
-template <typename T, std::size_t N>
-constexpr std::size_t CountOf(T const (&)[N]) noexcept
-{
-    return N;
-}
-
-constexpr const uint8_t TEXT_BUFFER[] = "The quick brown fox\njumps over the lazy dog.\n";
-constexpr const size_t TEXT_BUFFER_SIZE = CountOf(TEXT_BUFFER) - 1;
-
-static LexIO::VectorStream GetStream()
-{
-    LexIO::VectorStream rvo;
-    rvo.LexWrite(&TEXT_BUFFER[0], TEXT_BUFFER_SIZE);
-    rvo.LexSeek(LexIO::SeekPos(0, LexIO::Whence::start));
-    return rvo;
-}
-
 static_assert(LexIO::IsBufferedReaderV<VectorBufReader>, "VectorBufReader is not a BufferedReader");
 static_assert(LexIO::IsWriterV<VectorBufReader>, "VectorBufReader is not a Writer");
 static_assert(LexIO::IsSeekableV<VectorBufReader>, "VectorBufReader is not a Seekable");
@@ -85,14 +68,14 @@ TEST_CASE("FillBuffer, EOF")
     // Buffer everything.
     auto test = LexIO::FillBuffer(bufReader, 64);
     REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[TEXT_BUFFER_SIZE - 1] == '\n');
-    REQUIRE(test.second == TEXT_BUFFER_SIZE);
+    REQUIRE(test.first[BUFFER_LENGTH - 1] == '\n');
+    REQUIRE(test.second == BUFFER_LENGTH);
 
     // Buffer more than everything.
     test = LexIO::FillBuffer(bufReader, 96);
     REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[TEXT_BUFFER_SIZE - 1] == '\n');
-    REQUIRE(test.second == TEXT_BUFFER_SIZE);
+    REQUIRE(test.first[BUFFER_LENGTH - 1] == '\n');
+    REQUIRE(test.second == BUFFER_LENGTH);
 }
 
 TEST_CASE("FillBuffer, EOF with initial buffer")
@@ -110,8 +93,8 @@ TEST_CASE("FillBuffer, EOF with initial buffer")
     REQUIRE(test.first[0] == 'T');
     REQUIRE(test.first[3] == ' ');
     REQUIRE(test.first[4] == 'q');
-    REQUIRE(test.first[TEXT_BUFFER_SIZE - 1] == '\n');
-    REQUIRE(test.second == TEXT_BUFFER_SIZE);
+    REQUIRE(test.first[BUFFER_LENGTH - 1] == '\n');
+    REQUIRE(test.second == BUFFER_LENGTH);
 }
 
 TEST_CASE("FillBuffer, zero sized read")
@@ -172,10 +155,10 @@ TEST_CASE("ConsumeBuffer, EOF")
     test = LexIO::GetBuffer(bufReader);
     REQUIRE(test.first[0] == 'q');
     REQUIRE(test.first[3] == 'c');
-    REQUIRE(test.second == TEXT_BUFFER_SIZE - 4);
+    REQUIRE(test.second == BUFFER_LENGTH - 4);
 
     // Consume the rest of it.
-    REQUIRE_NOTHROW(LexIO::ConsumeBuffer(bufReader, TEXT_BUFFER_SIZE - 4));
+    REQUIRE_NOTHROW(LexIO::ConsumeBuffer(bufReader, BUFFER_LENGTH - 4));
     test = LexIO::GetBuffer(bufReader);
     REQUIRE(test.second == 0);
 }

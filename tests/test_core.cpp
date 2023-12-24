@@ -120,28 +120,9 @@ TEST_CASE("BadReaderBadReturn must not fulfill IsReaderV")
 
 //******************************************************************************
 
-template <typename T, std::size_t N>
-constexpr std::size_t CountOf(T const (&)[N]) noexcept
-{
-    return N;
-}
-
-constexpr uint8_t BUFFER_TEXT[] = "The quick brown fox\njumps over the lazy dog.\n";
-constexpr size_t BUFFER_LENGTH = CountOf(BUFFER_TEXT) - sizeof('\0');
-
-static LexIO::VectorStream GetBuffer()
-{
-    LexIO::VectorStream rvo;
-    rvo.LexWrite(&BUFFER_TEXT[0], BUFFER_LENGTH);
-    rvo.LexSeek(LexIO::SeekPos(0, LexIO::Whence::start));
-    return rvo;
-}
-
-//******************************************************************************
-
 TEST_CASE("Test Read with ptr/len")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
 
     uint8_t buffer[5] = {0};
     REQUIRE(LexIO::Read(&buffer[0], sizeof(buffer), basic) == 5);
@@ -149,7 +130,7 @@ TEST_CASE("Test Read with ptr/len")
 
 TEST_CASE("Test ReadAll")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
@@ -161,7 +142,7 @@ TEST_CASE("Test ReadAll")
 
 TEST_CASE("Test ReadAll with a small buffer")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
@@ -174,7 +155,7 @@ TEST_CASE("Test ReadAll with a small buffer")
 
 TEST_CASE("Test ReadUntil")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
@@ -195,7 +176,7 @@ TEST_CASE("Test ReadUntil")
 
 TEST_CASE("Test ReadUntil with a small buffer")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
@@ -216,7 +197,7 @@ TEST_CASE("Test ReadUntil with a small buffer")
 
 TEST_CASE("Test Write with ptr/len")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
 
     const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     REQUIRE(LexIO::Write(basic, &data[0], sizeof(data)) == 5);
@@ -224,7 +205,7 @@ TEST_CASE("Test Write with ptr/len")
 
 TEST_CASE("Test Rewind")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
     REQUIRE(LexIO::Read8(basic) == 'T');
     REQUIRE(LexIO::Read8(basic) == 'h');
     REQUIRE(LexIO::Read8(basic) == 'e');
@@ -234,7 +215,7 @@ TEST_CASE("Test Rewind")
 
 TEST_CASE("Test Seek/Tell")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
 
     LexIO::Seek(basic, 5, LexIO::Whence::start);
     REQUIRE(LexIO::Tell(basic) == 5);
@@ -248,7 +229,7 @@ TEST_CASE("Test Seek/Tell")
 
 TEST_CASE("Test Seek/Tell with SeekPos")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
 
     LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::Whence::start));
     REQUIRE(LexIO::Tell(basic) == 5);
@@ -262,7 +243,7 @@ TEST_CASE("Test Seek/Tell with SeekPos")
 
 TEST_CASE("Test Tell after Rewind")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
 
     LexIO::Seek(basic, 5, LexIO::Whence::start);
     REQUIRE(LexIO::Rewind(basic) == 0);
@@ -271,7 +252,7 @@ TEST_CASE("Test Tell after Rewind")
 
 TEST_CASE("Test Length")
 {
-    LexIO::VectorStream basic = GetBuffer();
+    LexIO::VectorStream basic = GetStream();
 
     REQUIRE(LexIO::Length(basic) == BUFFER_LENGTH);
 }

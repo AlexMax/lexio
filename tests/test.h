@@ -24,3 +24,20 @@
 #include "lexio/lexio.hpp"
 
 using VectorBufReader = LexIO::GenericBufReader<LexIO::VectorStream>;
+
+template <typename T, std::size_t N>
+constexpr std::size_t CountOf(T const (&)[N]) noexcept
+{
+    return N;
+}
+
+constexpr uint8_t BUFFER_TEXT[] = "The quick brown fox\njumps over the lazy dog.\n";
+constexpr size_t BUFFER_LENGTH = CountOf(BUFFER_TEXT) - sizeof('\0');
+
+inline LexIO::VectorStream GetStream()
+{
+    LexIO::VectorStream rvo;
+    rvo.LexWrite(&BUFFER_TEXT[0], BUFFER_LENGTH);
+    rvo.LexSeek(LexIO::SeekPos(0, LexIO::Whence::start));
+    return rvo;
+}
