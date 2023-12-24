@@ -22,3 +22,5 @@
 #include "config.h"
 
 #include "lexio/lexio.hpp"
+
+using VectorBufReader = LexIO::GenericBufReader<LexIO::VectorStream>;

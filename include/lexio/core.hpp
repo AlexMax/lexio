@@ -503,7 +503,7 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
             return size;
         }
 
-        // Copy the buffered data into the vector until we hit the passed byte.
+        // Copy the buffered data into the iterator until we hit the passed byte.
         const uint8_t *it = buf.first;
         for (size_t i = 0; i < buf.second; i++)
         {
@@ -511,15 +511,16 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
             {
                 // Found the terminator, append it and stop.
                 *outIt++ = *it++;
-                break;
+                ConsumeBuffer(bufReader, i + 1);
+                size += i + 1;
+                return size;
             }
             *outIt++ = *it++;
         }
 
         // Consume what we've read.
-        const size_t count = static_cast<size_t>(it - buf.first);
-        ConsumeBuffer(bufReader, count);
-        size += count;
+        ConsumeBuffer(bufReader, bufSize);
+        size += bufSize;
     }
 }
 

@@ -150,7 +150,7 @@ TEST_CASE("Test Read with ptr/len")
 TEST_CASE("Test ReadAll")
 {
     LexIO::VectorStream basic = GetBuffer();
-    auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
+    auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
@@ -162,7 +162,7 @@ TEST_CASE("Test ReadAll")
 TEST_CASE("Test ReadAll with a small buffer")
 {
     LexIO::VectorStream basic = GetBuffer();
-    auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
+    auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer, 4);
@@ -175,13 +175,43 @@ TEST_CASE("Test ReadAll with a small buffer")
 TEST_CASE("Test ReadUntil")
 {
     LexIO::VectorStream basic = GetBuffer();
-    auto buffer = LexIO::VectorBufReader<LexIO::VectorStream>::FromReader(std::move(basic));
+    auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
+    size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
     REQUIRE(bytes == 20);
     REQUIRE(data.size() == 20);
     REQUIRE(*(data.end() - 1) == '\n');
+
+    bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
+    REQUIRE(bytes == 25);
+    REQUIRE(data.size() == 45);
+    REQUIRE(*(data.end() - 1) == '\n');
+
+    bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
+    REQUIRE(bytes == 0);
+    REQUIRE(data.size() == 45);
+}
+
+TEST_CASE("Test ReadUntil with a small buffer")
+{
+    LexIO::VectorStream basic = GetBuffer();
+    auto buffer = VectorBufReader(std::move(basic));
+
+    std::vector<uint8_t> data;
+    size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n', 4);
+    REQUIRE(bytes == 20);
+    REQUIRE(data.size() == 20);
+    REQUIRE(*(data.end() - 1) == '\n');
+
+    bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n', 4);
+    REQUIRE(bytes == 25);
+    REQUIRE(data.size() == 45);
+    REQUIRE(*(data.end() - 1) == '\n');
+
+    bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n', 4);
+    REQUIRE(bytes == 0);
+    REQUIRE(data.size() == 45);
 }
 
 TEST_CASE("Test Write with ptr/len")
