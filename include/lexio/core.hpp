@@ -335,6 +335,13 @@ inline size_t Read(uint8_t (&outArray)[N], READER &reader)
     return reader.LexRead(&outArray[0], N);
 }
 
+template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<READER>>>
+inline size_t Read(IT outStart, IT outEnd, READER &reader)
+{
+    const size_t count = std::distance(outStart, outEnd);
+    return reader.LexRead(&(*outStart), count, reader);
+}
+
 /**
  * @brief Fill the internal buffer of data to the requested size without
  *        advancing the offset.  If EOF is encountered, the rest of the
@@ -385,6 +392,19 @@ template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline size_t Write(WRITER &writer, const uint8_t *src, const size_t count)
 {
     return writer.LexWrite(src, count);
+}
+
+template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline size_t Write(WRITER &writer, uint8_t (&array)[N])
+{
+    return writer.LexWrite(&array[0], N);
+}
+
+template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline size_t Write(WRITER &writer, IT start, IT end)
+{
+    const size_t count = std::distance(start, end);
+    return Write<WRITER>(writer, &(*start), count);
 }
 
 /**

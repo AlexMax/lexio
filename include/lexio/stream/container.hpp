@@ -22,8 +22,6 @@
 
 #include "../core.hpp"
 
-#include <vector> // Used by StdBufReader
-
 namespace LexIO
 {
 

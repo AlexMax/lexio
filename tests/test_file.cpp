@@ -70,7 +70,7 @@ TEST_CASE("Test file opened in read mode")
 
     // Test writing.
     uint8_t writeBuffer[32] = {0x00};
-    REQUIRE_THROWS(LexIO::WriteBytes(file, writeBuffer));
+    REQUIRE_THROWS(LexIO::Write(file, writeBuffer));
 
     // Test seeking.
     size_t pos = LexIO::Seek(file, 2, LexIO::Whence::start);
