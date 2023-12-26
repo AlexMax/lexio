@@ -128,6 +128,22 @@ TEST_CASE("Test Read with ptr/len")
     REQUIRE(LexIO::Read(&buffer[0], sizeof(buffer), basic) == 5);
 }
 
+TEST_CASE("Test Read with array")
+{
+    LexIO::VectorStream basic = GetStream();
+
+    uint8_t buffer[5] = {0};
+    REQUIRE(LexIO::Read(buffer, basic) == 5);
+}
+
+TEST_CASE("Test Read with iterator pair")
+{
+    LexIO::VectorStream basic = GetStream();
+
+    uint8_t buffer[5] = {0};
+    REQUIRE(LexIO::Read(&buffer[0], &buffer[5], basic) == 5);
+}
+
 TEST_CASE("Test ReadAll")
 {
     LexIO::VectorStream basic = GetStream();
@@ -201,6 +217,22 @@ TEST_CASE("Test Write with ptr/len")
 
     const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     REQUIRE(LexIO::Write(basic, &data[0], sizeof(data)) == 5);
+}
+
+TEST_CASE("Test Write with array")
+{
+    LexIO::VectorStream basic = GetStream();
+
+    const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    REQUIRE(LexIO::Write(basic, data) == 5);
+}
+
+TEST_CASE("Test Write with iterator pair")
+{
+    LexIO::VectorStream basic = GetStream();
+
+    const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    REQUIRE(LexIO::Write(basic, &data[0], &data[5]) == 5);
 }
 
 TEST_CASE("Test Rewind")

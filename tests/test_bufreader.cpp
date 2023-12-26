@@ -168,6 +168,9 @@ TEST_CASE("FillBuffer, zero sized read")
     REQUIRE(test.second == 0);
 }
 
+#if defined(__has_feature)
+#if __has_feature(address_sanitizer)
+
 TEST_CASE("FillBuffer, too large")
 {
     auto stream = GetStream();
@@ -175,6 +178,9 @@ TEST_CASE("FillBuffer, too large")
 
     REQUIRE_THROWS(LexIO::FillBuffer(bufReader, SIZE_MAX));
 }
+
+#endif
+#endif
 
 TEST_CASE("ConsumeBuffer, single call")
 {

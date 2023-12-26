@@ -339,7 +339,7 @@ template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<RE
 inline size_t Read(IT outStart, IT outEnd, READER &reader)
 {
     const size_t count = std::distance(outStart, outEnd);
-    return reader.LexRead(&(*outStart), count, reader);
+    return reader.LexRead(&(*outStart), count);
 }
 
 /**
@@ -378,7 +378,7 @@ inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
 }
 
 /**
- * @brief Write a span of data at the current offset, overwriting any
+ * @brief Write a buffer of data at the current offset, overwriting any
  *        existing data.
  *
  * @param writer Writer to operate on.
@@ -394,12 +394,33 @@ inline size_t Write(WRITER &writer, const uint8_t *src, const size_t count)
     return writer.LexWrite(src, count);
 }
 
+/**
+ * @brief Write an array of data at the current offset, overwriting any
+ *        existing data.
+ *
+ * @param writer Writer to operate on.
+ * @param array Input array.
+ * @return Actual number of bytes written.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.  A partial write is _not_ considered an error.
+ */
 template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, uint8_t (&array)[N])
+inline size_t Write(WRITER &writer, const uint8_t (&array)[N])
 {
     return writer.LexWrite(&array[0], N);
 }
 
+/**
+ * @brief Write a pointer or contiguous iterator pair covering a range of
+ *        data at the current offset, overwriting any existing data.
+ *
+ * @param writer Writer to operate on.
+ * @param start Iterator or pointer to start of input buffer.
+ * @param end Iterator or pointer to end of input buffer.
+ * @return Actual number of bytes written.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.  A partial write is _not_ considered an error.
+ */
 template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline size_t Write(WRITER &writer, IT start, IT end)
 {
