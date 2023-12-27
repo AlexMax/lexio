@@ -610,4 +610,38 @@ inline size_t Length(SEEKABLE &seekable)
     return len;
 }
 
+//******************************************************************************
+//
+// Utility functions.
+//
+//******************************************************************************
+
+/**
+ * @brief Copy the contents of a buffered reader to a writer until EOF is hit
+ *        on the reader.
+ *
+ * @param writer Writer to copy to.
+ * @param bufReader Buffered read to read from.
+ * @param bufSize Number of bytes to buffer per individual copy.
+ * @return Number of bytes copied.
+ */
+template <typename WRITER, typename BUFFERED_READER, typename = std::enable_if_t<IsWriterV<WRITER>>,
+          typename = std::enable_if_t<IsReaderV<BUFFERED_READER>>>
+inline size_t Copy(WRITER &writer, BUFFERED_READER &bufReader, const size_t bufSize = 8192)
+{
+    size_t count = 0;
+    for (;;)
+    {
+        const BufferView buffer = FillBuffer<BUFFERED_READER>(bufReader, bufSize);
+        if (buffer.second == 0)
+        {
+            return count;
+        }
+
+        const size_t written = Write<WRITER>(writer, buffer.first, buffer.second);
+        ConsumeBuffer<BUFFERED_READER>(bufReader, written);
+        count += written;
+    }
+}
+
 } // namespace LexIO

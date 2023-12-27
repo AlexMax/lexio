@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+#include <algorithm>
+
 #include "./test.h"
 #include "catch2/catch_all.hpp"
 
@@ -287,4 +289,24 @@ TEST_CASE("Test Length")
     LexIO::VectorStream basic = GetStream();
 
     REQUIRE(LexIO::Length(basic) == BUFFER_LENGTH);
+}
+
+TEST_CASE("Test Copy")
+{
+    VectorBufReader src = VectorBufReader(GetStream());
+    LexIO::VectorStream dest;
+    const LexIO::VectorStream &cDest = dest;
+
+    REQUIRE(BUFFER_LENGTH == LexIO::Copy(dest, src));
+    REQUIRE(src.Reader().Container() == cDest.Container());
+}
+
+TEST_CASE("Test Copy with a small buffer")
+{
+    VectorBufReader src = VectorBufReader(GetStream());
+    LexIO::VectorStream dest;
+    const LexIO::VectorStream &cDest = dest;
+
+    REQUIRE(BUFFER_LENGTH == LexIO::Copy(dest, src, 4));
+    REQUIRE(src.Reader().Container() == cDest.Container());
 }

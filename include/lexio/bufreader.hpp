@@ -108,6 +108,11 @@ class GenericBufReader
         return *this;
     }
 
+    /**
+     * @brief Return underlying Reader.
+     */
+    const READER &Reader() const { return m_wrapped; }
+
     size_t LexRead(uint8_t *outDest, const size_t count)
     {
         BufferView data = LexFillBuffer(count);
