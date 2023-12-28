@@ -61,17 +61,20 @@ class FixedBufWriter
 
     WRITER &&Writer() && { return std::move(m_wrapped); }
 
-    std::enable_if_t<IsReaderV<WRITER>, size_t> LexRead(uint8_t *outDest, const size_t count)
+    template <typename READER = WRITER, typename = std::enable_if_t<IsReaderV<READER>>>
+    size_t LexRead(uint8_t *outDest, const size_t count)
     {
         return Read<WRITER>(m_wrapped, outDest, count);
     }
 
-    std::enable_if_t<IsBufferedReaderV<WRITER>, BufferView> LexFillBuffer(const size_t count)
+    template <typename BUFFERED_READER = WRITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
+    BufferView LexFillBuffer(const size_t count)
     {
         return FillBuffer<WRITER>(m_wrapped, count);
     }
 
-    std::enable_if_t<IsBufferedReaderV<WRITER>, void> LexConsumeBuffer(const size_t count)
+    template <typename BUFFERED_READER = WRITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
+    void LexConsumeBuffer(const size_t count)
     {
         ConsumeBuffer<WRITER>(m_wrapped, count);
     }
@@ -108,7 +111,8 @@ class FixedBufWriter
         Flush<WRITER>(m_wrapped);
     }
 
-    std::enable_if_t<IsSeekableV<WRITER>, size_t> LexSeek(const SeekPos pos)
+    template <typename SEEKABLE = WRITER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
+    size_t LexSeek(const SeekPos pos)
     {
         LexFlush();
         return Seek<WRITER>(m_wrapped, pos);

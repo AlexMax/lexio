@@ -157,19 +157,19 @@ class GenericBufReader
         m_size -= count;
     }
 
-    template <typename = std::enable_if_t<IsWriterV<READER>>>
+    template <typename WRITER = READER, typename = std::enable_if_t<IsWriterV<WRITER>>>
     size_t LexWrite(const uint8_t *src, const size_t count)
     {
         return Write<READER>(m_wrapped, src, count);
     }
 
-    template <typename = std::enable_if_t<IsWriterV<READER>>>
+    template <typename WRITER = READER, typename = std::enable_if_t<IsWriterV<WRITER>>>
     void LexFlush()
     {
         Flush<READER>(m_wrapped);
     }
 
-    template <typename = std::enable_if_t<IsSeekableV<READER>>>
+    template <typename SEEKABLE = READER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
     size_t LexSeek(const SeekPos pos)
     {
         return Seek<READER>(m_wrapped, pos);
