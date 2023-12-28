@@ -15,7 +15,6 @@
 //
 
 #include "./test.h"
-#include "catch2/catch_all.hpp"
 
 #include <memory>
 
@@ -27,7 +26,7 @@ static void AcceptReaderSeekable(const LexIO::ReaderSeekableRef &) {}
 
 //******************************************************************************
 
-TEST_CASE("Test LexIO::ReaderRef")
+TEST(Ref, ReaderRef)
 {
     struct GoodR
     {
@@ -38,12 +37,12 @@ TEST_CASE("Test LexIO::ReaderRef")
     auto test = GoodR{};
     LexIO::ReaderRef ref(test);
 
-    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
+    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
 
     AcceptReader(ref);
 }
 
-TEST_CASE("Test LexIO::BufferedReaderRef")
+TEST(Ref, BufferedReaderRef)
 {
     struct GoodBR
     {
@@ -56,15 +55,15 @@ TEST_CASE("Test LexIO::BufferedReaderRef")
     auto test = GoodBR{};
     LexIO::BufferedReaderRef ref(test);
 
-    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
-    CHECK(LexIO::FillBuffer(ref, 0).second == 0);
+    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     LexIO::ConsumeBuffer(ref, 0);
 
     AcceptReader(ref);
     AcceptBufferedReader(ref);
 }
 
-TEST_CASE("Test LexIO::WriterRef")
+TEST(Ref, WriterRef)
 {
     struct GoodW
     {
@@ -76,13 +75,13 @@ TEST_CASE("Test LexIO::WriterRef")
     auto test = GoodW{};
     LexIO::WriterRef ref(test);
 
-    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
+    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
 
     AcceptWriter(ref);
 }
 
-TEST_CASE("Test LexIO::ReaderWriterRef")
+TEST(Ref, ReaderWriterRef)
 {
     struct GoodRW
     {
@@ -95,15 +94,15 @@ TEST_CASE("Test LexIO::ReaderWriterRef")
     auto test = GoodRW{};
     LexIO::ReaderWriterRef ref(test);
 
-    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
-    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
+    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
 
     AcceptReader(ref);
     AcceptWriter(ref);
 }
 
-TEST_CASE("Test LexIO::BufferedReaderWriterRef")
+TEST(Ref, BufferedReaderWriterRef)
 {
     struct GoodBRW
     {
@@ -118,10 +117,10 @@ TEST_CASE("Test LexIO::BufferedReaderWriterRef")
     auto test = GoodBRW{};
     LexIO::BufferedReaderWriterRef ref(test);
 
-    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
-    CHECK(LexIO::FillBuffer(ref, 0).second == 0);
+    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     LexIO::ConsumeBuffer(ref, 0);
-    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
+    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
 
     AcceptReader(ref);
@@ -129,7 +128,7 @@ TEST_CASE("Test LexIO::BufferedReaderWriterRef")
     AcceptWriter(ref);
 }
 
-TEST_CASE("Test LexIO::ReaderSeekableRef")
+TEST(Ref, ReaderSeekableRef)
 {
     struct GoodRS
     {
@@ -141,15 +140,15 @@ TEST_CASE("Test LexIO::ReaderSeekableRef")
     auto test = GoodRS{};
     LexIO::ReaderSeekableRef ref(test);
 
-    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
-    CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
+    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
 
     AcceptReader(ref);
     AcceptSeekable(ref);
     AcceptReaderSeekable(ref);
 }
 
-TEST_CASE("Test LexIO::BufferedReaderSeekableRef")
+TEST(Ref, BufferedReaderSeekableRef)
 {
     struct GoodBRS
     {
@@ -163,10 +162,10 @@ TEST_CASE("Test LexIO::BufferedReaderSeekableRef")
     auto test = GoodBRS{};
     LexIO::BufferedReaderSeekableRef ref(test);
 
-    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
-    CHECK(LexIO::FillBuffer(ref, 0).second == 0);
+    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     LexIO::ConsumeBuffer(ref, 0);
-    CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
+    EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
 
     AcceptReader(ref);
     AcceptBufferedReader(ref);
@@ -174,7 +173,7 @@ TEST_CASE("Test LexIO::BufferedReaderSeekableRef")
     AcceptReaderSeekable(ref);
 }
 
-TEST_CASE("Test LexIO::ReaderWriterSeekableRef")
+TEST(Ref, ReaderWriterSeekableRef)
 {
     struct GoodRWS
     {
@@ -188,10 +187,10 @@ TEST_CASE("Test LexIO::ReaderWriterSeekableRef")
     auto test = GoodRWS{};
     LexIO::ReaderWriterSeekableRef ref(test);
 
-    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
-    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
+    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
-    CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
+    EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
 
     AcceptReader(ref);
     AcceptWriter(ref);
@@ -199,7 +198,7 @@ TEST_CASE("Test LexIO::ReaderWriterSeekableRef")
     AcceptReaderSeekable(ref);
 }
 
-TEST_CASE("Test LexIO::BufferedReaderWriterSeekableRef")
+TEST(Ref, BufferedReaderWriterSeekableRef)
 {
     struct GoodBRWS
     {
@@ -215,12 +214,12 @@ TEST_CASE("Test LexIO::BufferedReaderWriterSeekableRef")
     auto test = GoodBRWS{};
     LexIO::BufferedReaderWriterSeekableRef ref(test);
 
-    CHECK(LexIO::Read(&buffer[0], sizeof(buffer), ref) == 0);
-    CHECK(LexIO::FillBuffer(ref, 0).second == 0);
+    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     LexIO::ConsumeBuffer(ref, 0);
-    CHECK(LexIO::Write(ref, &buffer[0], sizeof(buffer)) == 0);
+    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
-    CHECK(LexIO::Seek(ref, LexIO::SeekPos{}) == 0);
+    EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
 
     AcceptReader(ref);
     AcceptBufferedReader(ref);

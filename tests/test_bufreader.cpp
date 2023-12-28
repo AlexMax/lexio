@@ -15,26 +15,25 @@
 //
 
 #include "./test.h"
-#include "catch2/catch_all.hpp"
 
 //******************************************************************************
 
-TEST_CASE("VectorBufReader must fulfill BufferedReader")
+TEST(GenericBufReader, FulfillBufferedReader)
 {
-    REQUIRE(LexIO::IsBufferedReaderV<VectorBufReader>);
+    EXPECT_TRUE(LexIO::IsBufferedReaderV<VectorBufReader>);
 }
 
-TEST_CASE("VectorBufReader must fulfill Writer")
+TEST(GenericBufReader, FulfillWriter)
 {
-    REQUIRE(LexIO::IsWriterV<VectorBufReader>);
+    EXPECT_TRUE(LexIO::IsWriterV<VectorBufReader>);
 }
 
-TEST_CASE("VectorBufReader must fulfill Seekable")
+TEST(GenericBufReader, FulfillSeekable)
 {
-    REQUIRE(LexIO::IsSeekableV<VectorBufReader>);
+    EXPECT_TRUE(LexIO::IsSeekableV<VectorBufReader>);
 }
 
-TEST_CASE("Copy constructor/Copy assignment")
+TEST(GenericBufReader, CopyCtor_CopyAssign)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
@@ -42,20 +41,20 @@ TEST_CASE("Copy constructor/Copy assignment")
     VectorBufReader copyReader{bufReader};
     auto copyTest = LexIO::FillBuffer(copyReader, 8);
 
-    REQUIRE(copyTest.first[0] == bufTest.first[0]);
-    REQUIRE(copyTest.first[7] == bufTest.first[7]);
-    REQUIRE(copyTest.second == bufTest.second);
+    EXPECT_EQ(copyTest.first[0], bufTest.first[0]);
+    EXPECT_EQ(copyTest.first[7], bufTest.first[7]);
+    EXPECT_EQ(copyTest.second, bufTest.second);
 
     LexIO::FillBuffer(copyReader, 12);
     copyReader = bufReader;
     copyTest = LexIO::FillBuffer(copyReader, 8);
 
-    REQUIRE(copyTest.first[0] == bufTest.first[0]);
-    REQUIRE(copyTest.first[7] == bufTest.first[7]);
-    REQUIRE(copyTest.second == bufTest.second);
+    EXPECT_EQ(copyTest.first[0], bufTest.first[0]);
+    EXPECT_EQ(copyTest.first[7], bufTest.first[7]);
+    EXPECT_EQ(copyTest.second, bufTest.second);
 }
 
-TEST_CASE("Copy assignment, self-assignment")
+TEST(GenericBufReader, CopyAssignSelf)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
@@ -63,12 +62,12 @@ TEST_CASE("Copy assignment, self-assignment")
     bufReader = bufReader;
     auto bufTest = LexIO::FillBuffer(bufReader, 8);
 
-    REQUIRE(bufTest.first[0] == 'T');
-    REQUIRE(bufTest.first[7] == 'c');
-    REQUIRE(bufTest.second == 8);
+    EXPECT_EQ(bufTest.first[0], 'T');
+    EXPECT_EQ(bufTest.first[7], 'c');
+    EXPECT_EQ(bufTest.second, 8);
 }
 
-TEST_CASE("Move constructor")
+TEST(GenericBufReader, MoveCtor)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
@@ -76,12 +75,12 @@ TEST_CASE("Move constructor")
     VectorBufReader moveReader{std::move(bufReader)};
     auto moveTest = LexIO::FillBuffer(moveReader, 8);
 
-    REQUIRE(moveTest.first[0] == 'T');
-    REQUIRE(moveTest.first[7] == 'c');
-    REQUIRE(moveTest.second == 8);
+    EXPECT_EQ(moveTest.first[0], 'T');
+    EXPECT_EQ(moveTest.first[7], 'c');
+    EXPECT_EQ(moveTest.second, 8);
 }
 
-TEST_CASE("Move assignment")
+TEST(GenericBufReader, MoveAssign)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
@@ -91,182 +90,182 @@ TEST_CASE("Move assignment")
     moveReader = std::move(bufReader);
     auto moveTest = LexIO::FillBuffer(moveReader, 8);
 
-    REQUIRE(moveTest.first[0] == 'T');
-    REQUIRE(moveTest.first[7] == 'c');
-    REQUIRE(moveTest.second == 8);
+    EXPECT_EQ(moveTest.first[0], 'T');
+    EXPECT_EQ(moveTest.first[7], 'c');
+    EXPECT_EQ(moveTest.second, 8);
 }
 
-TEST_CASE("FillBuffer, single call")
+TEST(GenericBufReader, FillBufferSingle)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     auto test = LexIO::FillBuffer(bufReader, 8);
-    REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[7] == 'c');
-    REQUIRE(test.second == 8);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[7], 'c');
+    EXPECT_EQ(test.second, 8);
 }
 
-TEST_CASE("FillBuffer, multiple calls")
+TEST(GenericBufReader, FillBufferMultiple)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     // Buffer initial four bytes.
     auto test = LexIO::FillBuffer(bufReader, 4);
-    REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[3] == ' ');
-    REQUIRE(test.second == 4);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.second, 4);
 
     // Buffer less than what we had before, should read nothing.
     test = LexIO::FillBuffer(bufReader, 2);
-    REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[3] == ' ');
-    REQUIRE(test.second == 4);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.second, 4);
 
     // Buffer more than what we had before.
     test = LexIO::FillBuffer(bufReader, 8);
-    REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[3] == ' ');
-    REQUIRE(test.first[4] == 'q');
-    REQUIRE(test.first[7] == 'c');
-    REQUIRE(test.second == 8);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.first[4], 'q');
+    EXPECT_EQ(test.first[7], 'c');
+    EXPECT_EQ(test.second, 8);
 }
 
-TEST_CASE("FillBuffer, EOF")
+TEST(GenericBufReader, FillBufferEOF)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     // Buffer everything.
     auto test = LexIO::FillBuffer(bufReader, 64);
-    REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[BUFFER_LENGTH - 1] == '\n');
-    REQUIRE(test.second == BUFFER_LENGTH);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, BUFFER_LENGTH);
 
     // Buffer more than everything.
     test = LexIO::FillBuffer(bufReader, 96);
-    REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[BUFFER_LENGTH - 1] == '\n');
-    REQUIRE(test.second == BUFFER_LENGTH);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, BUFFER_LENGTH);
 }
 
-TEST_CASE("FillBuffer, EOF with initial buffer")
+TEST(GenericBufReader, FillBufferEOFInitial)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     auto test = LexIO::FillBuffer(bufReader, 4);
-    REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[3] == ' ');
-    REQUIRE(test.second == 4);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.second, 4);
 
     // Buffer everything.
     test = LexIO::FillBuffer(bufReader, 64);
-    REQUIRE(test.first[0] == 'T');
-    REQUIRE(test.first[3] == ' ');
-    REQUIRE(test.first[4] == 'q');
-    REQUIRE(test.first[BUFFER_LENGTH - 1] == '\n');
-    REQUIRE(test.second == BUFFER_LENGTH);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.first[4], 'q');
+    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, BUFFER_LENGTH);
 }
 
-TEST_CASE("FillBuffer, zero sized read")
+TEST(GenericBufReader, FillBufferZeroRead)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     auto test = LexIO::FillBuffer(bufReader, 0);
-    REQUIRE(test.second == 0);
+    EXPECT_EQ(test.second, 0);
 }
 
 #if defined(__has_feature)
-#if __has_feature(address_sanitizer)
+#if !__has_feature(address_sanitizer)
 
-TEST_CASE("FillBuffer, too large")
+TEST(GenericBufReader, FillBufferTooLarge)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
-    REQUIRE_THROWS(LexIO::FillBuffer(bufReader, SIZE_MAX));
+    EXPECT_ANY_THROW(LexIO::FillBuffer(bufReader, SIZE_MAX));
 }
 
 #endif
 #endif
 
-TEST_CASE("ConsumeBuffer, single call")
+TEST(GenericBufReader, ConsumeBufferSingle)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     // Fill, then consume whole buffer.
     LexIO::FillBuffer(bufReader, 8);
-    REQUIRE_NOTHROW(LexIO::ConsumeBuffer(bufReader, 8));
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, 8));
 
     auto test = LexIO::GetBuffer(bufReader);
-    REQUIRE(test.second == 0);
+    EXPECT_EQ(test.second, 0);
 
     // Subsequent read should pick up where we left off.
     test = LexIO::FillBuffer(bufReader, 8);
-    REQUIRE(test.first[0] == 'k');
-    REQUIRE(test.first[7] == ' ');
-    REQUIRE(test.second == 8);
+    EXPECT_EQ(test.first[0], 'k');
+    EXPECT_EQ(test.first[7], ' ');
+    EXPECT_EQ(test.second, 8);
 }
 
-TEST_CASE("ConsumeBuffer, multiple calls")
+TEST(GenericBufReader, ConsumeBufferMultiple)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     // Consume half the buffer.
     LexIO::FillBuffer(bufReader, 8);
-    REQUIRE_NOTHROW(LexIO::ConsumeBuffer(bufReader, 4));
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, 4));
     auto test = LexIO::GetBuffer(bufReader);
-    REQUIRE(test.first[0] == 'q');
-    REQUIRE(test.first[3] == 'c');
-    REQUIRE(test.second == 4);
+    EXPECT_EQ(test.first[0], 'q');
+    EXPECT_EQ(test.first[3], 'c');
+    EXPECT_EQ(test.second, 4);
 
     // Consume the other half of the buffer.
-    REQUIRE_NOTHROW(LexIO::ConsumeBuffer(bufReader, 4));
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, 4));
     test = LexIO::GetBuffer(bufReader);
-    REQUIRE(test.second == 0);
+    EXPECT_EQ(test.second, 0);
 }
 
-TEST_CASE("ConsumeBuffer, EOF")
+TEST(GenericBufReader, ConsumeBufferEOF)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     // Fill to EOF, consume part of it.
     auto test = LexIO::FillBuffer(bufReader, 64);
-    REQUIRE_NOTHROW(LexIO::ConsumeBuffer(bufReader, 4));
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, 4));
     test = LexIO::GetBuffer(bufReader);
-    REQUIRE(test.first[0] == 'q');
-    REQUIRE(test.first[3] == 'c');
-    REQUIRE(test.second == BUFFER_LENGTH - 4);
+    EXPECT_EQ(test.first[0], 'q');
+    EXPECT_EQ(test.first[3], 'c');
+    EXPECT_EQ(test.second, BUFFER_LENGTH - 4);
 
     // Consume the rest of it.
-    REQUIRE_NOTHROW(LexIO::ConsumeBuffer(bufReader, BUFFER_LENGTH - 4));
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, BUFFER_LENGTH - 4));
     test = LexIO::GetBuffer(bufReader);
-    REQUIRE(test.second == 0);
+    EXPECT_EQ(test.second, 0);
 }
 
-TEST_CASE("ConsumeBuffer, too large")
+TEST(GenericBufReader, ConsumeBufferTooLarge)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     LexIO::FillBuffer(bufReader, 8);
-    REQUIRE_THROWS(LexIO::ConsumeBuffer(bufReader, 12));
+    EXPECT_ANY_THROW(LexIO::ConsumeBuffer(bufReader, 12));
 }
 
-TEST_CASE("Read")
+TEST(GenericBufReader, Read)
 {
     auto stream = GetStream();
     auto bufReader = VectorBufReader(std::move(stream));
 
     uint8_t output[8] = {0};
     size_t count = LexIO::Read(output, bufReader);
-    REQUIRE(output[0] == 'T');
-    REQUIRE(output[7] == 'c');
-    REQUIRE(count == 8);
+    EXPECT_EQ(output[0], 'T');
+    EXPECT_EQ(output[7], 'c');
+    EXPECT_EQ(count, 8);
 }

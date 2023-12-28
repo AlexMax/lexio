@@ -15,7 +15,6 @@
 //
 
 #include "./test.h"
-#include "catch2/catch_all.hpp"
 
 #if 0
 

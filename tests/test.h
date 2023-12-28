@@ -23,6 +23,8 @@
 
 #include "lexio/lexio.hpp"
 
+#include <gtest/gtest.h>
+
 using VectorBufReader = LexIO::GenericBufReader<LexIO::VectorStream>;
 
 template <typename T, std::size_t N>

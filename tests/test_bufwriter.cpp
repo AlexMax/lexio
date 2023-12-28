@@ -15,47 +15,46 @@
 //
 
 #include "./test.h"
-#include "catch2/catch_all.hpp"
 
 using VectorBufWriter = LexIO::FixedBufWriter<LexIO::VectorStream>;
 
 //******************************************************************************
 
-TEST_CASE("VectorBufWriter must fulfill Reader")
+TEST(FixedBufWriter, FulfillReader)
 {
-    REQUIRE(LexIO::IsReaderV<VectorBufWriter>);
+    EXPECT_TRUE(LexIO::IsReaderV<VectorBufWriter>);
 }
 
-TEST_CASE("VectorBufWriter must fulfill Writer")
+TEST(FixedBufWriter, FulfillWriter)
 {
-    REQUIRE(LexIO::IsWriterV<VectorBufWriter>);
+    EXPECT_TRUE(LexIO::IsWriterV<VectorBufWriter>);
 }
 
-TEST_CASE("VectorBufWriter must fulfill Seekable")
+TEST(FixedBufWriter, FulfillSeekable)
 {
-    REQUIRE(LexIO::IsSeekableV<VectorBufWriter>);
+    EXPECT_TRUE(LexIO::IsSeekableV<VectorBufWriter>);
 }
 
-TEST_CASE("Write")
+TEST(FixedBufWriter, Write)
 {
     auto stream = LexIO::VectorStream{};
 
     auto bufWriter = VectorBufWriter{std::move(stream)};
-    REQUIRE(::BUFFER_LENGTH == LexIO::Write(bufWriter, ::BUFFER_TEXT, ::BUFFER_LENGTH));
+    EXPECT_EQ(::BUFFER_LENGTH, LexIO::Write(bufWriter, ::BUFFER_TEXT, ::BUFFER_LENGTH));
     LexIO::Flush(bufWriter);
 
     stream = std::move(bufWriter).Writer();
-    REQUIRE(::BUFFER_LENGTH == LexIO::Length(stream));
+    EXPECT_EQ(::BUFFER_LENGTH, LexIO::Length(stream));
 }
 
-TEST_CASE("Write, small buffer")
+TEST(FixedBufWriter, WriteSmallBuffer)
 {
     auto stream = LexIO::VectorStream{};
 
     auto bufWriter = VectorBufWriter{std::move(stream), 16};
-    REQUIRE(::BUFFER_LENGTH == LexIO::Write(bufWriter, ::BUFFER_TEXT, ::BUFFER_LENGTH));
+    EXPECT_EQ(::BUFFER_LENGTH, LexIO::Write(bufWriter, ::BUFFER_TEXT, ::BUFFER_LENGTH));
     LexIO::Flush(bufWriter);
 
     stream = std::move(bufWriter).Writer();
-    REQUIRE(::BUFFER_LENGTH == LexIO::Length(stream));
+    EXPECT_EQ(::BUFFER_LENGTH, LexIO::Length(stream));
 }

@@ -17,7 +17,6 @@
 #include <algorithm>
 
 #include "./test.h"
-#include "catch2/catch_all.hpp"
 
 //******************************************************************************
 
@@ -26,14 +25,14 @@ struct GoodReader
     size_t LexRead(uint8_t *, const size_t) { return 0; }
 };
 
-TEST_CASE("GoodReader must fulfill IsReader")
+TEST(Core, IsReader)
 {
-    REQUIRE(LexIO::IsReader<GoodReader>::value);
+    EXPECT_TRUE(LexIO::IsReader<GoodReader>::value);
 }
 
-TEST_CASE("GoodReader must fulfill IsReaderV")
+TEST(Core, IsReaderV)
 {
-    REQUIRE(LexIO::IsReaderV<GoodReader>);
+    EXPECT_TRUE(LexIO::IsReaderV<GoodReader>);
 }
 
 //******************************************************************************
@@ -44,14 +43,14 @@ struct GoodBufferedReader : public GoodReader
     void LexConsumeBuffer(const size_t size) { (void)size; }
 };
 
-TEST_CASE("GoodBufferedReader must fulfill IsBufferedReader")
+TEST(Core, IsBufferedReader)
 {
-    REQUIRE(LexIO::IsBufferedReader<GoodBufferedReader>::value);
+    EXPECT_TRUE(LexIO::IsBufferedReader<GoodBufferedReader>::value);
 }
 
-TEST_CASE("GoodBufferedReader must fulfill IsBufferedReaderV")
+TEST(Core, IsBufferedReaderV)
 {
-    REQUIRE(LexIO::IsBufferedReaderV<GoodBufferedReader>);
+    EXPECT_TRUE(LexIO::IsBufferedReaderV<GoodBufferedReader>);
 }
 
 //******************************************************************************
@@ -62,14 +61,14 @@ struct GoodWriter
     void LexFlush() {}
 };
 
-TEST_CASE("GoodWriter must fulfill IsWriter")
+TEST(Core, IsWriter)
 {
-    REQUIRE(LexIO::IsWriter<GoodWriter>::value);
+    EXPECT_TRUE(LexIO::IsWriter<GoodWriter>::value);
 }
 
-TEST_CASE("GoodWriter must fulfill IsWriterV")
+TEST(Core, IsWriterV)
 {
-    REQUIRE(LexIO::IsWriterV<GoodWriter>);
+    EXPECT_TRUE(LexIO::IsWriterV<GoodWriter>);
 }
 
 //******************************************************************************
@@ -79,14 +78,14 @@ struct GoodSeekable
     size_t LexSeek(const LexIO::SeekPos) { return 0; }
 };
 
-TEST_CASE("GoodSeekable must fulfill IsSeekable")
+TEST(Core, IsSeekable)
 {
-    REQUIRE(LexIO::IsSeekable<GoodSeekable>::value);
+    EXPECT_TRUE(LexIO::IsSeekable<GoodSeekable>::value);
 }
 
-TEST_CASE("GoodSeekable must fulfill IsSeekableV")
+TEST(Core, IsSeekableV)
 {
-    REQUIRE(LexIO::IsSeekableV<GoodSeekable>);
+    EXPECT_TRUE(LexIO::IsSeekableV<GoodSeekable>);
 }
 
 //******************************************************************************
@@ -95,9 +94,9 @@ struct BadReaderMissingClass
 {
 };
 
-TEST_CASE("BadReaderMissingClass must not fulfill IsReaderV")
+TEST(Core, IsReaderVMissingClass)
 {
-    REQUIRE_FALSE(LexIO::IsReaderV<BadReaderMissingClass>);
+    EXPECT_FALSE(LexIO::IsReaderV<BadReaderMissingClass>);
 }
 
 struct BadReaderBadParam
@@ -105,9 +104,9 @@ struct BadReaderBadParam
     size_t LexRead(uint8_t *&, const size_t) { return 0; }
 };
 
-TEST_CASE("BadReaderBadParam must not fulfill IsReaderV")
+TEST(Core, IsReaderVBadParam)
 {
-    REQUIRE_FALSE(LexIO::IsReaderV<BadReaderBadParam>);
+    EXPECT_FALSE(LexIO::IsReaderV<BadReaderBadParam>);
 }
 
 struct BadReaderBadReturn
@@ -115,198 +114,198 @@ struct BadReaderBadReturn
     void LexRead(uint8_t *, const size_t) {}
 };
 
-TEST_CASE("BadReaderBadReturn must not fulfill IsReaderV")
+TEST(Core, IsReaderVBadReturn)
 {
-    REQUIRE_FALSE(LexIO::IsReaderV<BadReaderBadReturn>);
+    EXPECT_FALSE(LexIO::IsReaderV<BadReaderBadReturn>);
 }
 
 //******************************************************************************
 
-TEST_CASE("Test Read with ptr/len")
+TEST(Core, ReadPtrLen)
 {
     LexIO::VectorStream basic = GetStream();
 
     uint8_t buffer[5] = {0};
-    REQUIRE(LexIO::Read(&buffer[0], sizeof(buffer), basic) == 5);
+    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), basic), 5);
 }
 
-TEST_CASE("Test Read with array")
+TEST(Core, ReadArray)
 {
     LexIO::VectorStream basic = GetStream();
 
     uint8_t buffer[5] = {0};
-    REQUIRE(LexIO::Read(buffer, basic) == 5);
+    EXPECT_EQ(LexIO::Read(buffer, basic), 5);
 }
 
-TEST_CASE("Test Read with iterator pair")
+TEST(Core, ReadIterator)
 {
     LexIO::VectorStream basic = GetStream();
 
     uint8_t buffer[5] = {0};
-    REQUIRE(LexIO::Read(&buffer[0], &buffer[5], basic) == 5);
+    EXPECT_EQ(LexIO::Read(&buffer[0], &buffer[5], basic), 5);
 }
 
-TEST_CASE("Test ReadAll")
+TEST(Core, ReadAll)
 {
     LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
-    REQUIRE(bytes == 45);
-    REQUIRE(data.size() == 45);
-    REQUIRE(*(data.end() - 1) == '\n');
+    EXPECT_EQ(bytes, 45);
+    EXPECT_EQ(data.size(), 45);
+    EXPECT_EQ(*(data.end() - 1), '\n');
 }
 
-TEST_CASE("Test ReadAll with a small buffer")
+TEST(Core, ReadAllSmallBuffer)
 {
     LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer, 4);
-    REQUIRE(data[4] == 'q'); // Check the buffer boundary.
-    REQUIRE(data[8] == 'k');
-    REQUIRE(bytes == 45);
-    REQUIRE(data.size() == 45);
+    EXPECT_EQ(data[4], 'q'); // Check the buffer boundary.
+    EXPECT_EQ(data[8], 'k');
+    EXPECT_EQ(bytes, 45);
+    EXPECT_EQ(data.size(), 45);
 }
 
-TEST_CASE("Test ReadUntil")
+TEST(Core, ReadUntil)
 {
     LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
     size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
-    REQUIRE(bytes == 20);
-    REQUIRE(data.size() == 20);
-    REQUIRE(*(data.end() - 1) == '\n');
+    EXPECT_EQ(bytes, 20);
+    EXPECT_EQ(data.size(), 20);
+    EXPECT_EQ(*(data.end() - 1), '\n');
 
     bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
-    REQUIRE(bytes == 25);
-    REQUIRE(data.size() == 45);
-    REQUIRE(*(data.end() - 1) == '\n');
+    EXPECT_EQ(bytes, 25);
+    EXPECT_EQ(data.size(), 45);
+    EXPECT_EQ(*(data.end() - 1), '\n');
 
     bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
-    REQUIRE(bytes == 0);
-    REQUIRE(data.size() == 45);
+    EXPECT_EQ(bytes, 0);
+    EXPECT_EQ(data.size(), 45);
 }
 
-TEST_CASE("Test ReadUntil with a small buffer")
+TEST(Core, ReadUntilSmallBuffer)
 {
     LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
     size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n', 4);
-    REQUIRE(bytes == 20);
-    REQUIRE(data.size() == 20);
-    REQUIRE(*(data.end() - 1) == '\n');
+    EXPECT_EQ(bytes, 20);
+    EXPECT_EQ(data.size(), 20);
+    EXPECT_EQ(*(data.end() - 1), '\n');
 
     bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n', 4);
-    REQUIRE(bytes == 25);
-    REQUIRE(data.size() == 45);
-    REQUIRE(*(data.end() - 1) == '\n');
+    EXPECT_EQ(bytes, 25);
+    EXPECT_EQ(data.size(), 45);
+    EXPECT_EQ(*(data.end() - 1), '\n');
 
     bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n', 4);
-    REQUIRE(bytes == 0);
-    REQUIRE(data.size() == 45);
+    EXPECT_EQ(bytes, 0);
+    EXPECT_EQ(data.size(), 45);
 }
 
-TEST_CASE("Test Write with ptr/len")
+TEST(Core, WritePtrLen)
 {
     LexIO::VectorStream basic = GetStream();
 
     const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    REQUIRE(LexIO::Write(basic, &data[0], sizeof(data)) == 5);
+    EXPECT_EQ(LexIO::Write(basic, &data[0], sizeof(data)), 5);
 }
 
-TEST_CASE("Test Write with array")
+TEST(Core, WriteArray)
 {
     LexIO::VectorStream basic = GetStream();
 
     const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    REQUIRE(LexIO::Write(basic, data) == 5);
+    EXPECT_EQ(LexIO::Write(basic, data), 5);
 }
 
-TEST_CASE("Test Write with iterator pair")
+TEST(Core, WriteIterator)
 {
     LexIO::VectorStream basic = GetStream();
 
     const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    REQUIRE(LexIO::Write(basic, &data[0], &data[5]) == 5);
+    EXPECT_EQ(LexIO::Write(basic, &data[0], &data[5]), 5);
 }
 
-TEST_CASE("Test Rewind")
+TEST(Core, Rewind)
 {
     LexIO::VectorStream basic = GetStream();
-    REQUIRE(LexIO::Read8(basic) == 'T');
-    REQUIRE(LexIO::Read8(basic) == 'h');
-    REQUIRE(LexIO::Read8(basic) == 'e');
-    REQUIRE(LexIO::Rewind(basic) == 0);
-    REQUIRE(LexIO::Tell(basic) == 0);
+    EXPECT_EQ(LexIO::Read8(basic), 'T');
+    EXPECT_EQ(LexIO::Read8(basic), 'h');
+    EXPECT_EQ(LexIO::Read8(basic), 'e');
+    EXPECT_EQ(LexIO::Rewind(basic), 0);
+    EXPECT_EQ(LexIO::Tell(basic), 0);
 }
 
-TEST_CASE("Test Seek/Tell")
+TEST(Core, Seek_Tell)
 {
     LexIO::VectorStream basic = GetStream();
 
     LexIO::Seek(basic, 5, LexIO::Whence::start);
-    REQUIRE(LexIO::Tell(basic) == 5);
+    EXPECT_EQ(LexIO::Tell(basic), 5);
 
     LexIO::Seek(basic, 5, LexIO::Whence::current);
-    REQUIRE(LexIO::Tell(basic) == 10);
+    EXPECT_EQ(LexIO::Tell(basic), 10);
 
     LexIO::Seek(basic, 5, LexIO::Whence::end);
-    REQUIRE(LexIO::Tell(basic) == BUFFER_LENGTH - 5);
+    EXPECT_EQ(LexIO::Tell(basic), BUFFER_LENGTH - 5);
 }
 
-TEST_CASE("Test Seek/Tell with SeekPos")
+TEST(Core, Seek_Tell_SeekPos)
 {
     LexIO::VectorStream basic = GetStream();
 
     LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::Whence::start));
-    REQUIRE(LexIO::Tell(basic) == 5);
+    EXPECT_EQ(LexIO::Tell(basic), 5);
 
     LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::Whence::current));
-    REQUIRE(LexIO::Tell(basic) == 10);
+    EXPECT_EQ(LexIO::Tell(basic), 10);
 
     LexIO::Seek(basic, LexIO::SeekPos(5, LexIO::Whence::end));
-    REQUIRE(LexIO::Tell(basic) == BUFFER_LENGTH - 5);
+    EXPECT_EQ(LexIO::Tell(basic), BUFFER_LENGTH - 5);
 }
 
-TEST_CASE("Test Tell after Rewind")
+TEST(Core, TellAfterRewind)
 {
     LexIO::VectorStream basic = GetStream();
 
     LexIO::Seek(basic, 5, LexIO::Whence::start);
-    REQUIRE(LexIO::Rewind(basic) == 0);
-    REQUIRE(LexIO::Tell(basic) == 0);
+    EXPECT_EQ(LexIO::Rewind(basic), 0);
+    EXPECT_EQ(LexIO::Tell(basic), 0);
 }
 
-TEST_CASE("Test Length")
+TEST(Core, Length)
 {
     LexIO::VectorStream basic = GetStream();
 
-    REQUIRE(LexIO::Length(basic) == BUFFER_LENGTH);
+    EXPECT_EQ(LexIO::Length(basic), BUFFER_LENGTH);
 }
 
-TEST_CASE("Test Copy")
+TEST(Core, Copy)
 {
     VectorBufReader src = VectorBufReader(GetStream());
     LexIO::VectorStream dest;
     const LexIO::VectorStream &cDest = dest;
 
-    REQUIRE(BUFFER_LENGTH == LexIO::Copy(dest, src));
-    REQUIRE(src.Reader().Container() == cDest.Container());
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Copy(dest, src));
+    EXPECT_EQ(src.Reader().Container(), cDest.Container());
 }
 
-TEST_CASE("Test Copy with a small buffer")
+TEST(Core, CopySmallBuffer)
 {
     VectorBufReader src = VectorBufReader(GetStream());
     LexIO::VectorStream dest;
     const LexIO::VectorStream &cDest = dest;
 
-    REQUIRE(BUFFER_LENGTH == LexIO::Copy(dest, src, 4));
-    REQUIRE(src.Reader().Container() == cDest.Container());
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Copy(dest, src, 4));
+    EXPECT_EQ(src.Reader().Container(), cDest.Container());
 }

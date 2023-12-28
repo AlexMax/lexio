@@ -15,47 +15,31 @@
 //
 
 #include "./test.h"
-#include "catch2/catch_all.hpp"
 
 //******************************************************************************
 
 #if defined(_WIN32)
-
-TEST_CASE("FileWin32 must be a Reader")
-{
-    REQUIRE(LexIO::IsReaderV<LexIO::FileWin32>);
-}
-
-TEST_CASE("FileWin32 must be a Writer")
-{
-    REQUIRE(LexIO::IsWriterV<LexIO::FileWin32>);
-}
-
-TEST_CASE("FileWin32 must be a Seekable")
-{
-    REQUIRE(LexIO::IsSeekableV<LexIO::FileWin32>);
-}
-
+using FileGeneric = LexIO::FileWin32;
 #else
-
-TEST_CASE("FilePOSIX must be a Reader")
-{
-    REQUIRE(LexIO::IsReaderV<LexIO::FilePOSIX>);
-}
-
-TEST_CASE("FilePOSIX must be a Writer")
-{
-    REQUIRE(LexIO::IsWriterV<LexIO::FilePOSIX>);
-}
-
-TEST_CASE("FilePOSIX must be a Seekable")
-{
-    REQUIRE(LexIO::IsSeekableV<LexIO::FilePOSIX>);
-}
-
+using FileGeneric = LexIO::FilePOSIX;
 #endif
 
-TEST_CASE("Test file opened in read mode")
+TEST(File, FulfillReader)
+{
+    EXPECT_TRUE(LexIO::IsReaderV<FileGeneric>);
+}
+
+TEST(File, FulfillWriter)
+{
+    EXPECT_TRUE(LexIO::IsWriterV<FileGeneric>);
+}
+
+TEST(File, FulfillSeekable)
+{
+    EXPECT_TRUE(LexIO::IsSeekableV<FileGeneric>);
+}
+
+TEST(File, ReadMode)
 {
     constexpr const char *firstLine = "The quick brown fox";
 
@@ -65,20 +49,25 @@ TEST_CASE("Test file opened in read mode")
     uint8_t readBuffer[32];
     LexIO::Read(readBuffer, file);
     size_t testLen = strlen(firstLine);
-    readBuffer[testLen] = '\0';                                                  // NOLINT
-    REQUIRE(!strcmp(reinterpret_cast<const char *>(&readBuffer[0]), firstLine)); // NOLINT
+    readBuffer[testLen] = '\0';                                                      // NOLINT
+    EXPECT_EQ(0, strcmp(reinterpret_cast<const char *>(&readBuffer[0]), firstLine)); // NOLINT
 
     // Test writing.
     uint8_t writeBuffer[32] = {0x00};
-    REQUIRE_THROWS(LexIO::Write(file, writeBuffer));
+    EXPECT_ANY_THROW(LexIO::Write(file, writeBuffer));
 
     // Test seeking.
     size_t pos = LexIO::Seek(file, 2, LexIO::Whence::start);
-    REQUIRE(pos == 2);
+    EXPECT_EQ(pos, 2);
 
     pos = LexIO::Seek(file, 6, LexIO::Whence::current);
-    REQUIRE(pos == 8);
+    EXPECT_EQ(pos, 8);
 
     pos = LexIO::Seek(file, 2, LexIO::Whence::end);
-    REQUIRE((pos == 47 || pos == 49)); // File contains two newlines.
+
+#if defined(_WIN32)
+    EXPECT_EQ(pos, 49);
+#else
+    EXPECT_EQ(pos, 47);
+#endif
 }
