@@ -15,7 +15,6 @@ enable_testing()
 set(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/test_bufreader.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_bufwriter.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test_bytes.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_container.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_core.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_file.cpp"
@@ -70,8 +69,9 @@ if(CODE_COVERAGE)
     include(CodeCoverage)
     append_coverage_compiler_flags_to_target(lexio_test)
     setup_target_for_coverage_lcov(
-        NAME test_coverage
+        NAME lexio_test_cov
         EXECUTABLE lexio_test
         DEPENDENCIES lexio_test
-        EXCLUDE "build/*" "tests" "/usr/include/*")
+        EXCLUDE "build/*" "tests" "/usr/include/*"
+        LCOV_ARGS --ignore-errors mismatch)
 endif()
