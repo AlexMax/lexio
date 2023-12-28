@@ -59,6 +59,8 @@ class FixedBufWriter
         ::delete[] m_buffer;
     }
 
+    WRITER &&Writer() && { return std::move(m_wrapped); }
+
     template <typename = std::enable_if_t<IsReaderV<WRITER>>>
     size_t LexRead(uint8_t *outDest, const size_t count)
     {

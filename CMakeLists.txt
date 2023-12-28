@@ -13,6 +13,7 @@ project(lexio LANGUAGES C CXX)
 
 set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bufreader.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/bufwriter.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/ref.hpp"

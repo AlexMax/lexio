@@ -14,6 +14,7 @@ include(Catch)
 
 set(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/test_bufreader.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_bufwriter.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_bytes.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_container.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_core.cpp"

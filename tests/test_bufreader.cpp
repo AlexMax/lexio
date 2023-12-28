@@ -19,9 +19,20 @@
 
 //******************************************************************************
 
-static_assert(LexIO::IsBufferedReaderV<VectorBufReader>, "VectorBufReader is not a BufferedReader");
-static_assert(LexIO::IsWriterV<VectorBufReader>, "VectorBufReader is not a Writer");
-static_assert(LexIO::IsSeekableV<VectorBufReader>, "VectorBufReader is not a Seekable");
+TEST_CASE("VectorBufReader must fulfill BufferedReader")
+{
+    REQUIRE(LexIO::IsBufferedReaderV<VectorBufReader>);
+}
+
+TEST_CASE("VectorBufReader must fulfill Writer")
+{
+    REQUIRE(LexIO::IsWriterV<VectorBufReader>);
+}
+
+TEST_CASE("VectorBufReader must fulfill Seekable")
+{
+    REQUIRE(LexIO::IsSeekableV<VectorBufReader>);
+}
 
 TEST_CASE("Copy constructor/Copy assignment")
 {

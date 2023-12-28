@@ -19,6 +19,7 @@
 #include "./core.hpp"
 
 #include "./bufreader.hpp"
+#include "./bufwriter.hpp"
 #include "./ref.hpp"
 #include "./serialize.hpp"
 #include "./stream.hpp"
