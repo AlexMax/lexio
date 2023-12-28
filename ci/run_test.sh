@@ -10,4 +10,4 @@ echo "CMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 cd "${SCRIPT_DIR}/../build/tests"
 
-"./${BUILD_TYPE}/test"
+"./${BUILD_TYPE}/lexio_test"

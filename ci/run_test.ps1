@@ -13,6 +13,6 @@ $VSPATH = & "${VSWHERE}" -latest -property installationPath
 
 Push-Location "${PSScriptRoot}\..\build\tests"
 
-& ".\${BUILD_TYPE}\test.exe"
+& ".\${BUILD_TYPE}\lexio_test.exe"
 
 Pop-Location
