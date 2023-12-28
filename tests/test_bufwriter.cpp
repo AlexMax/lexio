@@ -25,6 +25,11 @@ TEST(FixedBufWriter, FulfillReader)
     EXPECT_TRUE(LexIO::IsReaderV<VectorBufWriter>);
 }
 
+TEST(FixedBufWriter, FailBufferedReader)
+{
+    EXPECT_FALSE(LexIO::IsBufferedReaderV<VectorBufWriter>);
+}
+
 TEST(FixedBufWriter, FulfillWriter)
 {
     EXPECT_TRUE(LexIO::IsWriterV<VectorBufWriter>);

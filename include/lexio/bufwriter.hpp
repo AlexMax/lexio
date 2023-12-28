@@ -61,23 +61,11 @@ class FixedBufWriter
 
     WRITER &&Writer() && { return std::move(m_wrapped); }
 
-    template <typename = std::enable_if_t<IsReaderV<WRITER>>>
-    size_t LexRead(uint8_t *outDest, const size_t count)
-    {
-        return Read<WRITER>(m_wrapped, outDest, count);
-    }
+    size_t LexRead(uint8_t *outDest, const size_t count) { return Read<WRITER>(m_wrapped, outDest, count); }
 
-    template <typename = std::enable_if_t<IsBufferedReaderV<WRITER>>>
-    BufferView LexFillBuffer(const size_t count)
-    {
-        return LexFillBuffer<WRITER>(m_wrapped, count);
-    }
+    BufferView LexFillBuffer(const size_t count) { return FillBuffer<WRITER>(m_wrapped, count); }
 
-    template <typename = std::enable_if_t<IsBufferedReaderV<WRITER>>>
-    void LexConsumeBuffer(const size_t count)
-    {
-        LexConsumeBuffer<WRITER>(m_wrapped, count);
-    }
+    void LexConsumeBuffer(const size_t count) { ConsumeBuffer<WRITER>(m_wrapped, count); }
 
     size_t LexWrite(const uint8_t *src, const size_t count)
     {
