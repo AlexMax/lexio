@@ -566,6 +566,28 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
 }
 
 /**
+ * @brief Write a complete buffer of data to the stream, calling LexIO::Write
+ *        multiple times if necessary until the entire buffer is written
+ *        or an error is encountered.
+ *
+ * @param writer Writer to operate on.
+ * @param src Pointer to starting byte of input buffer.
+ * @param count Size of input buffer in bytes.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.
+ */
+template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
+inline void WriteAll(WRITER &writer, const uint8_t *src, const size_t count)
+{
+    size_t offset = 0;
+    while (offset < count)
+    {
+        const size_t written = Write<WRITER>(writer, src + offset, count);
+        offset += written;
+    }
+}
+
+/**
  * @brief Return the current offset position.
  *
  * @param seekable Seekable to operate on.
