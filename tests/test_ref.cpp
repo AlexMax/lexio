@@ -37,7 +37,7 @@ TEST(Ref, ReaderRef)
     auto test = GoodR{};
     LexIO::ReaderRef ref(test);
 
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
 
     AcceptReader(ref);
 }
@@ -55,7 +55,7 @@ TEST(Ref, BufferedReaderRef)
     auto test = GoodBR{};
     LexIO::BufferedReaderRef ref(test);
 
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
     EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     LexIO::ConsumeBuffer(ref, 0);
 
@@ -75,7 +75,7 @@ TEST(Ref, WriterRef)
     auto test = GoodW{};
     LexIO::WriterRef ref(test);
 
-    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
+    EXPECT_EQ(LexIO::RawWrite(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
 
     AcceptWriter(ref);
@@ -94,8 +94,8 @@ TEST(Ref, ReaderWriterRef)
     auto test = GoodRW{};
     LexIO::ReaderWriterRef ref(test);
 
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
-    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawWrite(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
 
     AcceptReader(ref);
@@ -117,10 +117,10 @@ TEST(Ref, BufferedReaderWriterRef)
     auto test = GoodBRW{};
     LexIO::BufferedReaderWriterRef ref(test);
 
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
     EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     LexIO::ConsumeBuffer(ref, 0);
-    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
+    EXPECT_EQ(LexIO::RawWrite(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
 
     AcceptReader(ref);
@@ -140,7 +140,7 @@ TEST(Ref, ReaderSeekableRef)
     auto test = GoodRS{};
     LexIO::ReaderSeekableRef ref(test);
 
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
     EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
 
     AcceptReader(ref);
@@ -162,7 +162,7 @@ TEST(Ref, BufferedReaderSeekableRef)
     auto test = GoodBRS{};
     LexIO::BufferedReaderSeekableRef ref(test);
 
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
     EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     LexIO::ConsumeBuffer(ref, 0);
     EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
@@ -187,8 +187,8 @@ TEST(Ref, ReaderWriterSeekableRef)
     auto test = GoodRWS{};
     LexIO::ReaderWriterSeekableRef ref(test);
 
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
-    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawWrite(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
     EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
 
@@ -214,10 +214,10 @@ TEST(Ref, BufferedReaderWriterSeekableRef)
     auto test = GoodBRWS{};
     LexIO::BufferedReaderWriterSeekableRef ref(test);
 
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
     EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     LexIO::ConsumeBuffer(ref, 0);
-    EXPECT_EQ(LexIO::Write(ref, &buffer[0], sizeof(buffer)), 0);
+    EXPECT_EQ(LexIO::RawWrite(ref, &buffer[0], sizeof(buffer)), 0);
     LexIO::Flush(ref);
     EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
 
