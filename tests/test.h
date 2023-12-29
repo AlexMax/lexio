@@ -44,15 +44,24 @@ inline LexIO::VectorStream GetStream()
     return rvo;
 }
 
-class PartialVectorStream
+inline LexIO::ArrayStream<4> GetStreamTrunc()
 {
-    LexIO::VectorStream m_stream;
+    LexIO::ArrayStream<4> rvo;
+    rvo.LexWrite(&BUFFER_TEXT[0], 4);
+    rvo.LexSeek(LexIO::SeekPos(0, LexIO::Whence::start));
+    return rvo;
+}
+
+template <typename STREAM>
+class PartialStream
+{
+    STREAM m_stream;
 
   public:
-    PartialVectorStream() = delete;
-    PartialVectorStream(LexIO::VectorStream &&stream) : m_stream(stream) {}
+    PartialStream() = delete;
+    PartialStream(STREAM &&stream) : m_stream(stream) {}
 
-    const LexIO::VectorStream &Stream() const { return m_stream; }
+    const STREAM &Stream() const { return m_stream; }
 
     size_t LexRead(uint8_t *outDest, const size_t count)
     {
