@@ -145,25 +145,25 @@ TEST(Core, ReadIterator)
     EXPECT_EQ(LexIO::Read(&buffer[0], &buffer[5], basic), 5);
 }
 
-TEST(Core, ReadAll)
+TEST(Core, ReadToEOF)
 {
     LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer);
+    const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), buffer);
     EXPECT_EQ(bytes, 45);
     EXPECT_EQ(data.size(), 45);
     EXPECT_EQ(*(data.end() - 1), '\n');
 }
 
-TEST(Core, ReadAllSmallBuffer)
+TEST(Core, ReadToEOFSmallBuffer)
 {
     LexIO::VectorStream basic = GetStream();
     auto buffer = VectorBufReader(std::move(basic));
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::ReadAll(std::back_inserter(data), buffer, 4);
+    const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), buffer, 4);
     EXPECT_EQ(data[4], 'q'); // Check the buffer boundary.
     EXPECT_EQ(data[8], 'k');
     EXPECT_EQ(bytes, 45);
