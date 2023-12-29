@@ -90,7 +90,7 @@ struct Writer
 
 This method should write `count` bytes from the buffer pointed to by `src`.
 
-If the write operation encounters a temporary error that implies the operation can be retried - such as `EINTR` - the operation shuold be retried until a result is returned.  If the write operation is successful, return the number of bytes that were actually written.  If an error was encountered, throw an exception.
+If the write operation encounters a temporary error that implies the operation can be retried - such as `EINTR` - the operation shuold be retried until a result is returned.  If the write operation is successful, return the number of bytes that were actually written.  If a condition tantamount to EOF was hit, such as reaching the end of a fixed-length stream, return 0 bytes.  If an error was encountered, throw an exception.
 
 #### LexFlush
 

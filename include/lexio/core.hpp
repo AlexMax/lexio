@@ -479,27 +479,41 @@ inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const Whence when
 //******************************************************************************
 
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline void ReadAll(uint8_t *outDest, const size_t count, READER &reader)
+inline size_t ReadAll(uint8_t *outDest, const size_t count, READER &reader)
 {
     size_t offset = 0, remain = count;
     while (offset != count)
     {
-        const size_t written = Read<READER>(outDest + offset, remain, reader);
-        offset += written;
-        remain -= written;
+        const size_t read = Read<READER>(outDest + offset, remain, reader);
+        if (read == 0)
+        {
+            return offset;
+        }
+
+        offset += read;
+        remain -= read;
     }
+
+    return count;
 }
 
 template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
-inline void ReadAll(uint8_t (&outArray)[N], READER &reader)
+inline size_t ReadAll(uint8_t (&outArray)[N], READER &reader)
 {
     size_t offset = 0, remain = N;
     while (offset != N)
     {
-        const size_t written = Read<READER>(&outArray[offset], remain, reader);
-        offset += written;
-        remain -= written;
+        const size_t read = Read<READER>(&outArray[offset], remain, reader);
+        if (read == 0)
+        {
+            return offset;
+        }
+
+        offset += read;
+        remain -= read;
     }
+
+    return N;
 }
 
 template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<READER>>>
@@ -508,9 +522,16 @@ inline size_t ReadAll(IT outStart, IT outEnd, READER &reader)
     IT iter = outStart;
     while (iter != outEnd)
     {
-        const size_t written = Read<READER>(outStart, outEnd, reader);
-        iter += written;
+        const size_t read = Read<READER>(iter, outEnd, reader);
+        if (read == 0)
+        {
+            return std::distance(outStart, iter);
+        }
+
+        iter += read;
     }
+
+    return std::distance(outStart, outEnd);
 }
 
 /**
@@ -612,38 +633,59 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
  *         encountered.
  */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteAll(WRITER &writer, const uint8_t *src, const size_t count)
+inline size_t WriteAll(WRITER &writer, const uint8_t *src, const size_t count)
 {
     size_t offset = 0, remain = count;
     while (offset != count)
     {
         const size_t written = Write<WRITER>(writer, src + offset, remain);
+        if (written == 0)
+        {
+            return offset;
+        }
+
         offset += written;
         remain -= written;
     }
+
+    return count;
 }
 
 template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteAll(WRITER &writer, const uint8_t (&array)[N])
+inline size_t WriteAll(WRITER &writer, const uint8_t (&array)[N])
 {
     size_t offset = 0, remain = N;
     while (offset != N)
     {
         const size_t written = Write<WRITER>(writer, array[offset], remain);
+        if (written == 0)
+        {
+            return offset;
+        }
+
         offset += written;
         remain -= written;
     }
+
+    return N;
 }
 
 template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteAll(WRITER &writer, IT start, IT end)
+inline size_t WriteAll(WRITER &writer, IT start, IT end)
 {
     IT iter = start;
     while (iter != end)
     {
         const size_t written = Write<WRITER>(writer, iter, end);
+        if (written == 0)
+        {
+            return std::distance(start, iter);
+        }
+
         iter += written;
     }
+
+    return std::distance(start, end);
 }
 
 /**
