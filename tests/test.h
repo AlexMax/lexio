@@ -43,3 +43,28 @@ inline LexIO::VectorStream GetStream()
     rvo.LexSeek(LexIO::SeekPos(0, LexIO::Whence::start));
     return rvo;
 }
+
+class PartialVectorStream
+{
+    LexIO::VectorStream m_stream;
+
+  public:
+    PartialVectorStream() = delete;
+    PartialVectorStream(LexIO::VectorStream &&stream) : m_stream(stream) {}
+
+    const LexIO::VectorStream &Stream() const { return m_stream; }
+
+    size_t LexRead(uint8_t *outDest, const size_t count)
+    {
+        return m_stream.LexRead(outDest, std::min<size_t>(count, 4));
+    }
+
+    size_t LexWrite(const uint8_t *src, const size_t count)
+    {
+        return m_stream.LexWrite(src, std::min<size_t>(count, 4));
+    }
+
+    void LexFlush() { m_stream.LexFlush(); }
+
+    size_t LexSeek(const LexIO::SeekPos pos) { return m_stream.LexSeek(pos); }
+};
