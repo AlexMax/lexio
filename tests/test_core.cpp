@@ -121,6 +121,13 @@ TEST(Core, IsReaderVBadReturn)
 
 //******************************************************************************
 
+TEST(Core, RawRead)
+{
+    LexIO::VectorStream basic = GetStream();
+
+    uint8_t buffer[5] = {0};
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), basic), 5);
+}
 TEST(Core, ReadPtrLen)
 {
     LexIO::VectorStream basic = GetStream();
@@ -210,6 +217,14 @@ TEST(Core, ReadUntilSmallBuffer)
     bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n', 4);
     EXPECT_EQ(bytes, 0);
     EXPECT_EQ(data.size(), 45);
+}
+
+TEST(Core, RawWrite)
+{
+    LexIO::VectorStream basic = GetStream();
+
+    const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    EXPECT_EQ(LexIO::RawWrite(basic, &data[0], sizeof(data)), 5);
 }
 
 TEST(Core, WritePtrLen)

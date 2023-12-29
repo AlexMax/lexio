@@ -301,45 +301,21 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
 //******************************************************************************
 
 /**
- * @brief Read data from the current offset, inserting it into the passed
- *        buffer and advancing the offset.
+ * @brief Attempt to read data from the current offset, inserting it into
+ *        the passed buffer.
  *
  * @param outDest Pointer to starting byte of output buffer.
  * @param count Size of output buffer in bytes.
  * @param reader Reader to operate on.
- * @return Actual number of bytes read.  Must be between 0 and the requested
- *         length.  0 can mean EOF or empty buffer.
+ * @return Actual number of bytes read, or 0 if EOF-like condition was
+ *         encountered.
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t Read(uint8_t *outDest, const size_t count, READER &reader)
+inline size_t RawRead(uint8_t *outDest, const size_t count, READER &reader)
 {
     return reader.LexRead(outDest, count);
-}
-
-/**
- * @brief Read data from the current offset, inserting it into the passed
- *        array and advancing the offset.
- *
- * @param outArray Output buffer.
- * @param reader Reader to operate on.
- * @return Actual number of bytes read.  Must be between 0 and the requested
- *         length.  0 can mean EOF or empty buffer.
- * @throws std::runtime_error if an error with the read operation was
- *         encountered.  EOF is _not_ considered an error.
- */
-template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t Read(uint8_t (&outArray)[N], READER &reader)
-{
-    return reader.LexRead(&outArray[0], N);
-}
-
-template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t Read(IT outStart, IT outEnd, READER &reader)
-{
-    const size_t count = std::distance(outStart, outEnd);
-    return reader.LexRead(&(*outStart), count);
 }
 
 /**
@@ -378,54 +354,20 @@ inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
 }
 
 /**
- * @brief Write a buffer of data at the current offset, overwriting any
- *        existing data.
+ * @brief Attempt to write a buffer of data at the current offset.
  *
  * @param writer Writer to operate on.
  * @param src Pointer to starting byte of input buffer.
  * @param count Size of input buffer in bytes.
- * @return Actual number of bytes written.
+ * @return Actual number of bytes written, or 0 if EOF-like condition was
+ *         encountered.
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, const uint8_t *src, const size_t count)
+inline size_t RawWrite(WRITER &writer, const uint8_t *src, const size_t count)
 {
     return writer.LexWrite(src, count);
-}
-
-/**
- * @brief Write an array of data at the current offset, overwriting any
- *        existing data.
- *
- * @param writer Writer to operate on.
- * @param array Input array.
- * @return Actual number of bytes written.
- * @throws std::runtime_error if an error with the write operation was
- *         encountered.  A partial write is _not_ considered an error.
- */
-template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, const uint8_t (&array)[N])
-{
-    return writer.LexWrite(&array[0], N);
-}
-
-/**
- * @brief Write a pointer or contiguous iterator pair covering a range of
- *        data at the current offset, overwriting any existing data.
- *
- * @param writer Writer to operate on.
- * @param start Iterator or pointer to start of input buffer.
- * @param end Iterator or pointer to end of input buffer.
- * @return Actual number of bytes written.
- * @throws std::runtime_error if an error with the write operation was
- *         encountered.  A partial write is _not_ considered an error.
- */
-template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, IT start, IT end)
-{
-    const size_t count = std::distance(start, end);
-    return Write<WRITER>(writer, &(*start), count);
 }
 
 /**
@@ -478,13 +420,26 @@ inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const Whence when
 //
 //******************************************************************************
 
+/**
+ * @brief Read data from the current offset, inserting it into the passed
+ *        buffer.  Calls LexIO::RawRead as many times as necessary to fill
+ *        the output buffer until EOF is hit.
+ *
+ * @param outDest Pointer to starting byte of output buffer.
+ * @param count Size of output buffer in bytes.
+ * @param reader Reader to operate on.
+ * @return Actual number of bytes read, or 0 if EOF-like condition was
+ *         encountered.
+ * @throws std::runtime_error if an error with the read operation was
+ *         encountered.  EOF is _not_ considered an error.
+ */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t ReadAll(uint8_t *outDest, const size_t count, READER &reader)
+inline size_t Read(uint8_t *outDest, const size_t count, READER &reader)
 {
     size_t offset = 0, remain = count;
     while (offset != count)
     {
-        const size_t read = Read<READER>(outDest + offset, remain, reader);
+        const size_t read = RawRead<READER>(outDest + offset, remain, reader);
         if (read == 0)
         {
             return offset;
@@ -498,12 +453,12 @@ inline size_t ReadAll(uint8_t *outDest, const size_t count, READER &reader)
 }
 
 template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t ReadAll(uint8_t (&outArray)[N], READER &reader)
+inline size_t Read(uint8_t (&outArray)[N], READER &reader)
 {
     size_t offset = 0, remain = N;
     while (offset != N)
     {
-        const size_t read = Read<READER>(&outArray[offset], remain, reader);
+        const size_t read = RawRead<READER>(&outArray[offset], remain, reader);
         if (read == 0)
         {
             return offset;
@@ -517,12 +472,12 @@ inline size_t ReadAll(uint8_t (&outArray)[N], READER &reader)
 }
 
 template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t ReadAll(IT outStart, IT outEnd, READER &reader)
+inline size_t Read(IT outStart, IT outEnd, READER &reader)
 {
     IT iter = outStart;
     while (iter != outEnd)
     {
-        const size_t read = Read<READER>(iter, outEnd, reader);
+        const size_t read = RawRead<READER>(&(*iter), std::distance(iter, outEnd), reader);
         if (read == 0)
         {
             return std::distance(outStart, iter);
@@ -622,23 +577,25 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
 }
 
 /**
- * @brief Write a complete buffer of data to the stream, calling LexIO::Write
- *        multiple times if necessary until the entire buffer is written
- *        or an error is encountered.
+ * @brief Write a buffer of data at the current offset.  Calls LexIO::RawWrite
+ *        as many times as necessary to write the entire buffer unless EOF
+ *        is hit.
  *
  * @param writer Writer to operate on.
  * @param src Pointer to starting byte of input buffer.
  * @param count Size of input buffer in bytes.
- * @throws std::runtime_error if an error with the write operation was
+ * @return Actual number of bytes written, or 0 if EOF-like condition was
  *         encountered.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t WriteAll(WRITER &writer, const uint8_t *src, const size_t count)
+inline size_t Write(WRITER &writer, const uint8_t *src, const size_t count)
 {
     size_t offset = 0, remain = count;
     while (offset != count)
     {
-        const size_t written = Write<WRITER>(writer, src + offset, remain);
+        const size_t written = RawWrite<WRITER>(writer, src + offset, remain);
         if (written == 0)
         {
             return offset;
@@ -652,12 +609,12 @@ inline size_t WriteAll(WRITER &writer, const uint8_t *src, const size_t count)
 }
 
 template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t WriteAll(WRITER &writer, const uint8_t (&array)[N])
+inline size_t Write(WRITER &writer, const uint8_t (&array)[N])
 {
     size_t offset = 0, remain = N;
     while (offset != N)
     {
-        const size_t written = Write<WRITER>(writer, array[offset], remain);
+        const size_t written = RawWrite<WRITER>(writer, &array[offset], remain);
         if (written == 0)
         {
             return offset;
@@ -671,12 +628,12 @@ inline size_t WriteAll(WRITER &writer, const uint8_t (&array)[N])
 }
 
 template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t WriteAll(WRITER &writer, IT start, IT end)
+inline size_t Write(WRITER &writer, IT start, IT end)
 {
     IT iter = start;
     while (iter != end)
     {
-        const size_t written = Write<WRITER>(writer, iter, end);
+        const size_t written = RawWrite<WRITER>(writer, &(*iter), std::distance(iter, end));
         if (written == 0)
         {
             return std::distance(start, iter);
