@@ -71,11 +71,10 @@ class GenericBufReader
         std::copy(&other.m_buffer[0], &other.m_buffer[m_size], m_buffer);
     }
 
-    GenericBufReader(GenericBufReader &&other)
-        : m_wrapped(std::move(other.m_wrapped)), m_buffer(other.m_buffer), m_allocSize(other.m_allocSize),
-          m_size(other.m_size)
+    GenericBufReader(GenericBufReader &&other) noexcept
+        : m_wrapped(std::move(other.m_wrapped)), m_buffer(std::exchange(other.m_buffer, nullptr)),
+          m_allocSize(other.m_allocSize), m_size(other.m_size)
     {
-        other.m_buffer = nullptr;
     }
 
     GenericBufReader(READER &&wrapped) : m_wrapped(wrapped) {}
@@ -98,20 +97,29 @@ class GenericBufReader
 
     GenericBufReader &operator=(GenericBufReader &&other) noexcept
     {
-        ::delete[] m_buffer;
+        if (this == &other)
+        {
+            return *this;
+        }
 
+        ::delete[] m_buffer;
         m_wrapped = std::move(other.m_wrapped);
-        m_buffer = other.m_buffer;
+        m_buffer = std::exchange(other.m_buffer, nullptr);
         m_allocSize = other.m_allocSize;
         m_size = other.m_size;
-        other.m_buffer = nullptr;
         return *this;
     }
 
     /**
      * @brief Return underlying Reader.
      */
-    const READER &Reader() const { return m_wrapped; }
+    const READER &Reader() const & { return m_wrapped; }
+
+    /**
+     * @brief Obtain the underlying wrapped Reader while moving-from the
+     *        GenericBufReader.
+     */
+    READER Reader() && { return m_wrapped; }
 
     size_t LexRead(uint8_t *outDest, const size_t count)
     {

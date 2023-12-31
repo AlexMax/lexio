@@ -59,7 +59,16 @@ class FixedBufWriter
         ::delete[] m_buffer;
     }
 
-    WRITER &&Writer() && { return std::move(m_wrapped); }
+    /**
+     * @brief Return underlying Writer.
+     */
+    const WRITER &Writer() const & { return m_wrapped; }
+
+    /**
+     * @brief Obtain the underlying wrapped Writer while moving-from the
+     *        FixedBufWriter.
+     */
+    WRITER Writer() && { return m_wrapped; }
 
     template <typename READER = WRITER, typename = std::enable_if_t<IsReaderV<READER>>>
     size_t LexRead(uint8_t *outDest, const size_t count)
