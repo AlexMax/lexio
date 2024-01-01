@@ -93,7 +93,7 @@ class GenericBufReader
      *
      * @param reader Reader to wrap with a buffer.
      */
-    GenericBufReader(READER &&reader) : m_reader(reader) {}
+    GenericBufReader(READER &&reader) : m_reader(std::move(reader)) {}
 
     /**
      * @brief Destructor.
