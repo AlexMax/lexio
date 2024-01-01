@@ -77,3 +77,34 @@ class PartialStream
 
     size_t LexSeek(const LexIO::SeekPos pos) { return m_stream.LexSeek(pos); }
 };
+
+template <typename STREAM>
+class NoCopyStream
+{
+    STREAM m_stream;
+
+  public:
+    NoCopyStream() = default;
+    NoCopyStream(const NoCopyStream &) = delete;
+    NoCopyStream(NoCopyStream &&) noexcept = default;
+    NoCopyStream &operator=(const NoCopyStream &) = delete;
+    NoCopyStream &operator=(NoCopyStream &&) noexcept = default;
+
+    NoCopyStream(STREAM &&stream) : m_stream(stream) {}
+
+    const STREAM &Stream() const & { return m_stream; }
+
+    STREAM Stream() const && { return m_stream; }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) { return m_stream.LexRead(outDest, count); }
+
+    LexIO::BufferView LexFillBuffer(const size_t size) { return m_stream.LexFillBuffer(size); }
+
+    void LexConsumeBuffer(const size_t size) { return m_stream.LexConsumeBuffer(size); }
+
+    size_t LexWrite(const uint8_t *src, const size_t count) { return m_stream.LexWrite(src, count); }
+
+    void LexFlush() { m_stream.LexFlush(); }
+
+    size_t LexSeek(const LexIO::SeekPos pos) { return m_stream.LexSeek(pos); }
+};

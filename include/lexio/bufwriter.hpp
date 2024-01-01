@@ -23,12 +23,19 @@
 namespace LexIO
 {
 
+/**
+ * @brief Add buffering to any Writer, with a fixed-length buffer.
+ *
+ * @tparam WRITER Writer type to wrap.
+ */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 class FixedBufWriter
 {
-    WRITER m_wrapped;
+    static constexpr size_t DEFAULT_ALLOC_SIZE = 8192;
+
+    WRITER m_writer;
     uint8_t *m_buffer = nullptr;
-    size_t m_allocSize = 0;
+    size_t m_allocSize = DEFAULT_ALLOC_SIZE;
     size_t m_size = 0;
 
   protected:
@@ -39,7 +46,7 @@ class FixedBufWriter
         const size_t totalSize = m_size;
         while (offset < totalSize)
         {
-            const size_t written = Write<WRITER>(m_wrapped, m_buffer + offset, countLeft);
+            const size_t written = Write<WRITER>(m_writer, m_buffer + offset, countLeft);
             offset += written;
             countLeft -= written;
         }
@@ -48,35 +55,63 @@ class FixedBufWriter
     }
 
   public:
-    FixedBufWriter() = delete;
+    /**
+     * @brief Default constructor.
+     *
+     * @param bufSize Size of write buffer in bytes.
+     */
+    FixedBufWriter(const size_t bufSize = DEFAULT_ALLOC_SIZE) : m_buffer(::new uint8_t[bufSize]), m_allocSize(bufSize)
+    {
+    }
 
+    /**
+     * @brief Copy constructor.
+     */
     FixedBufWriter(const FixedBufWriter &other)
-        : m_wrapped(other.m_wrapped), m_buffer(::new uint8_t[other.m_allocSize]), m_allocSize(other.m_allocSize),
+        : m_writer(other.m_writer), m_buffer(::new uint8_t[other.m_allocSize]), m_allocSize(other.m_allocSize),
           m_size(other.m_size)
     {
         std::copy(&other.m_buffer[0], &other.m_buffer[m_size], m_buffer);
     }
 
+    /**
+     * @brief Move constructor.
+     */
     FixedBufWriter(FixedBufWriter &&other) noexcept
-        : m_wrapped(std::move(other.m_wrapped)), m_buffer(std::exchange(other.m_buffer, nullptr)),
+        : m_writer(std::move(other.m_writer)), m_buffer(std::exchange(other.m_buffer, nullptr)),
           m_allocSize(other.m_allocSize), m_size(other.m_size)
     {
     }
 
-    FixedBufWriter(WRITER &&wrapped, const size_t bufSize = 8192)
-        : m_wrapped(wrapped), m_buffer(::new uint8_t[bufSize]), m_allocSize(bufSize)
+    /**
+     * @brief Constructor from existing Writer.
+     *
+     * @param writer Writer to wrap with a buffer.
+     * @param bufSize Size of write buffer in bytes.
+     */
+    FixedBufWriter(WRITER &&writer, const size_t bufSize = DEFAULT_ALLOC_SIZE)
+        : m_writer(writer), m_buffer(::new uint8_t[bufSize]), m_allocSize(bufSize)
     {
     }
 
+    /**
+     * @brief Destructor.
+     */
     ~FixedBufWriter()
     {
-        if (m_buffer)
+        if (m_buffer == nullptr)
         {
-            LexFlush();
-            ::delete[] m_buffer;
+            // Writer is moved-from, don't operate on it.
+            return;
         }
+
+        LexFlush();
+        ::delete[] m_buffer;
     }
 
+    /**
+     * @brief Copy assignment operator.
+     */
     FixedBufWriter &operator=(const FixedBufWriter &other)
     {
         if (this == &other)
@@ -85,13 +120,16 @@ class FixedBufWriter
         }
 
         FixedBufWriter copy{other};
-        std::swap(m_wrapped, copy.m_wrapped);
+        std::swap(m_writer, copy.m_writer);
         std::swap(m_buffer, copy.m_buffer);
         std::swap(m_allocSize, copy.m_allocSize);
         std::swap(m_size, copy.m_size);
         return *this;
     }
 
+    /**
+     * @brief Move assignment operator.
+     */
     FixedBufWriter &operator=(FixedBufWriter &&other) noexcept
     {
         if (this == &other)
@@ -100,7 +138,7 @@ class FixedBufWriter
         }
 
         ::delete[] m_buffer;
-        m_wrapped = std::move(other.m_wrapped);
+        m_writer = std::move(other.m_writer);
         m_buffer = std::exchange(other.m_buffer, nullptr);
         m_allocSize = other.m_allocSize;
         m_size = other.m_size;
@@ -110,30 +148,30 @@ class FixedBufWriter
     /**
      * @brief Return underlying Writer.
      */
-    const WRITER &Writer() const & { return m_wrapped; }
+    const WRITER &Writer() const & { return m_writer; }
 
     /**
      * @brief Obtain the underlying wrapped Writer while moving-from the
      *        FixedBufWriter.
      */
-    WRITER Writer() && { return m_wrapped; }
+    WRITER Writer() && { return m_writer; }
 
     template <typename READER = WRITER, typename = std::enable_if_t<IsReaderV<READER>>>
     size_t LexRead(uint8_t *outDest, const size_t count)
     {
-        return Read<WRITER>(m_wrapped, outDest, count);
+        return Read<WRITER>(m_writer, outDest, count);
     }
 
     template <typename BUFFERED_READER = WRITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
     BufferView LexFillBuffer(const size_t count)
     {
-        return FillBuffer<WRITER>(m_wrapped, count);
+        return FillBuffer<WRITER>(m_writer, count);
     }
 
     template <typename BUFFERED_READER = WRITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
     void LexConsumeBuffer(const size_t count)
     {
-        ConsumeBuffer<WRITER>(m_wrapped, count);
+        ConsumeBuffer<WRITER>(m_writer, count);
     }
 
     size_t LexWrite(const uint8_t *src, const size_t count)
@@ -159,20 +197,20 @@ class FixedBufWriter
         }
 
         // Write is too large for buffer, pass through.
-        return Write<WRITER>(m_wrapped, src, count);
+        return Write<WRITER>(m_writer, src, count);
     }
 
     void LexFlush()
     {
         FlushBuffer();
-        Flush<WRITER>(m_wrapped);
+        Flush<WRITER>(m_writer);
     }
 
     template <typename SEEKABLE = WRITER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
     size_t LexSeek(const SeekPos pos)
     {
         LexFlush();
-        return Seek<WRITER>(m_wrapped, pos);
+        return Seek<WRITER>(m_writer, pos);
     }
 };
 

@@ -17,6 +17,7 @@
 #include "./test.h"
 
 using VectorBufWriter = LexIO::FixedBufWriter<LexIO::VectorStream>;
+using VectorBufWriterNoCopy = LexIO::FixedBufWriter<NoCopyStream<LexIO::VectorStream>>;
 
 //******************************************************************************
 
@@ -42,7 +43,7 @@ TEST(FixedBufWriter, FulfillSeekable)
 
 TEST(FixedBufWriter, CopyCtor_CopyAssign)
 {
-    auto bufWriter = VectorBufWriter{LexIO::VectorStream{}};
+    auto bufWriter = VectorBufWriter{};
 
     uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     LexIO::Write(bufWriter, data);
@@ -68,7 +69,7 @@ TEST(FixedBufWriter, CopyCtor_CopyAssign)
 
 TEST(FixedBufWriter, CopyAssignSelf)
 {
-    auto bufWriter = VectorBufWriter{LexIO::VectorStream{}};
+    auto bufWriter = VectorBufWriter{};
 
     uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     LexIO::Write(bufWriter, data);
@@ -83,7 +84,7 @@ TEST(FixedBufWriter, CopyAssignSelf)
 
 TEST(FixedBufWriter, MoveCtor)
 {
-    auto bufWriter = VectorBufWriter{LexIO::VectorStream{}};
+    auto bufWriter = VectorBufWriterNoCopy{};
 
     uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     LexIO::Write(bufWriter, data);
@@ -92,14 +93,14 @@ TEST(FixedBufWriter, MoveCtor)
 
     for (size_t i = 0; i < sizeof(data); i++)
     {
-        EXPECT_EQ(moveWriter.Writer().Container()[i], data[i]);
+        EXPECT_EQ(moveWriter.Writer().Stream().Container()[i], data[i]);
     }
 }
 
 TEST(FixedBufWriter, MoveAssign)
 {
-    auto bufWriter = VectorBufWriter{LexIO::VectorStream{}};
-    auto moveWriter = VectorBufWriter{LexIO::VectorStream{}};
+    auto bufWriter = VectorBufWriterNoCopy{};
+    auto moveWriter = VectorBufWriterNoCopy{};
 
     uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     LexIO::Write(bufWriter, data);
@@ -108,13 +109,13 @@ TEST(FixedBufWriter, MoveAssign)
 
     for (size_t i = 0; i < sizeof(data); i++)
     {
-        EXPECT_EQ(moveWriter.Writer().Container()[i], data[i]);
+        EXPECT_EQ(moveWriter.Writer().Stream().Container()[i], data[i]);
     }
 }
 
 TEST(FixedBufWriter, MoveAssignSelf)
 {
-    auto bufWriter = VectorBufWriter{LexIO::VectorStream{}};
+    auto bufWriter = VectorBufWriterNoCopy{};
 
     uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     LexIO::Write(bufWriter, data);
@@ -123,7 +124,7 @@ TEST(FixedBufWriter, MoveAssignSelf)
 
     for (size_t i = 0; i < sizeof(data); i++)
     {
-        EXPECT_EQ(bufWriter.Writer().Container()[i], data[i]);
+        EXPECT_EQ(bufWriter.Writer().Stream().Container()[i], data[i]);
     }
 }
 
@@ -173,7 +174,7 @@ TEST(FixedBufWriter, WriteFlushThenBuffer)
 
 TEST(FixedBufWriter, Seek)
 {
-    auto bufWriter = VectorBufWriter{LexIO::VectorStream{}};
+    auto bufWriter = VectorBufWriter{};
 
     uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     LexIO::Write(bufWriter, data);
