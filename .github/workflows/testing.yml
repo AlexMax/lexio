@@ -32,10 +32,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - generator_toolset:
-          - generator_toolset: ClangCL
+          - cc: cl.exe
+            cxx: cl.exe
+          - cc: clang.exe
+            cxx: clang++.exe
     env:
-      GENERATOR_TOOLSET: ${{ matrix.generator_toolset }}
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
     steps:
     - uses: actions/checkout@v3
     - name: Configure
