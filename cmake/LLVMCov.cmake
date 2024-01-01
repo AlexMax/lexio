@@ -42,7 +42,7 @@ set(LLVMCOV_COMPILER_FLAGS "-fprofile-instr-generate -fcoverage-mapping"
 function(setup_target_for_coverage_llvmcov)
     set(options "")
     set(oneValueArgs BASE_DIRECTORY BUILD_DIRECTORY NAME)
-    set(multiValueArgs SOURCES EXECUTABLE DEPENDENCIES)
+    set(multiValueArgs SOURCES EXECUTABLE EXECUTABLE_ARGS DEPENDENCIES)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT LLVMCOV_PATH)
@@ -66,42 +66,50 @@ function(setup_target_for_coverage_llvmcov)
         set(BUILDDIR ${PROJECT_BINARY_DIR})
     endif()
 
+    set(LLVMCOV_EXEC_TESTS_CMD
+        "$<TARGET_FILE:${Coverage_EXECUTABLE}>" ${Coverage_EXECUTABLE_ARGS})
+
     set(LLVMCOV_MERGE_CMD
         "${LLVMPROFDATA_PATH}" merge -sparse "${BUILDDIR}/default.profraw"
             -o "${BUILDDIR}/default.profdata")
 
     set(LLVMCOV_REPORT_CMD
-        "${LLVMCOV_PATH}" report "${BUILDDIR}/lexio_test.exe"
+        "${LLVMCOV_PATH}" report "$<TARGET_FILE:${Coverage_EXECUTABLE}>"
             "-instr-profile=${BUILDDIR}/default.profdata"
             -sources ${Coverage_SOURCES})
 
     set(LLVMCOV_SHOW_CMD
-        "${LLVMCOV_PATH}" show "${BUILDDIR}/lexio_test.exe"
+        "${LLVMCOV_PATH}" show "$<TARGET_FILE:${Coverage_EXECUTABLE}>"
             "-instr-profile=${BUILDDIR}/default.profdata"
             -sources ${Coverage_SOURCES})
 
     if(TRUE)
         message(STATUS "Executed command report")
+        message(STATUS "Command to execute tests: ")
+        string(REPLACE ";" " " LLVMCOV_EXEC_TESTS_CMD_SPACED "${LLVMCOV_EXEC_TESTS_CMD}")
+        message(STATUS "${LLVMCOV_EXEC_TESTS_CMD_SPACED}")
+
         message(STATUS "Command to merge profile data: ")
         string(REPLACE ";" " " LLVMCOV_MERGE_CMD_SPACED "${LLVMCOV_MERGE_CMD}")
         message(STATUS "${LLVMCOV_MERGE_CMD_SPACED}")
 
-        message(STATUS "Command to merge profile data: ")
+        message(STATUS "Command to generate report: ")
         string(REPLACE ";" " " LLVMCOV_REPORT_CMD_SPACED "${LLVMCOV_REPORT_CMD}")
         message(STATUS "${LLVMCOV_REPORT_CMD_SPACED}")
 
-        message(STATUS "Command to merge profile data: ")
+        message(STATUS "Command to generate line report: ")
         string(REPLACE ";" " " LLVMCOV_SHOW_CMD_SPACED "${LLVMCOV_SHOW_CMD}")
         message(STATUS "${LLVMCOV_SHOW_CMD_SPACED}")
     endif()
 
     # Setup target
     add_custom_target(${Coverage_NAME}
+        COMMAND ${LLVMCOV_EXEC_TESTS_CMD}
         COMMAND ${LLVMCOV_MERGE_CMD}
         COMMAND ${LLVMCOV_REPORT_CMD}
         COMMAND ${LLVMCOV_SHOW_CMD}
 
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+        WORKING_DIRECTORY "${BUILDDIR}"
         DEPENDS ${Coverage_DEPENDENCIES}
         VERBATIM) # Protect arguments to commands
 endfunction()

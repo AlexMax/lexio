@@ -1,8 +1,13 @@
 $GENERATOR="${Env:GENERATOR}"
+$GENERATOR_TOOLSET="${Env:GENERATOR_TOOLSET}"
 $CXX_STANDARD="${Env:CXX_STANDARD}"
 
 if (-Not $GENERATOR) {
     $GENERATOR="Ninja Multi-Config"
+}
+
+if (-Not $GENERATOR_TOOLSET) {
+    $GENERATOR_TOOLSET=""
 }
 
 if (-Not $CXX_STANDARD) {
@@ -25,6 +30,7 @@ cmake `
     -S "${PSScriptRoot}\.." `
     -B "${PSScriptRoot}\..\build" `
     -G "${GENERATOR}" `
+    -T "${GENERATOR_TOOLSET}" `
     -D "CMAKE_CXX_STANDARD=${CXX_STANDARD}" `
     -D "LEXIO_ENABLE_TESTS=ON" `
     -D "SANITIZE_ADDRESS=ON" `
