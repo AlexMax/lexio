@@ -18,6 +18,9 @@
 
 #include "./test.h"
 
+using PartialVectorStream = PartialStream<LexIO::VectorStream>;
+using PartialArrayStream = PartialStream<LexIO::ArrayStream<5>>;
+
 //******************************************************************************
 
 struct GoodReader
@@ -163,7 +166,7 @@ TEST(Core, ReadPtrLen)
 
 TEST(Core, ReadPtrLenPartial)
 {
-    auto stream = PartialStream(GetStream());
+    auto stream = PartialVectorStream(GetStream());
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -204,7 +207,7 @@ TEST(Core, ReadArray)
 
 TEST(Core, ReadArrayPartial)
 {
-    auto stream = PartialStream(GetStream());
+    auto stream = PartialVectorStream(GetStream());
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -245,7 +248,7 @@ TEST(Core, ReadIterator)
 
 TEST(Core, ReadIteratorPartial)
 {
-    auto stream = PartialStream(GetStream());
+    auto stream = PartialVectorStream(GetStream());
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -383,7 +386,7 @@ TEST(Core, WritePtrLen)
 
 TEST(Core, WritePtrLenPartial)
 {
-    auto stream = PartialStream{LexIO::ArrayStream<5>{}};
+    auto stream = PartialArrayStream{LexIO::ArrayStream<5>{}};
     const auto &cstream = stream;
 
     size_t i = 0;
@@ -427,7 +430,7 @@ TEST(Core, WriteArray)
 
 TEST(Core, WriteArrayPartial)
 {
-    auto stream = PartialStream{LexIO::ArrayStream<5>{}};
+    auto stream = PartialArrayStream{LexIO::ArrayStream<5>{}};
     const auto &cstream = stream;
 
     size_t i = 0;
@@ -471,7 +474,7 @@ TEST(Core, WriteIterator)
 
 TEST(Core, WriteIteratorPartial)
 {
-    auto stream = PartialStream{LexIO::ArrayStream<5>{}};
+    auto stream = PartialArrayStream{LexIO::ArrayStream<5>{}};
     const auto &cstream = stream;
 
     size_t i = 0;
