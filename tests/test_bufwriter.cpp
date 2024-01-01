@@ -170,3 +170,17 @@ TEST(FixedBufWriter, WriteFlushThenBuffer)
         EXPECT_EQ(cstream.Container()[i], ::BUFFER_TEXT[i]);
     }
 }
+
+TEST(FixedBufWriter, Seek)
+{
+    auto bufWriter = VectorBufWriter{LexIO::VectorStream{}};
+
+    uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    LexIO::Write(bufWriter, data);
+
+    EXPECT_EQ(0, LexIO::Seek(bufWriter, 0, LexIO::Whence::start));
+    for (size_t i = 0; i < sizeof(data); i++)
+    {
+        EXPECT_EQ(bufWriter.Writer().Container()[i], data[i]);
+    }
+}
