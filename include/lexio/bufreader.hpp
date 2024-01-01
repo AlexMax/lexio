@@ -18,6 +18,8 @@
 
 #include "./core.hpp"
 
+#include <utility>
+
 namespace LexIO
 {
 

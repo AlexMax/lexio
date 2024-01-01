@@ -18,6 +18,8 @@
 
 #include "./core.hpp"
 
+#include <utility>
+
 namespace LexIO
 {
 
@@ -48,6 +50,19 @@ class FixedBufWriter
   public:
     FixedBufWriter() = delete;
 
+    FixedBufWriter(const FixedBufWriter &other)
+        : m_wrapped(other.m_wrapped), m_buffer(::new uint8_t[other.m_allocSize]), m_allocSize(other.m_allocSize),
+          m_size(other.m_size)
+    {
+        std::copy(&other.m_buffer[0], &other.m_buffer[m_size], m_buffer);
+    }
+
+    FixedBufWriter(FixedBufWriter &&other) noexcept
+        : m_wrapped(std::move(other.m_wrapped)), m_buffer(std::exchange(other.m_buffer, nullptr)),
+          m_allocSize(other.m_allocSize), m_size(other.m_size)
+    {
+    }
+
     FixedBufWriter(WRITER &&wrapped, const size_t bufSize = 8192)
         : m_wrapped(wrapped), m_buffer(::new uint8_t[bufSize]), m_allocSize(bufSize)
     {
@@ -55,8 +70,41 @@ class FixedBufWriter
 
     ~FixedBufWriter()
     {
-        LexFlush();
+        if (m_buffer)
+        {
+            LexFlush();
+            ::delete[] m_buffer;
+        }
+    }
+
+    FixedBufWriter &operator=(const FixedBufWriter &other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        FixedBufWriter copy{other};
+        std::swap(m_wrapped, copy.m_wrapped);
+        std::swap(m_buffer, copy.m_buffer);
+        std::swap(m_allocSize, copy.m_allocSize);
+        std::swap(m_size, copy.m_size);
+        return *this;
+    }
+
+    FixedBufWriter &operator=(FixedBufWriter &&other) noexcept
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+
         ::delete[] m_buffer;
+        m_wrapped = std::move(other.m_wrapped);
+        m_buffer = std::exchange(other.m_buffer, nullptr);
+        m_allocSize = other.m_allocSize;
+        m_size = other.m_size;
+        return *this;
     }
 
     /**

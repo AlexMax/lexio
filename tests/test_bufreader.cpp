@@ -95,6 +95,19 @@ TEST(GenericBufReader, MoveAssign)
     EXPECT_EQ(moveTest.second, 8);
 }
 
+TEST(GenericBufReader, MoveAssignSelf)
+{
+    auto stream = GetStream();
+    auto bufReader = VectorBufReader(std::move(stream));
+    LexIO::FillBuffer(bufReader, 8);
+    bufReader = std::move(bufReader);
+    auto bufTest = LexIO::FillBuffer(bufReader, 8);
+
+    EXPECT_EQ(bufTest.first[0], 'T');
+    EXPECT_EQ(bufTest.first[7], 'c');
+    EXPECT_EQ(bufTest.second, 8);
+}
+
 TEST(GenericBufReader, FillBufferSingle)
 {
     auto stream = GetStream();
