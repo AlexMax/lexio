@@ -32,6 +32,17 @@ TEST(Varint, TryReadUVarint32_ReadUVarint32)
     EXPECT_ANY_THROW(LexIO::ReadUVarint32(buffer));
 }
 
+TEST(Varint, TryReadUVarint32_ReadUVarint32_TooBig)
+{
+    LexIO::VectorStream buffer({0x88, 0xb3, 0xaa, 0xdd, 0x8b, 0x00});
+
+    uint32_t test;
+    EXPECT_EQ(LexIO::TryReadUVarint32(test, buffer), false);
+
+    LexIO::Rewind(buffer);
+    EXPECT_ANY_THROW(LexIO::ReadUVarint32(buffer));
+}
+
 TEST(Varint, TryWriteUVarint32_WriteUVarint32)
 {
     constexpr size_t COUNT = LexIO::UVarint32Bytes(0xbbaa9988);
@@ -176,6 +187,17 @@ TEST(Varint, TryReadUVarint64_ReadUVarint64)
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::ReadUVarint64(buffer), 0xffeeddccbbaa9988);
+    EXPECT_ANY_THROW(LexIO::ReadUVarint64(buffer));
+}
+
+TEST(Varint, TryReadUVarint64_ReadUVarint64_TooBig)
+{
+    LexIO::VectorStream buffer({0x88, 0xb3, 0xaa, 0xdd, 0xcb, 0xb9, 0xb7, 0xf7, 0xff, 0x81, 0x00});
+
+    uint64_t test;
+    EXPECT_EQ(LexIO::TryReadUVarint64(test, buffer), false);
+
+    LexIO::Rewind(buffer);
     EXPECT_ANY_THROW(LexIO::ReadUVarint64(buffer));
 }
 
