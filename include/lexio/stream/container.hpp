@@ -63,6 +63,11 @@ class ContainerBase
      */
     const T &Container() const { return m_container; }
 
+    /**
+     * @brief Replace existing container with passed container.
+     */
+    void Container(T &&container) { m_container = container; }
+
     virtual size_t LexRead(uint8_t *outDest, const size_t count)
     {
         const size_t wantedOffset = m_offset + count;

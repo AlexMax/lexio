@@ -38,6 +38,7 @@ add_library(lexio INTERFACE ${LEXIO_HEADERS})
 target_include_directories(lexio INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
 add_subdirectory(tests)
+add_subdirectory(benches)
 
 message(STATUS "CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
 if(CMAKE_BUILD_TYPE)
