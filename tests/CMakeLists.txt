@@ -22,6 +22,7 @@ set(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/test_int.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_ref.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_varint.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_vector.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test.h"
     "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
@@ -66,12 +67,25 @@ endif()
 
 option(CODE_COVERAGE "Enable code coverage on test suite" OFF)
 if(CODE_COVERAGE)
-    include(CodeCoverage)
-    append_coverage_compiler_flags_to_target(lexio_test)
-    setup_target_for_coverage_lcov(
-        NAME lexio_test_cov
-        EXECUTABLE lexio_test
-        DEPENDENCIES lexio_test
-        EXCLUDE "build/*" "tests" "/usr/include/*"
-        LCOV_ARGS --ignore-errors mismatch)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        include(CodeCoverage)
+        append_coverage_compiler_flags_to_target(lexio_test)
+        setup_target_for_coverage_lcov(
+            NAME lexio_test_cov
+            EXECUTABLE lexio_test
+            DEPENDENCIES lexio_test
+            EXCLUDE "build/*" "tests" "/usr/include/*"
+            LCOV_ARGS --ignore-errors mismatch)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        include(LLVMCov)
+        append_llvmcov_compiler_flags_to_target(lexio_test)
+        setup_target_for_coverage_llvmcov(
+            NAME lexio_test_cov
+            EXECUTABLE lexio_test
+            DEPENDENCIES lexio_test
+            SOURCES ${LEXIO_HEADERS}
+            BUILD_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+    else()
+        message(FATAL_ERROR "CODE_COVERAGE not supported by compiler")
+    endif()
 endif()
