@@ -89,7 +89,7 @@ TEST(GenericBufReader, MoveCtor)
 TEST(GenericBufReader, MoveAssign)
 {
     auto bufReader = VectorBufReaderNoCopy{GetStream()};
-    auto moveReader = std::move(bufReader);
+    auto moveReader = VectorBufReaderNoCopy{};
 
     LexIO::FillBuffer(bufReader, 8);
     moveReader = std::move(bufReader);
