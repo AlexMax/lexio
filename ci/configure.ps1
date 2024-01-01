@@ -26,6 +26,7 @@ cmake `
     -B "${PSScriptRoot}\..\build" `
     -G "${GENERATOR}" `
     -D "CMAKE_CXX_STANDARD=${CXX_STANDARD}" `
+    -D "LEXIO_ENABLE_TESTS=ON" `
     -D "SANITIZE_ADDRESS=ON" `
     -D "SANITIZE_UNDEFINED=ON"
 

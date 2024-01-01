@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD "20" CACHE STRING "C++ Standard to use")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+option(LEXIO_ENABLE_TESTS "Enable tests for LexIO")
+option(LEXIO_ENABLE_BENCHES "Enable benchmarks for LexIO")
+
 project(lexio LANGUAGES C CXX)
 
 set(LEXIO_HEADERS
@@ -37,8 +40,12 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${LEXIO_HEADERS})
 add_library(lexio INTERFACE ${LEXIO_HEADERS})
 target_include_directories(lexio INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
-add_subdirectory(tests)
-add_subdirectory(benches)
+if(LEXIO_ENABLE_TESTS)
+    add_subdirectory(tests)
+endif()
+if(LEXIO_ENABLE_BENCHES)
+    add_subdirectory(benches)
+endif()
 
 message(STATUS "CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
 if(CMAKE_BUILD_TYPE)
