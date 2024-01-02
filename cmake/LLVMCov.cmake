@@ -35,6 +35,7 @@ include(CMakeParseArguments)
 
 find_program( LLVMCOV_PATH llvm-cov )
 find_program( LLVMPROFDATA_PATH llvm-profdata )
+find_program( LLVMCXXFILT_PATH llvm-cxxfilt )
 
 set(LLVMCOV_COMPILER_FLAGS "-fprofile-instr-generate -fcoverage-mapping"
     CACHE INTERNAL "")
@@ -53,6 +54,10 @@ function(setup_target_for_coverage_llvmcov)
         message(FATAL_ERROR "llvm-profdata not found! Aborting...")
     endif() # NOT LLVMPROFDATA_PATH
 
+    if(NOT LLVMCXXFILT_PATH)
+        message(FATAL_ERROR "llvm-cxxfilt not found! Aborting...")
+    endif() # NOT LLVMCXXFILT_PATH
+
     # Set base directory (as absolute path), or default to PROJECT_SOURCE_DIR
     if(DEFINED Coverage_BASE_DIRECTORY)
         get_filename_component(BASEDIR ${Coverage_BASE_DIRECTORY} ABSOLUTE)
@@ -60,28 +65,20 @@ function(setup_target_for_coverage_llvmcov)
         set(BASEDIR ${PROJECT_SOURCE_DIR})
     endif()
 
-    if(DEFINED Coverage_BUILD_DIRECTORY)
-        get_filename_component(BUILDDIR ${Coverage_BUILD_DIRECTORY} ABSOLUTE)
-    else()
-        set(BUILDDIR ${PROJECT_BINARY_DIR})
-    endif()
-
     set(LLVMCOV_EXEC_TESTS_CMD
         "$<TARGET_FILE:${Coverage_EXECUTABLE}>" ${Coverage_EXECUTABLE_ARGS})
 
     set(LLVMCOV_MERGE_CMD
-        "${LLVMPROFDATA_PATH}" merge -sparse "${BUILDDIR}/default.profraw"
-            -o "${BUILDDIR}/default.profdata")
-
-    set(LLVMCOV_REPORT_CMD
-        "${LLVMCOV_PATH}" report "$<TARGET_FILE:${Coverage_EXECUTABLE}>"
-            "-instr-profile=${BUILDDIR}/default.profdata"
-            -sources ${Coverage_SOURCES})
+        "${LLVMPROFDATA_PATH}" merge -sparse default.profraw
+            -o default.profdata)
 
     set(LLVMCOV_SHOW_CMD
         "${LLVMCOV_PATH}" show "$<TARGET_FILE:${Coverage_EXECUTABLE}>"
-            "-instr-profile=${BUILDDIR}/default.profdata"
-            -sources ${Coverage_SOURCES} -format=html "-o=${Coverage_NAME}")
+            "-Xdemangler=${LLVMCXXFILT_PATH}"
+            -format=html
+            "-o=${Coverage_NAME}"
+            -instr-profile=default.profdata 
+            -sources ${Coverage_SOURCES})
 
     if(TRUE)
         message(STATUS "Executed command report")
@@ -94,10 +91,6 @@ function(setup_target_for_coverage_llvmcov)
         message(STATUS "${LLVMCOV_MERGE_CMD_SPACED}")
 
         message(STATUS "Command to generate report: ")
-        string(REPLACE ";" " " LLVMCOV_REPORT_CMD_SPACED "${LLVMCOV_REPORT_CMD}")
-        message(STATUS "${LLVMCOV_REPORT_CMD_SPACED}")
-
-        message(STATUS "Command to generate line report: ")
         string(REPLACE ";" " " LLVMCOV_SHOW_CMD_SPACED "${LLVMCOV_SHOW_CMD}")
         message(STATUS "${LLVMCOV_SHOW_CMD_SPACED}")
     endif()
@@ -106,12 +99,17 @@ function(setup_target_for_coverage_llvmcov)
     add_custom_target(${Coverage_NAME}
         COMMAND ${LLVMCOV_EXEC_TESTS_CMD}
         COMMAND ${LLVMCOV_MERGE_CMD}
-        COMMAND ${LLVMCOV_REPORT_CMD}
         COMMAND ${LLVMCOV_SHOW_CMD}
+
+        BYPRODUCTS
+            default.profdata
+            default.profraw
+            "${Coverage_NAME}/index.html"
 
         WORKING_DIRECTORY "${BUILDDIR}"
         DEPENDS ${Coverage_DEPENDENCIES}
-        VERBATIM) # Protect arguments to commands
+        VERBATIM # Protect arguments to commands
+        COMMENT "Processing code coverage counters and generating report.")
 endfunction()
 
 function(append_llvmcov_compiler_flags_to_target name)

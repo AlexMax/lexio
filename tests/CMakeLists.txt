@@ -83,8 +83,7 @@ if(CODE_COVERAGE)
             NAME lexio_test_cov
             EXECUTABLE lexio_test
             DEPENDENCIES lexio_test
-            SOURCES ${LEXIO_HEADERS}
-            BUILD_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+            SOURCES ${LEXIO_HEADERS})
     else()
         message(FATAL_ERROR "CODE_COVERAGE not supported by compiler")
     endif()
