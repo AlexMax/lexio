@@ -81,7 +81,7 @@ function(setup_target_for_coverage_llvmcov)
     set(LLVMCOV_SHOW_CMD
         "${LLVMCOV_PATH}" show "$<TARGET_FILE:${Coverage_EXECUTABLE}>"
             "-instr-profile=${BUILDDIR}/default.profdata"
-            -sources ${Coverage_SOURCES})
+            -sources ${Coverage_SOURCES} -format=html "-o=${Coverage_NAME}")
 
     if(TRUE)
         message(STATUS "Executed command report")
