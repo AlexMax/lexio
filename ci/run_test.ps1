@@ -1,19 +1,19 @@
 $BUILD_TYPE="${Env:BUILD_TYPE}"
-
 if (-Not $BUILD_TYPE) {
     $BUILD_TYPE="Debug"
 }
+Write-Output "BUILD_TYPE=${BUILD_TYPE}"
 
+$USE_VSWHERE="${Env:USE_VSWHERE}"
 if (-Not $USE_VSWHERE) {
     $USE_VSWHERE=""
 }
+Write-Output "USE_VSWHERE=${USE_VSWHERE}"
 
+$CODE_COVERAGE="${Env:CODE_COVERAGE}"
 if (-Not $CODE_COVERAGE) {
     $CODE_COVERAGE=""
 }
-
-Write-Output "BUILD_TYPE=${BUILD_TYPE}"
-Write-Output "USE_VSWHERE=${USE_VSWHERE}"
 Write-Output "CODE_COVERAGE=${CODE_COVERAGE}"
 
 # Find Visual Studio and set up compile environment, so we can run with ASan

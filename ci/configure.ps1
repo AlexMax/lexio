@@ -1,26 +1,25 @@
 $USE_VSWHERE="${Env:USE_VSWHERE}"
-$GENERATOR="${Env:GENERATOR}"
-$CXX_STANDARD="${Env:CXX_STANDARD}"
-
 if (-Not $USE_VSWHERE) {
     $USE_VSWHERE=""
 }
+Write-Output "USE_VSWHERE=${USE_VSWHERE}"
 
+$GENERATOR="${Env:GENERATOR}"
 if (-Not $GENERATOR) {
     $GENERATOR="Ninja Multi-Config"
 }
+Write-Output "GENERATOR=${GENERATOR}"
 
+$CXX_STANDARD="${Env:CXX_STANDARD}"
 if (-Not $CXX_STANDARD) {
     $CXX_STANDARD="20"
 }
+Write-Output "CXX_STANDARD=${CXX_STANDARD}"
 
+$CODE_COVERAGE="${Env:CODE_COVERAGE}"
 if (-Not $CODE_COVERAGE) {
     $CODE_COVERAGE="OFF"
 }
-
-Write-Output "USE_VSWHERE=${USE_VSWHERE}"
-Write-Output "GENERATOR=${GENERATOR}"
-Write-Output "CXX_STANDARD=${CXX_STANDARD}"
 Write-Output "CODE_COVERAGE=${CODE_COVERAGE}"
 
 if(Test-Path "${PSScriptRoot}\..\build") {
