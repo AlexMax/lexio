@@ -34,11 +34,13 @@ jobs:
         include:
           - cc: cl.exe
             cxx: cl.exe
+            use_vswhere: "ON"
           - cc: clang.exe
             cxx: clang++.exe
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
+      USE_VSWHERE: ${{ matrix.use_vswhere }}
     steps:
     - uses: actions/checkout@v3
     - name: Configure

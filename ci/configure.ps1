@@ -1,5 +1,10 @@
+$USE_VSWHERE="${Env:USE_VSWHERE}"
 $GENERATOR="${Env:GENERATOR}"
 $CXX_STANDARD="${Env:CXX_STANDARD}"
+
+if (-Not $USE_VSWHERE) {
+    $USE_VSWHERE=""
+}
 
 if (-Not $GENERATOR) {
     $GENERATOR="Ninja Multi-Config"
@@ -16,9 +21,11 @@ if(Test-Path "${PSScriptRoot}\..\build") {
 Push-Location .
 
 # Find Visual Studio and set up compile environment.
-$VSWHERE = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-$VSPATH = & "${VSWHERE}" -latest -property installationPath
-& "${VSPATH}\Common7\Tools\Launch-VsDevShell.ps1"
+if($USE_VSWHERE) {
+    $VSWHERE = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+    $VSPATH = & "${VSWHERE}" -latest -property installationPath
+    & "${VSPATH}\Common7\Tools\Launch-VsDevShell.ps1"
+}
 
 # Configure
 cmake `
