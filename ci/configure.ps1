@@ -14,6 +14,15 @@ if (-Not $CXX_STANDARD) {
     $CXX_STANDARD="20"
 }
 
+if (-Not $CODE_COVERAGE) {
+    $CODE_COVERAGE="OFF"
+}
+
+Write-Output "USE_VSWHERE=${USE_VSWHERE}"
+Write-Output "GENERATOR=${GENERATOR}"
+Write-Output "CXX_STANDARD=${CXX_STANDARD}"
+Write-Output "CODE_COVERAGE=${CODE_COVERAGE}"
+
 if(Test-Path "${PSScriptRoot}\..\build") {
     Remove-Item -Recurse -Force "${PSScriptRoot}\..\build"
 }
@@ -34,6 +43,7 @@ cmake `
     -G "${GENERATOR}" `
     -D "CMAKE_CXX_STANDARD=${CXX_STANDARD}" `
     -D "LEXIO_ENABLE_TESTS=ON" `
+    -D "CODE_COVERAGE=${CODE_COVERAGE}" `
     -D "SANITIZE_ADDRESS=ON" `
     -D "SANITIZE_UNDEFINED=ON"
 

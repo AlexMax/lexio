@@ -37,10 +37,12 @@ jobs:
             use_vswhere: "ON"
           - cc: clang.exe
             cxx: clang++.exe
+            code_coverage: "ON"
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
       USE_VSWHERE: ${{ matrix.use_vswhere }}
+      CODE_COVERAGE: ${{ matrix.code_coverage }}
     steps:
     - uses: actions/checkout@v3
     - uses: seanmiddleditch/gha-setup-ninja@master

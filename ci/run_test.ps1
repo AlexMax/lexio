@@ -4,15 +4,33 @@ if (-Not $BUILD_TYPE) {
     $BUILD_TYPE="Debug"
 }
 
-Write-Output "CMAKE_BUILD_TYPE=${BUILD_TYPE}"
+if (-Not $USE_VSWHERE) {
+    $USE_VSWHERE=""
+}
+
+if (-Not $CODE_COVERAGE) {
+    $CODE_COVERAGE=""
+}
+
+Write-Output "BUILD_TYPE=${BUILD_TYPE}"
+Write-Output "USE_VSWHERE=${USE_VSWHERE}"
+Write-Output "CODE_COVERAGE=${CODE_COVERAGE}"
 
 # Find Visual Studio and set up compile environment, so we can run with ASan
-$VSWHERE = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-$VSPATH = & "${VSWHERE}" -latest -property installationPath
-& "${VSPATH}\Common7\Tools\Launch-VsDevShell.ps1"
+if($USE_VSWHERE) {
+    $VSWHERE = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+    $VSPATH = & "${VSWHERE}" -latest -property installationPath
+    & "${VSPATH}\Common7\Tools\Launch-VsDevShell.ps1"
+}
 
-Push-Location "${PSScriptRoot}\..\build\tests"
+if($CODE_COVERAGE) {
+    # Run with code coverage.
+    cmake --build "${PSScriptRoot}\..\build" --config "${BUILD_TYPE}" --target lexio_test_cov
+} else {
+    # Run tests by themselves.
+    Push-Location "${PSScriptRoot}\..\build\tests"
 
-& ".\${BUILD_TYPE}\lexio_test.exe"
+    & ".\${BUILD_TYPE}\lexio_test.exe"
 
-Pop-Location
+    Pop-Location
+}

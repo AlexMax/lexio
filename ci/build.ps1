@@ -9,7 +9,8 @@ if (-Not $USE_VSWHERE) {
     $USE_VSWHERE=""
 }
 
-Write-Output "CMAKE_BUILD_TYPE=${BUILD_TYPE}"
+Write-Output "BUILD_TYPE=${BUILD_TYPE}"
+Write-Output "USE_VSWHERE=${USE_VSWHERE}"
 
 Push-Location .
 
