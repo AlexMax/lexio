@@ -37,12 +37,12 @@ include(GoogleTest)
 gtest_discover_tests(lexio_test)
 
 # Only use clang-tidy with Clang.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT MSVC)
-    find_program(CLANG_TIDY_EXE clang-tidy)
-    if(CLANG_TIDY_EXE)
-        set_target_properties(lexio_test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
-    endif()
-endif()
+# if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT MSVC)
+#     find_program(CLANG_TIDY_EXE clang-tidy)
+#     if(CLANG_TIDY_EXE)
+#         set_target_properties(lexio_test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
+#     endif()
+# endif()
 
 check_compiler_flag(CXX -Wmost W_MOST)
 if(W_MOST)

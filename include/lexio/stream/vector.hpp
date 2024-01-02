@@ -34,19 +34,14 @@ class VectorStream
   public:
     using container_type = std::vector<uint8_t>;
 
-  protected:
-    container_type m_container;
-    size_t m_offset = 0;
+    // Explicit rule-of-five for code coverage.
 
-    void OffsetCheck(const ptrdiff_t offset)
-    {
-        if (offset < 0)
-        {
-            throw std::runtime_error("attempted seek to negative position");
-        }
-    }
+    ~VectorStream() {}
+    VectorStream(const VectorStream &) = default;
+    VectorStream(VectorStream &&) noexcept = default;
+    VectorStream &operator=(const VectorStream &) = default;
+    VectorStream &operator=(VectorStream &&) noexcept = default;
 
-  public:
     VectorStream() = default;
     VectorStream(const container_type &buffer) : m_container(buffer) {}
     VectorStream(container_type &&buffer) : m_container(buffer) {}
@@ -59,7 +54,18 @@ class VectorStream
     /**
      * @brief A read-only reference of the wrapped container.
      */
-    const container_type &Container() const { return m_container; }
+    const container_type &Container() const & { return m_container; }
+
+    /**
+     * @brief Obtain the underlying container while moving-from the
+     *        VectorStream.
+     */
+    container_type Container() && { return m_container; }
+
+    /**
+     * @brief Replace existing container with copy of passed container.
+     */
+    void Container(const container_type &container) { m_container = container; }
 
     /**
      * @brief Replace existing container with passed container.
@@ -104,10 +110,19 @@ class VectorStream
             break;
         }
 
-        OffsetCheck(offset);
+        if (offset < 0)
+        {
+            // Negative offsets are invalid.
+            throw std::runtime_error("attempted seek to negative position");
+        }
+
         m_offset = static_cast<size_t>(offset);
         return m_offset;
     }
+
+  protected:
+    container_type m_container;
+    size_t m_offset = 0;
 };
 
 } // namespace LexIO

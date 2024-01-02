@@ -38,10 +38,7 @@ constexpr size_t BUFFER_LENGTH = CountOf(BUFFER_TEXT) - sizeof('\0');
 
 inline LexIO::VectorStream GetStream()
 {
-    LexIO::VectorStream rvo;
-    rvo.LexWrite(&BUFFER_TEXT[0], BUFFER_LENGTH);
-    rvo.LexSeek(LexIO::SeekPos(0, LexIO::Whence::start));
-    return rvo;
+    return LexIO::VectorStream{std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]}};
 }
 
 inline LexIO::ArrayStream<4> GetStreamTrunc()

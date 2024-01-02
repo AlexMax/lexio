@@ -515,6 +515,9 @@ TEST(Core, Seek_Tell)
 {
     LexIO::VectorStream stream = GetStream();
 
+    LexIO::Seek(stream, 5);
+    EXPECT_EQ(LexIO::Tell(stream), 5);
+
     LexIO::Seek(stream, 5, LexIO::Whence::start);
     EXPECT_EQ(LexIO::Tell(stream), 5);
 
