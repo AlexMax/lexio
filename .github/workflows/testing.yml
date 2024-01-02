@@ -35,9 +35,8 @@ jobs:
           - cc: cl.exe
             cxx: cl.exe
             use_vswhere: "ON"
-          - cc: clang-cl.exe
-            cxx: clang-cl.exe
-            use_vswhere: "ON"
+          - cc: clang.exe
+            cxx: clang++.exe
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
