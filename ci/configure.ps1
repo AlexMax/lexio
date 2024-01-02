@@ -14,10 +14,6 @@ if (-Not $CXX_STANDARD) {
     $CXX_STANDARD="20"
 }
 
-if ($null -eq (Get-Command "ninja.exe" -ErrorAction SilentlyContinue)) {
-    choco install ninja
-}
-
 if(Test-Path "${PSScriptRoot}\..\build") {
     Remove-Item -Recurse -Force "${PSScriptRoot}\..\build"
 }
