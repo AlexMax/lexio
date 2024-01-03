@@ -363,3 +363,125 @@ TEST(Varint, TryWriteSVarint64_WriteSVarint64)
         EXPECT_ANY_THROW(LexIO::WriteSVarint64(buffer, 9220960697760173252));
     }
 }
+
+TEST(Varint, UVarint32Bytes)
+{
+    EXPECT_EQ(1, LexIO::UVarint32Bytes(0));
+    EXPECT_EQ(1, LexIO::UVarint32Bytes(0x7f));
+    EXPECT_EQ(2, LexIO::UVarint32Bytes(0x80));
+    EXPECT_EQ(2, LexIO::UVarint32Bytes(0x3fff));
+    EXPECT_EQ(3, LexIO::UVarint32Bytes(0x4000));
+    EXPECT_EQ(3, LexIO::UVarint32Bytes(0x1fffff));
+    EXPECT_EQ(4, LexIO::UVarint32Bytes(0x200000));
+    EXPECT_EQ(4, LexIO::UVarint32Bytes(0xfffffff));
+    EXPECT_EQ(5, LexIO::UVarint32Bytes(0x10000000));
+    EXPECT_EQ(5, LexIO::UVarint32Bytes(0xffffffff));
+}
+
+TEST(Varint, Varint32Bytes)
+{
+    EXPECT_EQ(1, LexIO::Varint32Bytes(0));
+    EXPECT_EQ(1, LexIO::Varint32Bytes(0x7f));
+    EXPECT_EQ(2, LexIO::Varint32Bytes(0x80));
+    EXPECT_EQ(2, LexIO::Varint32Bytes(0x3fff));
+    EXPECT_EQ(3, LexIO::Varint32Bytes(0x4000));
+    EXPECT_EQ(3, LexIO::Varint32Bytes(0x1fffff));
+    EXPECT_EQ(4, LexIO::Varint32Bytes(0x200000));
+    EXPECT_EQ(4, LexIO::Varint32Bytes(0xfffffff));
+    EXPECT_EQ(5, LexIO::Varint32Bytes(0x10000000));
+    EXPECT_EQ(5, LexIO::Varint32Bytes(0x7fffffff));
+    EXPECT_EQ(5, LexIO::Varint32Bytes(0 - 0x1));
+    EXPECT_EQ(5, LexIO::Varint32Bytes(0 - 0x80000000));
+}
+
+TEST(Varint, SVarint32Bytes)
+{
+    EXPECT_EQ(1, LexIO::SVarint32Bytes(0));
+    EXPECT_EQ(1, LexIO::SVarint32Bytes(1));
+    EXPECT_EQ(1, LexIO::SVarint32Bytes(-1));
+    EXPECT_EQ(1, LexIO::SVarint32Bytes(0 - 0x40));
+    EXPECT_EQ(2, LexIO::SVarint32Bytes(0x40));
+    EXPECT_EQ(2, LexIO::SVarint32Bytes(0 - 0x2000));
+    EXPECT_EQ(3, LexIO::SVarint32Bytes(0x2000));
+    EXPECT_EQ(3, LexIO::SVarint32Bytes(0 - 0x100000));
+    EXPECT_EQ(4, LexIO::SVarint32Bytes(0x100000));
+    EXPECT_EQ(4, LexIO::SVarint32Bytes(0 - 0x8000000));
+    EXPECT_EQ(5, LexIO::SVarint32Bytes(0x8000000));
+    EXPECT_EQ(5, LexIO::SVarint32Bytes(0 - 0x80000000));
+    EXPECT_EQ(5, LexIO::SVarint32Bytes(0x7fffffff));
+}
+
+TEST(Varint, UVarint64Bytes)
+{
+    EXPECT_EQ(1, LexIO::UVarint64Bytes(0));
+    EXPECT_EQ(1, LexIO::UVarint64Bytes(0x7f));
+    EXPECT_EQ(2, LexIO::UVarint64Bytes(0x80));
+    EXPECT_EQ(2, LexIO::UVarint64Bytes(0x3fff));
+    EXPECT_EQ(3, LexIO::UVarint64Bytes(0x4000));
+    EXPECT_EQ(3, LexIO::UVarint64Bytes(0x1fffff));
+    EXPECT_EQ(4, LexIO::UVarint64Bytes(0x200000));
+    EXPECT_EQ(4, LexIO::UVarint64Bytes(0xfffffff));
+    EXPECT_EQ(5, LexIO::UVarint64Bytes(0x10000000));
+    EXPECT_EQ(5, LexIO::UVarint64Bytes(0x7ffffffff));
+    EXPECT_EQ(6, LexIO::UVarint64Bytes(0x800000000));
+    EXPECT_EQ(6, LexIO::UVarint64Bytes(0x3ffffffffff));
+    EXPECT_EQ(7, LexIO::UVarint64Bytes(0x40000000000));
+    EXPECT_EQ(7, LexIO::UVarint64Bytes(0x1ffffffffffff));
+    EXPECT_EQ(8, LexIO::UVarint64Bytes(0x2000000000000));
+    EXPECT_EQ(8, LexIO::UVarint64Bytes(0xffffffffffffff));
+    EXPECT_EQ(9, LexIO::UVarint64Bytes(0x100000000000000));
+    EXPECT_EQ(9, LexIO::UVarint64Bytes(0x7fffffffffffffff));
+    EXPECT_EQ(10, LexIO::UVarint64Bytes(0x8000000000000000));
+    EXPECT_EQ(10, LexIO::UVarint64Bytes(0xffffffffffffffff));
+}
+
+TEST(Varint, Varint64Bytes)
+{
+    EXPECT_EQ(1, LexIO::Varint64Bytes(0));
+    EXPECT_EQ(1, LexIO::Varint64Bytes(0x7f));
+    EXPECT_EQ(2, LexIO::Varint64Bytes(0x80));
+    EXPECT_EQ(2, LexIO::Varint64Bytes(0x3fff));
+    EXPECT_EQ(3, LexIO::Varint64Bytes(0x4000));
+    EXPECT_EQ(3, LexIO::Varint64Bytes(0x1fffff));
+    EXPECT_EQ(4, LexIO::Varint64Bytes(0x200000));
+    EXPECT_EQ(4, LexIO::Varint64Bytes(0xfffffff));
+    EXPECT_EQ(5, LexIO::Varint64Bytes(0x10000000));
+    EXPECT_EQ(5, LexIO::Varint64Bytes(0x7ffffffff));
+    EXPECT_EQ(6, LexIO::Varint64Bytes(0x800000000));
+    EXPECT_EQ(6, LexIO::Varint64Bytes(0x3ffffffffff));
+    EXPECT_EQ(7, LexIO::Varint64Bytes(0x40000000000));
+    EXPECT_EQ(7, LexIO::Varint64Bytes(0x1ffffffffffff));
+    EXPECT_EQ(8, LexIO::Varint64Bytes(0x2000000000000));
+    EXPECT_EQ(8, LexIO::Varint64Bytes(0xffffffffffffff));
+    EXPECT_EQ(9, LexIO::Varint64Bytes(0x100000000000000));
+    EXPECT_EQ(9, LexIO::Varint64Bytes(0x7fffffffffffffff));
+    EXPECT_EQ(10, LexIO::Varint64Bytes(0 - 0x1));
+    EXPECT_EQ(10, LexIO::Varint64Bytes(0 - 0x8000000000000000));
+}
+
+TEST(Varint, SVarint64Bytes)
+{
+    EXPECT_EQ(1, LexIO::SVarint64Bytes(0));
+    EXPECT_EQ(1, LexIO::SVarint64Bytes(1));
+    EXPECT_EQ(1, LexIO::SVarint64Bytes(-1));
+    EXPECT_EQ(1, LexIO::SVarint64Bytes(0 - 0x40));
+    EXPECT_EQ(2, LexIO::SVarint64Bytes(0x40));
+    EXPECT_EQ(2, LexIO::SVarint64Bytes(0 - 0x2000));
+    EXPECT_EQ(3, LexIO::SVarint64Bytes(0x2000));
+    EXPECT_EQ(3, LexIO::SVarint64Bytes(0 - 0x100000));
+    EXPECT_EQ(4, LexIO::SVarint64Bytes(0x100000));
+    EXPECT_EQ(4, LexIO::SVarint64Bytes(0 - 0x8000000));
+    EXPECT_EQ(5, LexIO::SVarint64Bytes(0x8000000));
+    EXPECT_EQ(5, LexIO::SVarint64Bytes(0 - 0x400000000));
+    EXPECT_EQ(6, LexIO::SVarint64Bytes(0x400000000));
+    EXPECT_EQ(6, LexIO::SVarint64Bytes(0 - 0x20000000000));
+    EXPECT_EQ(7, LexIO::SVarint64Bytes(0x20000000000));
+    EXPECT_EQ(7, LexIO::SVarint64Bytes(0 - 0x1000000000000));
+    EXPECT_EQ(8, LexIO::SVarint64Bytes(0x1000000000000));
+    EXPECT_EQ(8, LexIO::SVarint64Bytes(0 - 0x80000000000000));
+    EXPECT_EQ(9, LexIO::SVarint64Bytes(0x80000000000000));
+    EXPECT_EQ(9, LexIO::SVarint64Bytes(0 - 0x4000000000000000));
+    EXPECT_EQ(10, LexIO::SVarint64Bytes(0x4000000000000000));
+    EXPECT_EQ(10, LexIO::SVarint64Bytes(0 - 0x8000000000000000));
+    EXPECT_EQ(10, LexIO::SVarint64Bytes(0x7fffffffffffffff));
+}
