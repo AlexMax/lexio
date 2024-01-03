@@ -81,6 +81,22 @@ TEST(Ref, WriterRef)
     AcceptWriter(ref);
 }
 
+TEST(Ref, SeekableRef)
+{
+    struct GoodS
+    {
+        size_t LexSeek(const LexIO::SeekPos) { return 0; }
+    };
+
+    uint8_t buffer[4];
+    auto test = GoodS{};
+    LexIO::SeekableRef ref(test);
+
+    EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
+
+    AcceptSeekable(ref);
+}
+
 TEST(Ref, ReaderWriterRef)
 {
     struct GoodRW
