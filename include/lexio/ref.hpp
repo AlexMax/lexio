@@ -25,63 +25,98 @@ namespace LexIO
 
 namespace Detail
 {
+
 using lexRead_t = size_t (*)(void *, uint8_t *, const size_t);
 using lexFillBuffer_t = BufferView (*)(void *, const size_t);
 using lexConsumeBuffer_t = void (*)(void *, const size_t);
 using lexWrite_t = size_t (*)(void *, const uint8_t *, const size_t);
 using lexFlush_t = void (*)(void *);
 using lexSeek_t = size_t (*)(void *, const SeekPos);
+
+template <typename READER>
+inline size_t WrapRead(void *ptr, uint8_t *outDest, const size_t count)
+{
+    return static_cast<READER *>(ptr)->LexRead(outDest, count);
+}
+
+template <typename BUFFERED_READER>
+inline BufferView WrapFillBuffer(void *ptr, const size_t size)
+{
+    return static_cast<BUFFERED_READER *>(ptr)->LexFillBuffer(size);
+}
+
+template <typename BUFFERED_READER>
+inline void WrapConsumeBuffer(void *ptr, const size_t size)
+{
+    static_cast<BUFFERED_READER *>(ptr)->LexConsumeBuffer(size);
+}
+
+template <typename WRITER>
+size_t WrapWrite(void *ptr, const uint8_t *src, const size_t count)
+{
+    return static_cast<WRITER *>(ptr)->LexWrite(src, count);
+}
+
+template <typename WRITER>
+inline void WrapFlush(void *ptr)
+{
+    static_cast<WRITER *>(ptr)->LexFlush();
+}
+
+template <typename SEEKABLE>
+inline size_t WrapSeek(void *ptr, const SeekPos pos)
+{
+    return static_cast<SEEKABLE *>(ptr)->LexSeek(pos);
+}
+
 } // namespace Detail
 
+/**
+ * @brief A type-erased reference to a stream that implements Reader.
+ */
 class ReaderRef
 {
   protected:
     void *m_ptr;
     Detail::lexRead_t m_lexRead;
 
-    ReaderRef(void *ptr, Detail::lexRead_t read) : m_ptr(ptr), m_lexRead(read) {}
-
   public:
     template <typename READER>
-    ReaderRef(READER &reader)
-        : m_ptr(&reader), m_lexRead([](void *ptr, uint8_t *outDest, const size_t count) -> size_t {
-              return static_cast<READER *>(ptr)->LexRead(outDest, count);
-          })
+    ReaderRef(READER &reader) : m_ptr(&reader), m_lexRead(Detail::WrapRead<READER>)
     {
     }
 
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
 };
 
-class BufferedReaderRef : public ReaderRef
+/**
+ * @brief A type-erased reference to a stream that implements BufferedReader.
+ */
+class BufferedReaderRef
 {
   protected:
     void *m_ptr;
+    Detail::lexRead_t m_lexRead;
     Detail::lexFillBuffer_t m_lexFillBuffer;
     Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
-
-    BufferedReaderRef(void *ptr, Detail::lexRead_t lexRead, Detail::lexFillBuffer_t lexFillBuffer,
-                      Detail::lexConsumeBuffer_t lexConsumeBuffer)
-        : ReaderRef(ptr, lexRead), m_ptr(ptr), m_lexFillBuffer(lexFillBuffer), m_lexConsumeBuffer(lexConsumeBuffer)
-    {
-    }
 
   public:
     template <typename BUFFERED_READER>
     BufferedReaderRef(BUFFERED_READER &bufReader)
-        : ReaderRef(bufReader), m_ptr(&bufReader), m_lexFillBuffer([](void *ptr, const size_t size) -> BufferView { //
-              return static_cast<BUFFERED_READER *>(ptr)->LexFillBuffer(size);
-          }),
-          m_lexConsumeBuffer([](void *ptr, const size_t size) -> void { //
-              static_cast<BUFFERED_READER *>(ptr)->LexConsumeBuffer(size);
-          })
+        : m_ptr(&bufReader), m_lexRead(Detail::WrapRead<BUFFERED_READER>),
+          m_lexFillBuffer(Detail::WrapFillBuffer<BUFFERED_READER>),
+          m_lexConsumeBuffer(Detail::WrapConsumeBuffer<BUFFERED_READER>)
     {
     }
 
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
     BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
     void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
 };
 
+/**
+ * @brief A type-erased reference to a stream that implements Writer.
+ */
 class WriterRef
 {
   protected:
@@ -89,20 +124,10 @@ class WriterRef
     Detail::lexWrite_t m_lexWrite;
     Detail::lexFlush_t m_lexFlush;
 
-    WriterRef(void *ptr, Detail::lexWrite_t lexWrite, Detail::lexFlush_t lexFlush)
-        : m_ptr(ptr), m_lexWrite(lexWrite), m_lexFlush(lexFlush)
-    {
-    }
-
   public:
     template <typename WRITER>
     WriterRef(WRITER &writer)
-        : m_ptr(&writer), m_lexWrite([](void *ptr, const uint8_t *src, const size_t count) -> size_t { //
-              return static_cast<WRITER *>(ptr)->LexWrite(src, count);
-          }),
-          m_lexFlush([](void *ptr) -> void { //
-              static_cast<WRITER *>(ptr)->LexFlush();
-          })
+        : m_ptr(&writer), m_lexWrite(Detail::WrapWrite<WRITER>), m_lexFlush(Detail::WrapFlush<WRITER>)
     {
     }
 
@@ -110,93 +135,187 @@ class WriterRef
     void LexFlush() const { m_lexFlush(m_ptr); }
 };
 
+/**
+ * @brief A type-erased reference to a stream that implements Seekable.
+ */
 class SeekableRef
 {
   protected:
     void *m_ptr;
     Detail::lexSeek_t m_lexSeek;
 
-    SeekableRef(void *ptr, Detail::lexSeek_t lexSeek) : m_ptr(ptr), m_lexSeek(lexSeek) {}
-
   public:
     template <typename SEEKABLE>
-    SeekableRef(SEEKABLE &seekable)
-        : m_ptr(&seekable), m_lexSeek([](void *ptr, const SeekPos pos) -> size_t { //
-              return static_cast<SEEKABLE *>(ptr)->LexSeek(pos);
-          })
+    SeekableRef(SEEKABLE &seekable) : m_ptr(&seekable), m_lexSeek(Detail::WrapSeek<SEEKABLE>)
     {
     }
 
     size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
 };
 
-class ReaderWriterRef : public ReaderRef, public WriterRef
+/**
+ * @brief A type-erased reference to a stream that implements Reader,
+ *        and Writer.
+ */
+class ReaderWriterRef
 {
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexWrite_t m_lexWrite;
+    Detail::lexFlush_t m_lexFlush;
+
   public:
-    template <typename READER_WRITER>
-    ReaderWriterRef(READER_WRITER &readerWriter) : ReaderRef(readerWriter), WriterRef(readerWriter)
+    template <typename STREAM>
+    ReaderWriterRef(STREAM &readerWriter)
+        : m_ptr(&readerWriter), m_lexRead(Detail::WrapRead<STREAM>), m_lexWrite(Detail::WrapWrite<STREAM>),
+          m_lexFlush(Detail::WrapFlush<STREAM>)
     {
     }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
 };
 
-class BufferedReaderWriterRef : public BufferedReaderRef, public WriterRef
+/**
+ * @brief A type-erased reference to a stream that implements BufferedReader,
+ *        and Writer.
+ */
+class BufferedReaderWriterRef
 {
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexFillBuffer_t m_lexFillBuffer;
+    Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
+    Detail::lexWrite_t m_lexWrite;
+    Detail::lexFlush_t m_lexFlush;
+
   public:
-    template <typename BUFFERED_READER_WRITER>
-    BufferedReaderWriterRef(BUFFERED_READER_WRITER &bufferedReaderWriter)
-        : BufferedReaderRef(bufferedReaderWriter), WriterRef(bufferedReaderWriter)
+    template <typename STREAM>
+    BufferedReaderWriterRef(STREAM &bufferedReaderWriter)
+        : m_ptr(&bufferedReaderWriter), m_lexRead(Detail::WrapRead<STREAM>),
+          m_lexFillBuffer(Detail::WrapFillBuffer<STREAM>), m_lexConsumeBuffer(Detail::WrapConsumeBuffer<STREAM>),
+          m_lexWrite(Detail::WrapWrite<STREAM>), m_lexFlush(Detail::WrapFlush<STREAM>)
     {
     }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
 };
 
-class ReaderSeekableRef : public ReaderRef, public SeekableRef
+/**
+ * @brief A type-erased reference to a stream that implements Reader,
+ *        and Seekable.
+ */
+class ReaderSeekableRef
 {
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexSeek_t m_lexSeek;
+
   public:
-    template <typename READER_SEEKABLE>
-    ReaderSeekableRef(READER_SEEKABLE &readerSeekable) : ReaderRef(readerSeekable), SeekableRef(readerSeekable)
+    template <typename STREAM>
+    ReaderSeekableRef(STREAM &readerSeekable)
+        : m_ptr(&readerSeekable), m_lexRead(Detail::WrapRead<STREAM>), m_lexSeek(Detail::WrapSeek<STREAM>)
     {
     }
 
-    ReaderSeekableRef(void *ptr, Detail::lexRead_t lexRead, Detail::lexSeek_t lexSeek)
-        : ReaderRef(ptr, lexRead), SeekableRef(ptr, lexSeek)
-    {
-    }
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
 };
 
-class BufferedReaderSeekableRef : public BufferedReaderRef, public SeekableRef
+/**
+ * @brief A type-erased reference to a stream that implements BufferedReader,
+ *        and Seekable.
+ */
+class BufferedReaderSeekableRef
 {
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexFillBuffer_t m_lexFillBuffer;
+    Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
+    Detail::lexSeek_t m_lexSeek;
+
   public:
-    template <typename BUFFERED_READER_SEEKABLE>
-    BufferedReaderSeekableRef(BUFFERED_READER_SEEKABLE &bufferedReaderSeekable)
-        : BufferedReaderRef(bufferedReaderSeekable), SeekableRef(bufferedReaderSeekable)
+    template <typename STREAM>
+    BufferedReaderSeekableRef(STREAM &bufferedReaderSeekable)
+        : m_ptr(&bufferedReaderSeekable), m_lexRead(Detail::WrapRead<STREAM>),
+          m_lexFillBuffer(Detail::WrapFillBuffer<STREAM>), m_lexConsumeBuffer(Detail::WrapConsumeBuffer<STREAM>),
+          m_lexSeek(Detail::WrapSeek<STREAM>)
     {
     }
 
-    operator ReaderSeekableRef() { return ReaderSeekableRef{ReaderRef::m_ptr, m_lexRead, m_lexSeek}; }
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
 };
 
-class ReaderWriterSeekableRef : public ReaderWriterRef, public SeekableRef
+/**
+ * @brief A type-erased reference to a stream that implements Reader, Writer,
+ *        and Seekable.
+ */
+class ReaderWriterSeekableRef
 {
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexWrite_t m_lexWrite;
+    Detail::lexFlush_t m_lexFlush;
+    Detail::lexSeek_t m_lexSeek;
+
   public:
-    template <typename READER_WRITER_SEEKABLE>
-    ReaderWriterSeekableRef(READER_WRITER_SEEKABLE &readerWriterSeekable)
-        : ReaderWriterRef(readerWriterSeekable), SeekableRef(readerWriterSeekable)
+    template <typename STREAM>
+    ReaderWriterSeekableRef(STREAM &readerWriterSeekable)
+        : m_ptr(&readerWriterSeekable), m_lexRead(Detail::WrapRead<STREAM>), m_lexWrite(Detail::WrapWrite<STREAM>),
+          m_lexFlush(Detail::WrapFlush<STREAM>), m_lexSeek(Detail::WrapSeek<STREAM>)
     {
     }
 
-    operator ReaderSeekableRef() { return ReaderSeekableRef{ReaderRef::m_ptr, m_lexRead, m_lexSeek}; }
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
 };
 
-class BufferedReaderWriterSeekableRef : public BufferedReaderWriterRef, public SeekableRef
+/**
+ * @brief A type-erased reference to a stream that implements BufferedReader,
+ *        Writer, and Seekable.
+ */
+class BufferedReaderWriterSeekableRef
 {
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexFillBuffer_t m_lexFillBuffer;
+    Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
+    Detail::lexWrite_t m_lexWrite;
+    Detail::lexFlush_t m_lexFlush;
+    Detail::lexSeek_t m_lexSeek;
+
   public:
-    template <typename BUFFERED_READER_WRITER_SEEKABLE>
-    BufferedReaderWriterSeekableRef(BUFFERED_READER_WRITER_SEEKABLE &bufferedReaderWriterSeekable)
-        : BufferedReaderWriterRef(bufferedReaderWriterSeekable), SeekableRef(bufferedReaderWriterSeekable)
+    template <typename STREAM>
+    BufferedReaderWriterSeekableRef(STREAM &bufferedReaderWriterSeekable)
+        : m_ptr(&bufferedReaderWriterSeekable), m_lexRead(Detail::WrapRead<STREAM>),
+          m_lexFillBuffer(Detail::WrapFillBuffer<STREAM>), m_lexConsumeBuffer(Detail::WrapConsumeBuffer<STREAM>),
+          m_lexWrite(Detail::WrapWrite<STREAM>), m_lexFlush(Detail::WrapFlush<STREAM>),
+          m_lexSeek(Detail::WrapSeek<STREAM>)
     {
     }
 
-    operator ReaderSeekableRef() { return ReaderSeekableRef{ReaderRef::m_ptr, m_lexRead, m_lexSeek}; }
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
 };
 
 } // namespace LexIO
