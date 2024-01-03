@@ -99,6 +99,32 @@ class ScopeDelete
 
 #else
 
+static std::string TempFile()
+{
+    char filename[] = "/tmp/lexXXXXXX";
+    int fd = mkstemp(filename);
+    if (fd == -1)
+    {
+        throw std::runtime_error("could not get temporary name");
+    }
+    return std::string(&filename[0], sizeof(filename));
+}
+
+class ScopeDelete
+{
+    std::string m_filename;
+
+  public:
+    ScopeDelete(const std::string &filename) : m_filename(filename) {}
+    ~ScopeDelete()
+    {
+        if (unlink(m_filename.c_str()) == -1)
+        {
+            std::terminate();
+        }
+    }
+};
+
 #endif
 
 TEST(File, FulfillReader)

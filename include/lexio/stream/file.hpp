@@ -299,7 +299,7 @@ class FilePOSIX
         m_fd = -1;
     }
 
-    int FileHandle() && { return m_fileHandle; }
+    int FileHandle() && { return m_fd; }
 
     static int InvalidFileHandle() { return -1; }
 
