@@ -21,7 +21,9 @@
 
 #include "config.h"
 
-#include "lexio/lexio.hpp"
+#include "lexio/bufreader.hpp"
+#include "lexio/stream/array.hpp"
+#include "lexio/stream/vector.hpp"
 
 #include <gtest/gtest.h>
 

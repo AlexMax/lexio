@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+#include "lexio/bufreader.hpp"
+
 #include "./test.h"
 
 using VectorBufReaderNoCopy = LexIO::GenericBufReader<NoCopyStream<LexIO::VectorStream>>;

@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+#include "lexio/ref.hpp"
+
 #include "./test.h"
 
 #include <memory>
@@ -88,7 +90,6 @@ TEST(Ref, SeekableRef)
         size_t LexSeek(const LexIO::SeekPos) { return 0; }
     };
 
-    uint8_t buffer[4];
     auto test = GoodS{};
     LexIO::SeekableRef ref(test);
 

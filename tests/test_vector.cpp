@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+#include "lexio/stream/vector.hpp"
+
 #include "./test.h"
 
 //******************************************************************************

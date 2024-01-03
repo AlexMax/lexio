@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+#include "lexio/serialize/float.hpp"
+
 #include "./test.h"
 #include <cmath>
 

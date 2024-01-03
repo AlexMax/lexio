@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+#include "lexio/serialize/int.hpp"
+
 #include "./test.h"
 
 TEST(Int, TryReadU8_ReadU8)

@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+#include "lexio/bufwriter.hpp"
+
 #include "./test.h"
 
 using VectorBufWriter = LexIO::FixedBufWriter<LexIO::VectorStream>;

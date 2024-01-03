@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+#include "lexio/serialize/varint.hpp"
+
 #include "./test.h"
 
 //******************************************************************************

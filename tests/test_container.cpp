@@ -14,7 +14,10 @@
 //  limitations under the License.
 //
 
+#include "lexio/stream/container.hpp"
+
 #include "./test.h"
+#include "lexio/serialize/int.hpp"
 
 //******************************************************************************
 

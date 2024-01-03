@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "./int.hpp"
 #include "./tryvarint.hpp"
 
 namespace LexIO

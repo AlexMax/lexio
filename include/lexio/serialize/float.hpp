@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "./int.hpp"
 #include "./tryfloat.hpp"
 
 namespace LexIO

@@ -14,9 +14,11 @@
 //  limitations under the License.
 //
 
-#include <algorithm>
+#include "lexio/core.hpp"
 
 #include "./test.h"
+#include "lexio/serialize/int.hpp"
+#include <algorithm>
 
 using PartialVectorStream = PartialStream<LexIO::VectorStream>;
 using PartialArrayStream = PartialStream<LexIO::ArrayStream<5>>;

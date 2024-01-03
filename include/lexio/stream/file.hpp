@@ -68,11 +68,10 @@ class Win32Error : public std::runtime_error
 
 class FileWin32
 {
-    HANDLE m_fileHandle = INVALID_HANDLE_VALUE;
-
-    FileWin32(const HANDLE fileHandle) : m_fileHandle(fileHandle) {}
-
   public:
+    using handle_type = HANDLE;
+
+    FileWin32() = default;
     FileWin32(const FileWin32 &other) = delete;
     FileWin32 &operator=(const FileWin32 &other) = delete;
 
@@ -100,6 +99,10 @@ class FileWin32
         }
         m_fileHandle = INVALID_HANDLE_VALUE;
     }
+
+    handle_type FileHandle() && { return m_fileHandle; }
+
+    static handle_type InvalidFileHandle() { return INVALID_HANDLE_VALUE; }
 
     /**
      * @brief Open a file for reading.
@@ -216,6 +219,11 @@ class FileWin32
         }
         return static_cast<size_t>(newOffset.QuadPart);
     }
+
+  protected:
+    HANDLE m_fileHandle = INVALID_HANDLE_VALUE;
+
+    FileWin32(const HANDLE fileHandle) : m_fileHandle(fileHandle) {}
 };
 
 using File = FileWin32;
@@ -266,6 +274,7 @@ class FilePOSIX
     FilePOSIX(const int fd) : m_fd(fd) {}
 
   public:
+    FilePOSIX() = default;
     FilePOSIX(const FilePOSIX &other) = delete;
     FilePOSIX &operator=(const FilePOSIX &other) = delete;
 
@@ -289,6 +298,10 @@ class FilePOSIX
         }
         m_fd = -1;
     }
+
+    int FileHandle() && { return m_fileHandle; }
+
+    static int InvalidFileHandle() { return -1; }
 
     /**
      * @brief Open a file for reading.
