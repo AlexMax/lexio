@@ -21,6 +21,11 @@
 using VectorBufWriter = LexIO::FixedBufWriter<LexIO::VectorStream>;
 using VectorBufWriterNoCopy = LexIO::FixedBufWriter<NoCopyStream<LexIO::VectorStream>>;
 
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#pragma clang diagnostic ignored "-Wself-move"
+#endif
+
 //******************************************************************************
 
 TEST(FixedBufWriter, FulfillReader)
