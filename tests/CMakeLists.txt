@@ -23,6 +23,7 @@ set(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/test_ref.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_varint.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_vector.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_view.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test.h"
     "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 

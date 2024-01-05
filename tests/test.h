@@ -24,6 +24,7 @@
 #include "lexio/bufreader.hpp"
 #include "lexio/stream/array.hpp"
 #include "lexio/stream/vector.hpp"
+#include "lexio/stream/view.hpp"
 
 #include <gtest/gtest.h>
 
@@ -38,9 +39,14 @@ constexpr std::size_t CountOf(T const (&)[N]) noexcept
 constexpr uint8_t BUFFER_TEXT[] = "The quick brown fox\njumps over the lazy dog.\n";
 constexpr size_t BUFFER_LENGTH = CountOf(BUFFER_TEXT) - sizeof('\0');
 
-inline LexIO::VectorStream GetStream()
+inline LexIO::VectorStream GetVectorStream()
 {
     return LexIO::VectorStream{std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]}};
+}
+
+inline LexIO::ViewStream<const uint8_t> GetViewStream()
+{
+    return LexIO::ViewStream{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
 }
 
 inline LexIO::ArrayStream<4> GetStreamTrunc()

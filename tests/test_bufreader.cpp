@@ -20,6 +20,11 @@
 
 using VectorBufReaderNoCopy = LexIO::GenericBufReader<NoCopyStream<LexIO::VectorStream>>;
 
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#pragma clang diagnostic ignored "-Wself-move"
+#endif
+
 //******************************************************************************
 
 TEST(GenericBufReader, FulfillBufferedReader)
@@ -46,7 +51,7 @@ TEST(GenericBufReader, DefCtor)
 
 TEST(GenericBufReader, CopyCtor_CopyAssign)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
     auto bufTest = LexIO::FillBuffer(bufReader, 8);
     VectorBufReader copyReader{bufReader};
     auto copyTest = LexIO::FillBuffer(copyReader, 8);
@@ -66,7 +71,7 @@ TEST(GenericBufReader, CopyCtor_CopyAssign)
 
 TEST(GenericBufReader, CopyAssignSelf)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
     LexIO::FillBuffer(bufReader, 8);
     bufReader = bufReader;
     auto bufTest = LexIO::FillBuffer(bufReader, 8);
@@ -78,7 +83,7 @@ TEST(GenericBufReader, CopyAssignSelf)
 
 TEST(GenericBufReader, MoveCtor)
 {
-    VectorBufReaderNoCopy bufReader{GetStream()};
+    VectorBufReaderNoCopy bufReader{GetVectorStream()};
     LexIO::FillBuffer(bufReader, 8);
     VectorBufReaderNoCopy moveReader{std::move(bufReader)};
     auto moveTest = LexIO::FillBuffer(moveReader, 8);
@@ -90,7 +95,7 @@ TEST(GenericBufReader, MoveCtor)
 
 TEST(GenericBufReader, MoveAssign)
 {
-    auto bufReader = VectorBufReaderNoCopy{GetStream()};
+    auto bufReader = VectorBufReaderNoCopy{GetVectorStream()};
     auto moveReader = VectorBufReaderNoCopy{};
 
     LexIO::FillBuffer(bufReader, 8);
@@ -104,7 +109,7 @@ TEST(GenericBufReader, MoveAssign)
 
 TEST(GenericBufReader, MoveAssignSelf)
 {
-    auto bufReader = VectorBufReaderNoCopy{GetStream()};
+    auto bufReader = VectorBufReaderNoCopy{GetVectorStream()};
     LexIO::FillBuffer(bufReader, 8);
     bufReader = std::move(bufReader);
     auto bufTest = LexIO::FillBuffer(bufReader, 8);
@@ -116,7 +121,7 @@ TEST(GenericBufReader, MoveAssignSelf)
 
 TEST(GenericBufReader, FillBufferSingle)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     auto test = LexIO::FillBuffer(bufReader, 8);
     EXPECT_EQ(test.first[0], 'T');
@@ -126,7 +131,7 @@ TEST(GenericBufReader, FillBufferSingle)
 
 TEST(GenericBufReader, FillBufferMultiple)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     // Buffer initial four bytes.
     auto test = LexIO::FillBuffer(bufReader, 4);
@@ -151,7 +156,7 @@ TEST(GenericBufReader, FillBufferMultiple)
 
 TEST(GenericBufReader, FillBufferEOF)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     // Buffer everything.
     auto test = LexIO::FillBuffer(bufReader, 64);
@@ -168,7 +173,7 @@ TEST(GenericBufReader, FillBufferEOF)
 
 TEST(GenericBufReader, FillBufferEOFInitial)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     auto test = LexIO::FillBuffer(bufReader, 4);
     EXPECT_EQ(test.first[0], 'T');
@@ -186,7 +191,7 @@ TEST(GenericBufReader, FillBufferEOFInitial)
 
 TEST(GenericBufReader, FillBufferZeroRead)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     auto test = LexIO::FillBuffer(bufReader, 0);
     EXPECT_EQ(test.second, 0);
@@ -197,7 +202,7 @@ TEST(GenericBufReader, FillBufferZeroRead)
 
 TEST(GenericBufReader, FillBufferTooLarge)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     EXPECT_ANY_THROW(LexIO::FillBuffer(bufReader, SIZE_MAX));
 }
@@ -207,7 +212,7 @@ TEST(GenericBufReader, FillBufferTooLarge)
 
 TEST(GenericBufReader, ConsumeBufferSingle)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     // Fill, then consume whole buffer.
     LexIO::FillBuffer(bufReader, 8);
@@ -225,7 +230,7 @@ TEST(GenericBufReader, ConsumeBufferSingle)
 
 TEST(GenericBufReader, ConsumeBufferMultiple)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     // Consume half the buffer.
     LexIO::FillBuffer(bufReader, 8);
@@ -243,7 +248,7 @@ TEST(GenericBufReader, ConsumeBufferMultiple)
 
 TEST(GenericBufReader, ConsumeBufferEOF)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     // Fill to EOF, consume part of it.
     auto test = LexIO::FillBuffer(bufReader, 64);
@@ -261,7 +266,7 @@ TEST(GenericBufReader, ConsumeBufferEOF)
 
 TEST(GenericBufReader, ConsumeBufferTooLarge)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     LexIO::FillBuffer(bufReader, 8);
     EXPECT_ANY_THROW(LexIO::ConsumeBuffer(bufReader, 12));
@@ -269,7 +274,7 @@ TEST(GenericBufReader, ConsumeBufferTooLarge)
 
 TEST(GenericBufReader, Read)
 {
-    auto bufReader = VectorBufReader{GetStream()};
+    auto bufReader = VectorBufReader{GetVectorStream()};
 
     uint8_t output[8] = {0};
     size_t count = LexIO::Read(output, bufReader);

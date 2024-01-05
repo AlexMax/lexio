@@ -33,7 +33,8 @@ set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/array.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/container.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/file.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/vector.hpp")
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/vector.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/view.hpp")
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${LEXIO_HEADERS})
 
 # Main LexIO header-only library

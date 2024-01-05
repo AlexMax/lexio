@@ -14,43 +14,43 @@
 //  limitations under the License.
 //
 
-#include "lexio/stream/vector.hpp"
+#include "lexio/stream/view.hpp"
 
 #include "./test.h"
 
 //******************************************************************************
 
-TEST(VectorStream, FulfillReader)
+TEST(ViewStream, FulfillReader)
 {
-    EXPECT_TRUE(LexIO::IsReaderV<LexIO::VectorStream>);
+    EXPECT_TRUE(LexIO::IsReaderV<LexIO::ViewStream>);
 }
 
-TEST(VectorStream, FailBufferedReader)
+TEST(ViewStream, FailBufferedReader)
 {
-    EXPECT_FALSE(LexIO::IsBufferedReaderV<LexIO::VectorStream>);
+    EXPECT_FALSE(LexIO::IsBufferedReaderV<LexIO::ViewStream>);
 }
 
-TEST(VectorStream, FulfillWriter)
+TEST(ViewStream, FulfillWriter)
 {
-    EXPECT_TRUE(LexIO::IsWriterV<LexIO::VectorStream>);
+    EXPECT_TRUE(LexIO::IsWriterV<LexIO::ViewStream>);
 }
 
-TEST(VectorStream, FulfillSeekable)
+TEST(ViewStream, FulfillSeekable)
 {
-    EXPECT_TRUE(LexIO::IsSeekableV<LexIO::VectorStream>);
+    EXPECT_TRUE(LexIO::IsSeekableV<LexIO::ViewStream>);
 }
 
-TEST(VectorStream, DefCtor)
+TEST(ViewStream, DefCtor)
 {
-    auto vecStream = LexIO::VectorStream{};
+    auto vecStream = LexIO::ViewStream{};
 
     EXPECT_EQ(0, LexIO::Length(vecStream));
 }
 
-TEST(VectorStream, CopyCtor)
+TEST(ViewStream, CopyCtor)
 {
     auto copyStream = GetVectorStream();
-    auto vecStream = LexIO::VectorStream{copyStream};
+    auto vecStream = LexIO::ViewStream{copyStream};
 
     EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
@@ -59,10 +59,10 @@ TEST(VectorStream, CopyCtor)
     }
 }
 
-TEST(VectorStream, CopyAssign)
+TEST(ViewStream, CopyAssign)
 {
     auto copyStream = GetVectorStream();
-    auto vecStream = LexIO::VectorStream{};
+    auto vecStream = LexIO::ViewStream{};
     vecStream = copyStream;
 
     EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
@@ -72,9 +72,9 @@ TEST(VectorStream, CopyAssign)
     }
 }
 
-TEST(VectorStream, MoveCtor)
+TEST(ViewStream, MoveCtor)
 {
-    auto vecStream = LexIO::VectorStream{GetVectorStream()};
+    auto vecStream = LexIO::ViewStream{GetVectorStream()};
 
     EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
@@ -83,9 +83,9 @@ TEST(VectorStream, MoveCtor)
     }
 }
 
-TEST(VectorStream, MoveAssign)
+TEST(ViewStream, MoveAssign)
 {
-    auto vecStream = LexIO::VectorStream{};
+    auto vecStream = LexIO::ViewStream{};
     vecStream = GetVectorStream();
 
     EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
@@ -95,10 +95,10 @@ TEST(VectorStream, MoveAssign)
     }
 }
 
-TEST(VectorStream, VectorCopyCtor)
+TEST(ViewStream, VectorCopyCtor)
 {
     auto copyVec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
-    auto vecStream = LexIO::VectorStream{copyVec};
+    auto vecStream = LexIO::ViewStream{copyVec};
 
     EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
@@ -107,10 +107,10 @@ TEST(VectorStream, VectorCopyCtor)
     }
 }
 
-TEST(VectorStream, VectorMoveCtor)
+TEST(ViewStream, VectorMoveCtor)
 {
     auto moveVec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
-    auto vecStream = LexIO::VectorStream{std::move(moveVec)};
+    auto vecStream = LexIO::ViewStream{std::move(moveVec)};
 
     EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
@@ -119,7 +119,7 @@ TEST(VectorStream, VectorMoveCtor)
     }
 }
 
-TEST(VectorStream, Read)
+TEST(ViewStream, Read)
 {
     auto vecStream = GetVectorStream();
 
@@ -132,9 +132,9 @@ TEST(VectorStream, Read)
     }
 }
 
-TEST(VectorStream, Write)
+TEST(ViewStream, Write)
 {
-    auto vecStream = LexIO::VectorStream{};
+    auto vecStream = LexIO::ViewStream{};
 
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
     {
@@ -144,7 +144,7 @@ TEST(VectorStream, Write)
     EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
 }
 
-TEST(VectorStream, Seek)
+TEST(ViewStream, Seek)
 {
     auto vecStream = GetVectorStream();
 
@@ -155,7 +155,7 @@ TEST(VectorStream, Seek)
     EXPECT_EQ(BUFFER_LENGTH - 8, LexIO::Seek(vecStream, -4, LexIO::Whence::current));
 }
 
-TEST(VectorStream, Seek_Negative)
+TEST(ViewStream, Seek_Negative)
 {
     auto vecStream = GetVectorStream();
 

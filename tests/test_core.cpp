@@ -128,7 +128,7 @@ TEST(Core, IsReaderVBadReturn)
 
 TEST(Core, RawRead)
 {
-    auto stream = GetStream();
+    auto stream = GetVectorStream();
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -154,7 +154,7 @@ TEST(Core, RawReadTrunc)
 }
 TEST(Core, ReadPtrLen)
 {
-    auto stream = GetStream();
+    auto stream = GetVectorStream();
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -168,7 +168,7 @@ TEST(Core, ReadPtrLen)
 
 TEST(Core, ReadPtrLenPartial)
 {
-    auto stream = PartialVectorStream(GetStream());
+    auto stream = PartialVectorStream(GetVectorStream());
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -195,7 +195,7 @@ TEST(Core, ReadPtrLenTrunc)
 
 TEST(Core, ReadArray)
 {
-    auto stream = GetStream();
+    auto stream = GetVectorStream();
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -209,7 +209,7 @@ TEST(Core, ReadArray)
 
 TEST(Core, ReadArrayPartial)
 {
-    auto stream = PartialVectorStream(GetStream());
+    auto stream = PartialVectorStream(GetVectorStream());
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -236,7 +236,7 @@ TEST(Core, ReadArrayTrunc)
 
 TEST(Core, ReadIterator)
 {
-    auto stream = GetStream();
+    auto stream = GetVectorStream();
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -250,7 +250,7 @@ TEST(Core, ReadIterator)
 
 TEST(Core, ReadIteratorPartial)
 {
-    auto stream = PartialVectorStream(GetStream());
+    auto stream = PartialVectorStream(GetVectorStream());
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
@@ -277,7 +277,7 @@ TEST(Core, ReadIteratorTrunc)
 
 TEST(Core, ReadToEOF)
 {
-    auto stream = GetStream();
+    auto stream = GetVectorStream();
     auto buffer = VectorBufReader(std::move(stream));
 
     std::vector<uint8_t> data;
@@ -289,7 +289,7 @@ TEST(Core, ReadToEOF)
 
 TEST(Core, ReadToEOFSmallBuffer)
 {
-    LexIO::VectorStream stream = GetStream();
+    LexIO::VectorStream stream = GetVectorStream();
     auto buffer = VectorBufReader(std::move(stream));
 
     std::vector<uint8_t> data;
@@ -302,7 +302,7 @@ TEST(Core, ReadToEOFSmallBuffer)
 
 TEST(Core, ReadUntil)
 {
-    auto stream = GetStream();
+    auto stream = GetVectorStream();
     auto buffer = VectorBufReader(std::move(stream));
 
     std::vector<uint8_t> data;
@@ -323,7 +323,7 @@ TEST(Core, ReadUntil)
 
 TEST(Core, ReadUntilSmallBuffer)
 {
-    LexIO::VectorStream stream = GetStream();
+    LexIO::VectorStream stream = GetVectorStream();
     auto buffer = VectorBufReader(std::move(stream));
 
     std::vector<uint8_t> data;
@@ -505,7 +505,7 @@ TEST(Core, WriteIteratorTrunc)
 
 TEST(Core, Rewind)
 {
-    LexIO::VectorStream stream = GetStream();
+    LexIO::VectorStream stream = GetVectorStream();
     EXPECT_EQ(LexIO::Read8(stream), 'T');
     EXPECT_EQ(LexIO::Read8(stream), 'h');
     EXPECT_EQ(LexIO::Read8(stream), 'e');
@@ -515,7 +515,7 @@ TEST(Core, Rewind)
 
 TEST(Core, Seek_Tell)
 {
-    LexIO::VectorStream stream = GetStream();
+    LexIO::VectorStream stream = GetVectorStream();
 
     LexIO::Seek(stream, 5);
     EXPECT_EQ(LexIO::Tell(stream), 5);
@@ -532,7 +532,7 @@ TEST(Core, Seek_Tell)
 
 TEST(Core, Seek_Tell_SeekPos)
 {
-    LexIO::VectorStream stream = GetStream();
+    LexIO::VectorStream stream = GetVectorStream();
 
     LexIO::Seek(stream, LexIO::SeekPos(5, LexIO::Whence::start));
     EXPECT_EQ(LexIO::Tell(stream), 5);
@@ -546,7 +546,7 @@ TEST(Core, Seek_Tell_SeekPos)
 
 TEST(Core, TellAfterRewind)
 {
-    LexIO::VectorStream stream = GetStream();
+    LexIO::VectorStream stream = GetVectorStream();
 
     LexIO::Seek(stream, 5, LexIO::Whence::start);
     EXPECT_EQ(LexIO::Rewind(stream), 0);
@@ -555,14 +555,14 @@ TEST(Core, TellAfterRewind)
 
 TEST(Core, Length)
 {
-    LexIO::VectorStream stream = GetStream();
+    LexIO::VectorStream stream = GetVectorStream();
 
     EXPECT_EQ(LexIO::Length(stream), BUFFER_LENGTH);
 }
 
 TEST(Core, Copy)
 {
-    VectorBufReader src = VectorBufReader(GetStream());
+    VectorBufReader src = VectorBufReader(GetVectorStream());
     LexIO::VectorStream dest;
     const LexIO::VectorStream &cDest = dest;
 
@@ -572,7 +572,7 @@ TEST(Core, Copy)
 
 TEST(Core, CopySmallBuffer)
 {
-    VectorBufReader src = VectorBufReader(GetStream());
+    VectorBufReader src = VectorBufReader(GetVectorStream());
     LexIO::VectorStream dest;
     const LexIO::VectorStream &cDest = dest;
 
