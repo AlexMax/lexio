@@ -30,8 +30,6 @@ set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/tryvarint.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/varint.hpp"
 
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/array.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/container.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/file.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/vector.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream/view.hpp")

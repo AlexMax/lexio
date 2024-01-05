@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "./stream/array.hpp"
-#include "./stream/container.hpp"
 #include "./stream/file.hpp"
 #include "./stream/vector.hpp"
+#include "./stream/view.hpp"

@@ -22,7 +22,6 @@
 #include "config.h"
 
 #include "lexio/bufreader.hpp"
-#include "lexio/stream/array.hpp"
 #include "lexio/stream/vector.hpp"
 #include "lexio/stream/view.hpp"
 
@@ -54,14 +53,6 @@ inline LexIO::ViewStream GetViewStream(uint8_t (&array)[N])
 inline LexIO::ConstViewStream GetConstViewStream()
 {
     return LexIO::ConstViewStream{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
-}
-
-inline LexIO::ArrayStream<4> GetStreamTrunc()
-{
-    LexIO::ArrayStream<4> rvo;
-    rvo.LexWrite(&BUFFER_TEXT[0], 4);
-    rvo.LexSeek(LexIO::SeekPos(0, LexIO::Whence::start));
-    return rvo;
 }
 
 template <typename STREAM>

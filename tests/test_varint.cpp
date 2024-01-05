@@ -51,29 +51,29 @@ TEST(Varint, TryWriteUVarint32_WriteUVarint32)
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_EQ(LexIO::TryWriteUVarint32(buffer, 0xbbaa9988), true);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x0b);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0x0b);
         EXPECT_EQ(LexIO::TryWriteUVarint32(buffer, 0xbbaa9988), false);
     }
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_NO_THROW(LexIO::WriteUVarint32(buffer, 0xbbaa9988));
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x0b);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0x0b);
         EXPECT_ANY_THROW(LexIO::WriteUVarint32(buffer, 0xbbaa9988));
     }
 }
@@ -100,29 +100,29 @@ TEST(Varint, TryWriteVarint32_WriteVarint32)
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_EQ(LexIO::TryWriteVarint32(buffer, -1146447480), true);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x0b);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0x0b);
         EXPECT_EQ(LexIO::TryWriteVarint32(buffer, -1146447480), false);
     }
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_NO_THROW(LexIO::WriteVarint32(buffer, -1146447480));
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x0b);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0x0b);
         EXPECT_ANY_THROW(LexIO::WriteVarint32(buffer, -1146447480));
     }
 }
@@ -149,29 +149,29 @@ TEST(Varint, TryWriteSVarint32_WriteSVarint32)
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_EQ(LexIO::TryWriteSVarint32(buffer, 1574259908), true);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x0b);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0x0b);
         EXPECT_EQ(LexIO::TryWriteSVarint32(buffer, 1574259908), false);
     }
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_NO_THROW(LexIO::WriteSVarint32(buffer, 1574259908));
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x0b);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0x0b);
         EXPECT_ANY_THROW(LexIO::WriteSVarint32(buffer, 1574259908));
     }
 }
@@ -209,39 +209,39 @@ TEST(Varint, TryWriteUVarint64_WriteUVarint64)
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_EQ(LexIO::TryWriteUVarint64(buffer, 0xffeeddccbbaa9988), true);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xcb);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb9);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xf7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xff);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x01);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0xcb);
+        EXPECT_EQ(streamBuf[i++], 0xb9);
+        EXPECT_EQ(streamBuf[i++], 0xb7);
+        EXPECT_EQ(streamBuf[i++], 0xf7);
+        EXPECT_EQ(streamBuf[i++], 0xff);
+        EXPECT_EQ(streamBuf[i++], 0x01);
         EXPECT_EQ(LexIO::TryWriteUVarint64(buffer, 0xffeeddccbbaa9988), false);
     }
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_NO_THROW(LexIO::WriteUVarint64(buffer, 0xffeeddccbbaa9988));
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xcb);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb9);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xf7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xff);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x01);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0xcb);
+        EXPECT_EQ(streamBuf[i++], 0xb9);
+        EXPECT_EQ(streamBuf[i++], 0xb7);
+        EXPECT_EQ(streamBuf[i++], 0xf7);
+        EXPECT_EQ(streamBuf[i++], 0xff);
+        EXPECT_EQ(streamBuf[i++], 0x01);
         EXPECT_ANY_THROW(LexIO::WriteUVarint64(buffer, 0xffeeddccbbaa9988));
     }
 }
@@ -268,39 +268,39 @@ TEST(Varint, TryWriteVarint64_WriteVarint64)
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_EQ(LexIO::TryWriteVarint64(buffer, -4822678189205112), true);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xcb);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb9);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xf7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xff);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x01);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0xcb);
+        EXPECT_EQ(streamBuf[i++], 0xb9);
+        EXPECT_EQ(streamBuf[i++], 0xb7);
+        EXPECT_EQ(streamBuf[i++], 0xf7);
+        EXPECT_EQ(streamBuf[i++], 0xff);
+        EXPECT_EQ(streamBuf[i++], 0x01);
         EXPECT_EQ(LexIO::TryWriteVarint64(buffer, -4822678189205112), false);
     }
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_NO_THROW(LexIO::WriteVarint64(buffer, -4822678189205112));
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xcb);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb9);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xf7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xff);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x01);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0xcb);
+        EXPECT_EQ(streamBuf[i++], 0xb9);
+        EXPECT_EQ(streamBuf[i++], 0xb7);
+        EXPECT_EQ(streamBuf[i++], 0xf7);
+        EXPECT_EQ(streamBuf[i++], 0xff);
+        EXPECT_EQ(streamBuf[i++], 0x01);
         EXPECT_ANY_THROW(LexIO::WriteVarint64(buffer, -4822678189205112));
     }
 }
@@ -329,39 +329,39 @@ TEST(Varint, TryWriteSVarint64_WriteSVarint64)
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_EQ(LexIO::TryWriteSVarint64(buffer, 9220960697760173252), true);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xcb);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb9);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xf7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xff);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x01);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0xcb);
+        EXPECT_EQ(streamBuf[i++], 0xb9);
+        EXPECT_EQ(streamBuf[i++], 0xb7);
+        EXPECT_EQ(streamBuf[i++], 0xf7);
+        EXPECT_EQ(streamBuf[i++], 0xff);
+        EXPECT_EQ(streamBuf[i++], 0x01);
         EXPECT_EQ(LexIO::TryWriteSVarint64(buffer, 9220960697760173252), false);
     }
 
     {
         size_t i = 0;
-        LexIO::ArrayStream<COUNT> buffer;
-        const LexIO::ArrayStream<COUNT> &cbuffer = buffer;
+        uint8_t streamBuf[COUNT] = {0};
+        auto buffer = LexIO::ViewStream{streamBuf};
 
         EXPECT_NO_THROW(LexIO::WriteSVarint64(buffer, 9220960697760173252));
-        EXPECT_EQ(cbuffer.Container()[i++], 0x88);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb3);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xaa);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xdd);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xcb);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb9);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xb7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xf7);
-        EXPECT_EQ(cbuffer.Container()[i++], 0xff);
-        EXPECT_EQ(cbuffer.Container()[i++], 0x01);
+        EXPECT_EQ(streamBuf[i++], 0x88);
+        EXPECT_EQ(streamBuf[i++], 0xb3);
+        EXPECT_EQ(streamBuf[i++], 0xaa);
+        EXPECT_EQ(streamBuf[i++], 0xdd);
+        EXPECT_EQ(streamBuf[i++], 0xcb);
+        EXPECT_EQ(streamBuf[i++], 0xb9);
+        EXPECT_EQ(streamBuf[i++], 0xb7);
+        EXPECT_EQ(streamBuf[i++], 0xf7);
+        EXPECT_EQ(streamBuf[i++], 0xff);
+        EXPECT_EQ(streamBuf[i++], 0x01);
         EXPECT_ANY_THROW(LexIO::WriteSVarint64(buffer, 9220960697760173252));
     }
 }
