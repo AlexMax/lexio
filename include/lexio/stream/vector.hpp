@@ -22,8 +22,6 @@
 
 #include "../core.hpp"
 
-#include "./container.hpp"
-
 #include <vector>
 
 namespace LexIO

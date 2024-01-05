@@ -17,6 +17,7 @@
 #include "lexio/stream/view.hpp"
 
 #include "./test.h"
+#include "lexio/serialize/int.hpp"
 
 //******************************************************************************
 
@@ -177,6 +178,141 @@ TEST(ViewStream, Seek_Negative)
 {
     uint8_t buffer[BUFFER_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
+
+    EXPECT_ANY_THROW(LexIO::Seek(viewStream, -1, LexIO::Whence::current));
+}
+
+//******************************************************************************
+
+TEST(ConstViewStream, FulfillReader)
+{
+    EXPECT_TRUE(LexIO::IsReaderV<LexIO::ConstViewStream>);
+}
+
+TEST(ConstViewStream, FailBufferedReader)
+{
+    EXPECT_FALSE(LexIO::IsBufferedReaderV<LexIO::ConstViewStream>);
+}
+
+TEST(ConstViewStream, FulfillWriter)
+{
+    EXPECT_TRUE(!LexIO::IsWriterV<LexIO::ConstViewStream>);
+}
+
+TEST(ConstViewStream, FulfillSeekable)
+{
+    EXPECT_TRUE(LexIO::IsSeekableV<LexIO::ConstViewStream>);
+}
+
+TEST(ConstViewStream, DefCtor)
+{
+    auto viewStream = LexIO::ConstViewStream{};
+
+    EXPECT_EQ(0, LexIO::Length(viewStream));
+}
+
+TEST(ConstViewStream, CopyCtor)
+{
+    auto copyStream = GetConstViewStream();
+    auto viewStream = LexIO::ConstViewStream{copyStream};
+
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+    }
+}
+
+TEST(ConstViewStream, CopyAssign)
+{
+    auto copyStream = GetConstViewStream();
+    auto viewStream = LexIO::ConstViewStream{};
+    viewStream = copyStream;
+
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+    }
+}
+
+TEST(ConstViewStream, MoveCtor)
+{
+    auto moveStream = GetConstViewStream();
+    auto viewStream = LexIO::ConstViewStream{std::move(moveStream)};
+
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+    }
+}
+
+TEST(ConstViewStream, MoveAssign)
+{
+    auto viewStream = LexIO::ConstViewStream{};
+    viewStream = GetConstViewStream();
+
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+    }
+}
+
+TEST(ConstViewStream, VectorIterCtor)
+{
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    std::memcpy(&buffer[0], &BUFFER_TEXT[0], BUFFER_LENGTH);
+    auto viewStream = LexIO::ConstViewStream{&buffer[0], &buffer[BUFFER_LENGTH]};
+
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+    }
+}
+
+TEST(ConstViewStream, VectorArrayCtor)
+{
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    std::memcpy(&buffer[0], &BUFFER_TEXT[0], BUFFER_LENGTH);
+    auto viewStream = LexIO::ConstViewStream{buffer};
+
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+    }
+}
+
+TEST(ConstViewStream, Read)
+{
+    auto viewStream = GetConstViewStream();
+
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        uint8_t data[1] = {0};
+        EXPECT_EQ(1, LexIO::Read(data, viewStream));
+        EXPECT_EQ(data[0], BUFFER_TEXT[i]);
+    }
+}
+
+TEST(ConstViewStream, Seek)
+{
+    auto viewStream = GetConstViewStream();
+
+    EXPECT_EQ(4, LexIO::Seek(viewStream, 4, LexIO::Whence::start));
+    EXPECT_EQ(8, LexIO::Seek(viewStream, 4, LexIO::Whence::current));
+
+    EXPECT_EQ(BUFFER_LENGTH - 4, LexIO::Seek(viewStream, 4, LexIO::Whence::end));
+    EXPECT_EQ(BUFFER_LENGTH - 8, LexIO::Seek(viewStream, -4, LexIO::Whence::current));
+}
+
+TEST(ConstViewStream, Seek_Negative)
+{
+    auto viewStream = GetConstViewStream();
 
     EXPECT_ANY_THROW(LexIO::Seek(viewStream, -1, LexIO::Whence::current));
 }

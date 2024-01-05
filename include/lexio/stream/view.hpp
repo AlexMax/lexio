@@ -22,8 +22,6 @@
 
 #include "../core.hpp"
 
-#include "./container.hpp"
-
 namespace LexIO
 {
 
@@ -98,6 +96,70 @@ class ViewStream
   protected:
     uint8_t *m_start = nullptr;
     uint8_t *m_end = nullptr;
+    size_t m_offset = 0;
+
+    size_t Size() const { return size_t(std::distance(m_start, m_end)); }
+};
+
+class ConstViewStream
+{
+  public:
+    // Explicit rule-of-five for code coverage.
+
+    ~ConstViewStream() {}
+    ConstViewStream(const ConstViewStream &) = default;
+    ConstViewStream(ConstViewStream &&) noexcept = default;
+    ConstViewStream &operator=(const ConstViewStream &) = default;
+    ConstViewStream &operator=(ConstViewStream &&) noexcept = default;
+
+    ConstViewStream() = default;
+
+    ConstViewStream(const uint8_t *start, const uint8_t *end) : m_start(start), m_end(end) {}
+
+    template <size_t N>
+    ConstViewStream(const uint8_t (&array)[N]) : m_start(&array[0]), m_end(&array[N])
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count)
+    {
+        const size_t wantedOffset = m_offset + count;
+        const size_t destOffset = std::min(wantedOffset, Size());
+        const size_t actualLength = destOffset - m_offset;
+        std::memcpy(outDest, m_start + m_offset, actualLength);
+        m_offset += actualLength;
+        return actualLength;
+    }
+
+    size_t LexSeek(const SeekPos pos)
+    {
+        ptrdiff_t offset = 0;
+        switch (pos.whence)
+        {
+        case LexIO::Whence::start:
+            offset = pos.offset;
+            break;
+        case LexIO::Whence::current:
+            offset = static_cast<ptrdiff_t>(m_offset) + pos.offset;
+            break;
+        case LexIO::Whence::end:
+            offset = static_cast<ptrdiff_t>(Size()) - pos.offset;
+            break;
+        }
+
+        if (offset < 0)
+        {
+            // Negative offsets are invalid.
+            throw std::runtime_error("attempted seek to negative position");
+        }
+
+        m_offset = static_cast<size_t>(offset);
+        return m_offset;
+    }
+
+  protected:
+    const uint8_t *m_start = nullptr;
+    const uint8_t *m_end = nullptr;
     size_t m_offset = 0;
 
     size_t Size() const { return size_t(std::distance(m_start, m_end)); }

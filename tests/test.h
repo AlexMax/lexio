@@ -51,6 +51,11 @@ inline LexIO::ViewStream GetViewStream(uint8_t (&array)[N])
     return LexIO::ViewStream{&array[0], &array[N]};
 }
 
+inline LexIO::ConstViewStream GetConstViewStream()
+{
+    return LexIO::ConstViewStream{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
+}
+
 inline LexIO::ArrayStream<4> GetStreamTrunc()
 {
     LexIO::ArrayStream<4> rvo;
