@@ -119,6 +119,58 @@ TEST(VectorStream, VectorMoveCtor)
     }
 }
 
+TEST(VectorStream, CopyFrom)
+{
+    auto vecStream = LexIO::VectorStream{};
+    LexIO::Write(vecStream, &BUFFER_TEXT[0], BUFFER_LENGTH);
+
+    auto vec = vecStream.Container();
+    EXPECT_EQ(BUFFER_LENGTH, vec.size());
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(vec[i], BUFFER_TEXT[i]);
+    }
+}
+
+TEST(VectorStream, MoveFrom)
+{
+    auto vecStream = LexIO::VectorStream{};
+    LexIO::Write(vecStream, &BUFFER_TEXT[0], BUFFER_LENGTH);
+
+    auto vec = std::move(vecStream).Container();
+    EXPECT_EQ(BUFFER_LENGTH, vec.size());
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(vec[i], BUFFER_TEXT[i]);
+    }
+}
+
+TEST(VectorStream, CopyTo)
+{
+    auto vec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
+    auto vecStream = LexIO::VectorStream{};
+
+    vecStream.Container(vec);
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+    }
+}
+
+TEST(VectorStream, MoveTo)
+{
+    auto vec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
+    auto vecStream = LexIO::VectorStream{};
+
+    vecStream.Container(std::move(vec));
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    {
+        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+    }
+}
+
 TEST(VectorStream, Read)
 {
     auto vecStream = GetVectorStream();
