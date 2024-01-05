@@ -27,12 +27,9 @@
 namespace LexIO
 {
 
-template <typename BYTE = uint8_t>
 class ViewStream
 {
   public:
-    using byte_type = BYTE;
-
     // Explicit rule-of-five for code coverage.
 
     ~ViewStream() {}
@@ -43,10 +40,10 @@ class ViewStream
 
     ViewStream() = default;
 
-    ViewStream(byte_type *start, byte_type *end) : m_start(start), m_end(end) {}
+    ViewStream(uint8_t *start, uint8_t *end) : m_start(start), m_end(end) {}
 
     template <size_t N>
-    ViewStream(byte_type (&array)[N]) : m_start(&array[0]), m_end(&array[N])
+    ViewStream(uint8_t (&array)[N]) : m_start(&array[0]), m_end(&array[N])
     {
     }
 
@@ -99,8 +96,8 @@ class ViewStream
     }
 
   protected:
-    byte_type *m_start = nullptr;
-    byte_type *m_end = nullptr;
+    uint8_t *m_start = nullptr;
+    uint8_t *m_end = nullptr;
     size_t m_offset = 0;
 
     size_t Size() const { return size_t(std::distance(m_start, m_end)); }

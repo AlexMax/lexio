@@ -44,9 +44,11 @@ inline LexIO::VectorStream GetVectorStream()
     return LexIO::VectorStream{std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]}};
 }
 
-inline LexIO::ViewStream<const uint8_t> GetViewStream()
+template <size_t N>
+inline LexIO::ViewStream GetViewStream(uint8_t (&array)[N])
 {
-    return LexIO::ViewStream{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
+    std::memcpy(&array[0], &BUFFER_TEXT[0], N);
+    return LexIO::ViewStream{&array[0], &array[N]};
 }
 
 inline LexIO::ArrayStream<4> GetStreamTrunc()

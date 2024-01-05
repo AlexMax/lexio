@@ -42,122 +42,141 @@ TEST(ViewStream, FulfillSeekable)
 
 TEST(ViewStream, DefCtor)
 {
-    auto vecStream = LexIO::ViewStream{};
+    auto viewStream = LexIO::ViewStream{};
 
-    EXPECT_EQ(0, LexIO::Length(vecStream));
+    EXPECT_EQ(0, LexIO::Length(viewStream));
 }
 
 TEST(ViewStream, CopyCtor)
 {
-    auto copyStream = GetVectorStream();
-    auto vecStream = LexIO::ViewStream{copyStream};
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto copyStream = GetViewStream(buffer);
+    auto viewStream = LexIO::ViewStream{copyStream};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
     }
 }
 
 TEST(ViewStream, CopyAssign)
 {
-    auto copyStream = GetVectorStream();
-    auto vecStream = LexIO::ViewStream{};
-    vecStream = copyStream;
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto copyStream = GetViewStream(buffer);
+    auto viewStream = LexIO::ViewStream{};
+    viewStream = copyStream;
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
     }
 }
 
 TEST(ViewStream, MoveCtor)
 {
-    auto vecStream = LexIO::ViewStream{GetVectorStream()};
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto moveStream = GetViewStream(buffer);
+    auto viewStream = LexIO::ViewStream{std::move(moveStream)};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
     }
 }
 
 TEST(ViewStream, MoveAssign)
 {
-    auto vecStream = LexIO::ViewStream{};
-    vecStream = GetVectorStream();
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto viewStream = LexIO::ViewStream{};
+    viewStream = GetViewStream(buffer);
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
     }
 }
 
-TEST(ViewStream, VectorCopyCtor)
+TEST(ViewStream, VectorIterCtor)
 {
-    auto copyVec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
-    auto vecStream = LexIO::ViewStream{copyVec};
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    std::memcpy(&buffer[0], &BUFFER_TEXT[0], BUFFER_LENGTH);
+    auto viewStream = LexIO::ViewStream{&buffer[0], &buffer[BUFFER_LENGTH]};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
     }
 }
 
-TEST(ViewStream, VectorMoveCtor)
+TEST(ViewStream, VectorArrayCtor)
 {
-    auto moveVec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
-    auto vecStream = LexIO::ViewStream{std::move(moveVec)};
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    std::memcpy(&buffer[0], &BUFFER_TEXT[0], BUFFER_LENGTH);
+    auto viewStream = LexIO::ViewStream{buffer};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
     }
 }
 
 TEST(ViewStream, Read)
 {
-    auto vecStream = GetVectorStream();
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto viewStream = GetViewStream(buffer);
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
     {
         uint8_t data[1] = {0};
-        EXPECT_EQ(1, LexIO::Read(data, vecStream));
+        EXPECT_EQ(1, LexIO::Read(data, viewStream));
         EXPECT_EQ(data[0], BUFFER_TEXT[i]);
     }
 }
 
 TEST(ViewStream, Write)
 {
-    auto vecStream = LexIO::ViewStream{};
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto viewStream = LexIO::ViewStream{buffer};
 
     for (size_t i = 0; i < BUFFER_LENGTH; i++)
     {
-        EXPECT_EQ(1, LexIO::Write(vecStream, &BUFFER_TEXT[i], 1));
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(1, LexIO::Write(viewStream, &BUFFER_TEXT[i], 1));
+        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
     }
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
+}
+
+TEST(ViewStream, Flush)
+{
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto viewStream = LexIO::ViewStream{buffer};
+
+    EXPECT_NO_THROW(LexIO::Flush(viewStream));
 }
 
 TEST(ViewStream, Seek)
 {
-    auto vecStream = GetVectorStream();
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto viewStream = GetViewStream(buffer);
 
-    EXPECT_EQ(4, LexIO::Seek(vecStream, 4, LexIO::Whence::start));
-    EXPECT_EQ(8, LexIO::Seek(vecStream, 4, LexIO::Whence::current));
+    EXPECT_EQ(4, LexIO::Seek(viewStream, 4, LexIO::Whence::start));
+    EXPECT_EQ(8, LexIO::Seek(viewStream, 4, LexIO::Whence::current));
 
-    EXPECT_EQ(BUFFER_LENGTH - 4, LexIO::Seek(vecStream, 4, LexIO::Whence::end));
-    EXPECT_EQ(BUFFER_LENGTH - 8, LexIO::Seek(vecStream, -4, LexIO::Whence::current));
+    EXPECT_EQ(BUFFER_LENGTH - 4, LexIO::Seek(viewStream, 4, LexIO::Whence::end));
+    EXPECT_EQ(BUFFER_LENGTH - 8, LexIO::Seek(viewStream, -4, LexIO::Whence::current));
 }
 
 TEST(ViewStream, Seek_Negative)
 {
-    auto vecStream = GetVectorStream();
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto viewStream = GetViewStream(buffer);
 
-    EXPECT_ANY_THROW(LexIO::Seek(vecStream, -1, LexIO::Whence::current));
+    EXPECT_ANY_THROW(LexIO::Seek(viewStream, -1, LexIO::Whence::current));
 }
