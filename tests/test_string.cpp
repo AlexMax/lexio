@@ -24,7 +24,7 @@ TEST(String, ReadStringPtrLen)
 
     size_t i = 0;
     char buffer[5] = {0};
-    EXPECT_EQ(LexIO::ReadString(&buffer[0], sizeof(buffer), stream), 5);
+    EXPECT_EQ(5, LexIO::ReadString(&buffer[0], sizeof(buffer), stream));
     EXPECT_EQ(buffer[i++], 'T');
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
@@ -38,7 +38,7 @@ TEST(String, ReadStringArray)
 
     size_t i = 0;
     char buffer[5] = {0};
-    EXPECT_EQ(LexIO::ReadString(buffer, stream), 5);
+    EXPECT_EQ(5, LexIO::ReadString(buffer, stream));
     EXPECT_EQ(buffer[i++], 'T');
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
@@ -52,7 +52,7 @@ TEST(String, ReadStringIterator)
 
     size_t i = 0;
     char buffer[5] = {0};
-    EXPECT_EQ(LexIO::ReadString(&buffer[0], &buffer[5], stream), 5);
+    EXPECT_EQ(5, LexIO::ReadString(&buffer[0], &buffer[5], stream));
     EXPECT_EQ(buffer[i++], 'T');
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
@@ -67,7 +67,7 @@ TEST(String, WriteStringPtrLen)
 
     size_t i = 0;
     const char data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    EXPECT_EQ(LexIO::WriteString(stream, &data[0], sizeof(data)), 5);
+    EXPECT_EQ(5, LexIO::WriteString(stream, &data[0], sizeof(data)));
     EXPECT_EQ(cstream.Container()[i++], 'X');
     EXPECT_EQ(cstream.Container()[i++], 'Y');
     EXPECT_EQ(cstream.Container()[i++], 'Z');
@@ -82,7 +82,7 @@ TEST(String, WriteStringArray)
 
     size_t i = 0;
     const char data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    EXPECT_EQ(LexIO::WriteString(stream, data), 5);
+    EXPECT_EQ(5, LexIO::WriteString(stream, data));
     EXPECT_EQ(cstream.Container()[i++], 'X');
     EXPECT_EQ(cstream.Container()[i++], 'Y');
     EXPECT_EQ(cstream.Container()[i++], 'Z');
@@ -97,10 +97,18 @@ TEST(String, WriteStringIterator)
 
     size_t i = 0;
     const char data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    EXPECT_EQ(LexIO::WriteString(stream, &data[0], &data[5]), 5);
+    EXPECT_EQ(5, LexIO::WriteString(stream, &data[0], &data[5]));
     EXPECT_EQ(cstream.Container()[i++], 'X');
     EXPECT_EQ(cstream.Container()[i++], 'Y');
     EXPECT_EQ(cstream.Container()[i++], 'Z');
     EXPECT_EQ(cstream.Container()[i++], 'Z');
     EXPECT_EQ(cstream.Container()[i++], 'Y');
+}
+
+TEST(String, WriteStringIteratorEmpty)
+{
+    auto stream = LexIO::VectorStream{};
+
+    const std::vector<char> data = {'X', 'Y', 'Z', 'Z', 'Y'};
+    EXPECT_EQ(0, LexIO::WriteString(stream, data.begin(), data.begin()));
 }

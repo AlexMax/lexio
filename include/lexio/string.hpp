@@ -60,6 +60,11 @@ inline size_t WriteString(WRITER &writer, const char (&array)[N])
 template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline size_t WriteString(WRITER &writer, IT start, IT end)
 {
+    if (start == end)
+    {
+        return 0;
+    }
+
     const uint8_t *src = reinterpret_cast<const uint8_t *>(std::addressof(*start));
     const size_t count = std::distance(start, end);
     return Write<WRITER>(writer, src, count);

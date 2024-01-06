@@ -507,6 +507,15 @@ TEST(Core, WriteIteratorTrunc)
     EXPECT_EQ(streamBuf[i++], 'Z');
 }
 
+TEST(Core, WriteIteratorEmpty)
+{
+    uint8_t streamBuf[4] = {0};
+    auto stream = GetViewStream(streamBuf);
+
+    const std::vector<uint8_t> data = {'X', 'Y', 'Z', 'Z', 'Y'};
+    EXPECT_EQ(0, LexIO::Write(stream, data.begin(), data.begin()));
+}
+
 TEST(Core, Rewind)
 {
     LexIO::VectorStream stream = GetVectorStream();
