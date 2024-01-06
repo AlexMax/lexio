@@ -23,3 +23,4 @@
 #include "./ref.hpp"
 #include "./serialize.hpp"
 #include "./stream.hpp"
+#include "./string.hpp"
