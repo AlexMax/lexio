@@ -18,7 +18,7 @@
 
 #include "./test.h"
 #include "lexio/serialize/int.hpp"
-#include <algorithm>
+#include <array>
 
 using PartialVectorStream = PartialStream<LexIO::VectorStream>;
 using PartialViewStream = PartialStream<LexIO::ViewStream>;
@@ -277,6 +277,14 @@ TEST(Core, ReadIteratorTrunc)
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
     EXPECT_EQ(buffer[i++], ' ');
+}
+
+TEST(Core, ReadIteratorEmpty)
+{
+    auto stream = GetVectorStream();
+
+    std::array<uint8_t, 5> buffer = {0};
+    EXPECT_EQ(0, LexIO::Read(buffer.begin(), buffer.begin(), stream));
 }
 
 TEST(Core, ReadToEOF)

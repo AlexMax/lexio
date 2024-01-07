@@ -641,6 +641,18 @@ inline size_t Write(WRITER &writer, const uint8_t *src, const size_t count)
     return count;
 }
 
+/**
+ * @brief Write a buffer of data at the current offset.  Calls LexIO::RawWrite
+ *        as many times as necessary to write the entire buffer unless EOF
+ *        is hit.
+ *
+ * @param writer Writer to operate on.
+ * @param array Input buffer array.
+ * @return Actual number of bytes written, or 0 if EOF-like condition was
+ *         encountered.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.  A partial write is _not_ considered an error.
+ */
 template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline size_t Write(WRITER &writer, const uint8_t (&array)[N])
 {
@@ -660,6 +672,19 @@ inline size_t Write(WRITER &writer, const uint8_t (&array)[N])
     return N;
 }
 
+/**
+ * @brief Write a buffer of data at the current offset.  Calls LexIO::RawWrite
+ *        as many times as necessary to write the entire buffer unless EOF
+ *        is hit.
+ *
+ * @param writer Writer to operate on.
+ * @param start Iterator to start byte of input buffer.
+ * @param end Iterator to end byte of input buffer.
+ * @return Actual number of bytes written, or 0 if EOF-like condition was
+ *         encountered.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.  A partial write is _not_ considered an error.
+ */
 template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline size_t Write(WRITER &writer, IT start, IT end)
 {

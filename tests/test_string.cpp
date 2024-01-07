@@ -17,6 +17,7 @@
 #include "lexio/string.hpp"
 
 #include "./test.h"
+#include <array>
 
 TEST(String, ReadStringPtrLen)
 {
@@ -58,6 +59,14 @@ TEST(String, ReadStringIterator)
     EXPECT_EQ(buffer[i++], 'e');
     EXPECT_EQ(buffer[i++], ' ');
     EXPECT_EQ(buffer[i++], 'q');
+}
+
+TEST(String, ReadStringIteratorEmpty)
+{
+    auto stream = GetVectorStream();
+
+    std::array<char, 5> buffer = {0};
+    EXPECT_EQ(0, LexIO::ReadString(buffer.begin(), buffer.begin(), stream));
 }
 
 TEST(String, WriteStringPtrLen)
