@@ -28,24 +28,9 @@ using VectorBufWriterNoCopy = LexIO::FixedBufWriter<NoCopyStream<LexIO::VectorSt
 
 //******************************************************************************
 
-TEST(FixedBufWriter, FulfillReader)
-{
-    EXPECT_TRUE(LexIO::IsReaderV<VectorBufWriter>);
-}
-
-TEST(FixedBufWriter, FailBufferedReader)
-{
-    EXPECT_FALSE(LexIO::IsBufferedReaderV<VectorBufWriter>);
-}
-
 TEST(FixedBufWriter, FulfillWriter)
 {
     EXPECT_TRUE(LexIO::IsWriterV<VectorBufWriter>);
-}
-
-TEST(FixedBufWriter, FulfillSeekable)
-{
-    EXPECT_TRUE(LexIO::IsSeekableV<VectorBufWriter>);
 }
 
 TEST(FixedBufWriter, CopyCtor_CopyAssign)

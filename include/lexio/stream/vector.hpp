@@ -72,12 +72,44 @@ class VectorStream
 
     size_t LexRead(uint8_t *outDest, const size_t count)
     {
+        BufferView data = LexFillBuffer(count);
+        std::memcpy(outDest, data.first, data.second);
+        LexConsumeBuffer(data.second);
+        return data.second;
+    }
+
+    BufferView LexFillBuffer(const size_t count)
+    {
+        if (m_offset == m_container.size())
+        {
+            // EOF, return nullptr to avoid OOB subscript.
+            return BufferView{nullptr, 0};
+        }
+        if (count <= m_bufferLength)
+        {
+            // Return view to current buffer.
+            BufferView{&m_container[m_offset], m_bufferLength};
+        }
+
+        // Grow the buffer, if possible.
         const size_t wantedOffset = m_offset + count;
         const size_t destOffset = std::min(wantedOffset, m_container.size());
-        const size_t actualLength = destOffset - m_offset;
-        std::memcpy(outDest, m_container.data() + m_offset, actualLength);
-        m_offset += actualLength;
-        return actualLength;
+        m_bufferLength = destOffset - m_offset;
+
+        // Return view to new buffer.
+        return BufferView{&m_container[m_offset], m_bufferLength};
+    }
+
+    void LexConsumeBuffer(const size_t count)
+    {
+        if (count > m_bufferLength)
+        {
+            throw new std::runtime_error("can't consume more bytes than buffer size");
+        }
+
+        // Advance the offset and shrink the buffer.
+        m_offset += count;
+        m_bufferLength -= count;
     }
 
     size_t LexWrite(const uint8_t *src, const size_t count)
@@ -121,6 +153,7 @@ class VectorStream
   protected:
     container_type m_container;
     size_t m_offset = 0;
+    size_t m_bufferLength = 0;
 };
 
 } // namespace LexIO

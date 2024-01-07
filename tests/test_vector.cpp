@@ -27,7 +27,7 @@ TEST(VectorStream, FulfillReader)
 
 TEST(VectorStream, FailBufferedReader)
 {
-    EXPECT_FALSE(LexIO::IsBufferedReaderV<LexIO::VectorStream>);
+    EXPECT_TRUE(LexIO::IsBufferedReaderV<LexIO::VectorStream>);
 }
 
 TEST(VectorStream, FulfillWriter)
