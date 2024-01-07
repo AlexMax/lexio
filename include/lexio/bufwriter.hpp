@@ -71,7 +71,7 @@ class FixedBufWriter
         : m_writer(other.m_writer), m_buffer(::new uint8_t[other.m_allocSize]), m_allocSize(other.m_allocSize),
           m_size(other.m_size)
     {
-        std::copy(&other.m_buffer[0], &other.m_buffer[m_size], m_buffer);
+        std::memcpy(m_buffer, &other.m_buffer[0], m_size);
     }
 
     /**
@@ -180,7 +180,7 @@ class FixedBufWriter
         if (wantSize < m_allocSize)
         {
             // Fast path, just append to the buffer.
-            std::copy(src, src + count, &m_buffer[m_size]);
+            std::memcpy(&m_buffer[m_size], src, count);
             m_size = wantSize;
             return count;
         }
@@ -191,7 +191,7 @@ class FixedBufWriter
         if (count < m_allocSize)
         {
             // Room in the buffer, write to it.
-            std::copy(src, src + count, &m_buffer[0]);
+            std::memcpy(&m_buffer[0], src, count);
             m_size = count;
             return count;
         }

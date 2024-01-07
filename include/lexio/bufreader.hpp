@@ -76,7 +76,7 @@ class GenericBufReader
         : m_reader(other.m_reader), m_buffer(::new uint8_t[other.m_allocSize]), m_allocSize(other.m_allocSize),
           m_size(other.m_size)
     {
-        std::copy(&other.m_buffer[0], &other.m_buffer[m_size], m_buffer);
+        std::memcpy(m_buffer, &other.m_buffer[0], m_size);
     }
 
     /**
@@ -150,7 +150,7 @@ class GenericBufReader
     size_t LexRead(uint8_t *outDest, const size_t count)
     {
         BufferView data = LexFillBuffer(count);
-        std::copy(data.first, data.first + data.second, outDest);
+        std::memcpy(outDest, data.first, data.second);
         LexConsumeBuffer(data.second);
         return data.second;
     }
@@ -168,7 +168,7 @@ class GenericBufReader
             // Reallocate our buffer with any existing data.
             const size_t newAllocSize = CalcGrowth(count);
             uint8_t *buffer = ::new uint8_t[newAllocSize];
-            std::copy(&m_buffer[0], &m_buffer[m_size], buffer);
+            std::memcpy(buffer, &m_buffer[0], m_size);
             ::delete[] m_buffer;
             m_buffer = buffer;
             m_allocSize = newAllocSize;
@@ -187,25 +187,28 @@ class GenericBufReader
         {
             throw new std::runtime_error("can't consume more bytes than buffer size");
         }
-        std::copy(&m_buffer[count], &m_buffer[m_size], &m_buffer[0]);
+        std::memcpy(&m_buffer[0], &m_buffer[count], m_size);
         m_size -= count;
     }
 
     template <typename WRITER = READER, typename = std::enable_if_t<IsWriterV<WRITER>>>
     size_t LexWrite(const uint8_t *src, const size_t count)
     {
+        m_size = 0; // Invalidate buffer.
         return Write<READER>(m_reader, src, count);
     }
 
     template <typename WRITER = READER, typename = std::enable_if_t<IsWriterV<WRITER>>>
     void LexFlush()
     {
+        m_size = 0; // Invalidate buffer.
         Flush<READER>(m_reader);
     }
 
     template <typename SEEKABLE = READER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
     size_t LexSeek(const SeekPos pos)
     {
+        m_size = 0; // Invalidate buffer.
         return Seek<READER>(m_reader, pos);
     }
 };
