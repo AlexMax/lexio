@@ -15,12 +15,12 @@ enable_testing()
 set(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/test_bufreader.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_bufwriter.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_chars.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_core.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_file.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_float.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_int.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_ref.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test_string.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_varint.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_vector.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_view.cpp"

@@ -34,7 +34,7 @@ namespace LexIO
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t ReadString(char *outDest, const size_t count, READER &reader)
+inline size_t ReadChars(char *outDest, const size_t count, READER &reader)
 {
     uint8_t *outDestByte = reinterpret_cast<uint8_t *>(outDest);
     return Read<READER>(outDestByte, count, reader);
@@ -52,7 +52,7 @@ inline size_t ReadString(char *outDest, const size_t count, READER &reader)
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t ReadString(char (&outArray)[N], READER &reader)
+inline size_t ReadChars(char (&outArray)[N], READER &reader)
 {
     uint8_t *outDestByte = reinterpret_cast<uint8_t *>(&outArray[0]);
     return Read<READER>(outDestByte, N, reader);
@@ -71,7 +71,7 @@ inline size_t ReadString(char (&outArray)[N], READER &reader)
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t ReadString(IT outStart, IT outEnd, READER &reader)
+inline size_t ReadChars(IT outStart, IT outEnd, READER &reader)
 {
     if (outStart == outEnd)
     {
@@ -95,7 +95,7 @@ inline size_t ReadString(IT outStart, IT outEnd, READER &reader)
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t WriteString(WRITER &writer, const char *src, const size_t count)
+inline size_t WriteChars(WRITER &writer, const char *src, const size_t count)
 {
     const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(src);
     return Write<WRITER>(writer, srcByte, count);
@@ -112,7 +112,7 @@ inline size_t WriteString(WRITER &writer, const char *src, const size_t count)
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t WriteString(WRITER &writer, const char (&array)[N])
+inline size_t WriteChars(WRITER &writer, const char (&array)[N])
 {
     const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(&array[0]);
     return Write<WRITER>(writer, srcByte, N);
@@ -130,7 +130,7 @@ inline size_t WriteString(WRITER &writer, const char (&array)[N])
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t WriteString(WRITER &writer, IT start, IT end)
+inline size_t WriteChars(WRITER &writer, IT start, IT end)
 {
     if (start == end)
     {
