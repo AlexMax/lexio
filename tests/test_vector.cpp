@@ -184,6 +184,146 @@ TEST(VectorStream, Read)
     }
 }
 
+TEST(VectorStream, FillBufferSingle)
+{
+    auto bufReader = GetVectorStream();
+
+    auto test = LexIO::FillBuffer(bufReader, 8);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[7], 'c');
+    EXPECT_EQ(test.second, 8);
+}
+
+TEST(VectorStream, FillBufferMultiple)
+{
+    auto bufReader = GetVectorStream();
+
+    // Buffer initial four bytes.
+    auto test = LexIO::FillBuffer(bufReader, 4);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.second, 4);
+
+    // Buffer less than what we had before, should read nothing.
+    test = LexIO::FillBuffer(bufReader, 2);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.second, 4);
+
+    // Buffer more than what we had before.
+    test = LexIO::FillBuffer(bufReader, 8);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.first[4], 'q');
+    EXPECT_EQ(test.first[7], 'c');
+    EXPECT_EQ(test.second, 8);
+}
+
+TEST(VectorStream, FillBufferEOF)
+{
+    auto bufReader = GetVectorStream();
+
+    // Buffer everything.
+    auto test = LexIO::FillBuffer(bufReader, 64);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, BUFFER_LENGTH);
+
+    // Buffer more than everything.
+    test = LexIO::FillBuffer(bufReader, 96);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, BUFFER_LENGTH);
+}
+
+TEST(VectorStream, FillBufferEOFInitial)
+{
+    auto bufReader = GetVectorStream();
+
+    auto test = LexIO::FillBuffer(bufReader, 4);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.second, 4);
+
+    // Buffer everything.
+    test = LexIO::FillBuffer(bufReader, 64);
+    EXPECT_EQ(test.first[0], 'T');
+    EXPECT_EQ(test.first[3], ' ');
+    EXPECT_EQ(test.first[4], 'q');
+    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, BUFFER_LENGTH);
+}
+
+TEST(VectorStream, FillBufferZeroRead)
+{
+    auto bufReader = GetVectorStream();
+
+    auto test = LexIO::FillBuffer(bufReader, 0);
+    EXPECT_EQ(test.second, 0);
+}
+
+TEST(VectorStream, ConsumeBufferSingle)
+{
+    auto bufReader = GetVectorStream();
+
+    // Fill, then consume whole buffer.
+    LexIO::FillBuffer(bufReader, 8);
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, 8));
+
+    auto test = LexIO::GetBuffer(bufReader);
+    EXPECT_EQ(test.second, 0);
+
+    // Subsequent read should pick up where we left off.
+    test = LexIO::FillBuffer(bufReader, 8);
+    EXPECT_EQ(test.first[0], 'k');
+    EXPECT_EQ(test.first[7], ' ');
+    EXPECT_EQ(test.second, 8);
+}
+
+TEST(VectorStream, ConsumeBufferMultiple)
+{
+    auto bufReader = GetVectorStream();
+
+    // Consume half the buffer.
+    LexIO::FillBuffer(bufReader, 8);
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, 4));
+    auto test = LexIO::GetBuffer(bufReader);
+    EXPECT_EQ(test.first[0], 'q');
+    EXPECT_EQ(test.first[3], 'c');
+    EXPECT_EQ(test.second, 4);
+
+    // Consume the other half of the buffer.
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, 4));
+    test = LexIO::GetBuffer(bufReader);
+    EXPECT_EQ(test.second, 0);
+}
+
+TEST(VectorStream, ConsumeBufferEOF)
+{
+    auto bufReader = GetVectorStream();
+
+    // Fill to EOF, consume part of it.
+    auto test = LexIO::FillBuffer(bufReader, 64);
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, 4));
+    test = LexIO::GetBuffer(bufReader);
+    EXPECT_EQ(test.first[0], 'q');
+    EXPECT_EQ(test.first[3], 'c');
+    EXPECT_EQ(test.second, BUFFER_LENGTH - 4);
+
+    // Consume the rest of it.
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, BUFFER_LENGTH - 4));
+    test = LexIO::GetBuffer(bufReader);
+    EXPECT_EQ(test.second, 0);
+}
+
+TEST(VectorStream, ConsumeBufferTooLarge)
+{
+    auto bufReader = GetVectorStream();
+
+    LexIO::FillBuffer(bufReader, 8);
+    EXPECT_ANY_THROW(LexIO::ConsumeBuffer(bufReader, 12));
+}
+
 TEST(VectorStream, Write)
 {
     auto vecStream = LexIO::VectorStream{};

@@ -88,7 +88,7 @@ class VectorStream
         if (count <= m_bufferLength)
         {
             // Return view to current buffer.
-            BufferView{&m_container[m_offset], m_bufferLength};
+            return BufferView{&m_container[m_offset], m_bufferLength};
         }
 
         // Grow the buffer, if possible.

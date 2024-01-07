@@ -119,6 +119,17 @@ TEST(GenericBufReader, MoveAssignSelf)
     EXPECT_EQ(bufTest.second, 8);
 }
 
+TEST(GenericBufReader, Read)
+{
+    auto bufReader = VectorBufReader{GetVectorStream()};
+
+    uint8_t output[8] = {0};
+    size_t count = LexIO::Read(output, bufReader);
+    EXPECT_EQ(output[0], 'T');
+    EXPECT_EQ(output[7], 'c');
+    EXPECT_EQ(count, 8);
+}
+
 TEST(GenericBufReader, FillBufferSingle)
 {
     auto bufReader = VectorBufReader{GetVectorStream()};
@@ -270,15 +281,4 @@ TEST(GenericBufReader, ConsumeBufferTooLarge)
 
     LexIO::FillBuffer(bufReader, 8);
     EXPECT_ANY_THROW(LexIO::ConsumeBuffer(bufReader, 12));
-}
-
-TEST(GenericBufReader, Read)
-{
-    auto bufReader = VectorBufReader{GetVectorStream()};
-
-    uint8_t output[8] = {0};
-    size_t count = LexIO::Read(output, bufReader);
-    EXPECT_EQ(output[0], 'T');
-    EXPECT_EQ(output[7], 'c');
-    EXPECT_EQ(count, 8);
 }

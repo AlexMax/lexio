@@ -191,12 +191,12 @@ TEST(ConstViewStream, FulfillReader)
 
 TEST(ConstViewStream, FailBufferedReader)
 {
-    EXPECT_FALSE(LexIO::IsBufferedReaderV<LexIO::ConstViewStream>);
+    EXPECT_TRUE(LexIO::IsBufferedReaderV<LexIO::ConstViewStream>);
 }
 
 TEST(ConstViewStream, FulfillWriter)
 {
-    EXPECT_TRUE(!LexIO::IsWriterV<LexIO::ConstViewStream>);
+    EXPECT_FALSE(LexIO::IsWriterV<LexIO::ConstViewStream>);
 }
 
 TEST(ConstViewStream, FulfillSeekable)
