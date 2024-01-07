@@ -304,6 +304,14 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
  * @brief Attempt to read data from the current offset, inserting it into
  *        the passed buffer.
  *
+ * @detail For a Reader, the LexRead method is expected to
+ *         call the underlying read method a single time unless a retryable
+ *         error is returned, such as EINTR.  Partial reads are an acceptable
+ *         return condition, use LexIO::Read for a full read.
+ *
+ *         For a BufferedReader, this is usually implemented in terms of
+ *         FillBuffer and ConsumeBuffer.
+ *
  * @param outDest Pointer to starting byte of output buffer.
  * @param count Size of output buffer in bytes.
  * @param reader Reader to operate on.
@@ -329,7 +337,7 @@ inline size_t RawRead(uint8_t *outDest, const size_t count, READER &reader)
  *         requested size.  Must be a span with a size between 0 and the
  *         given size.  A span of size 0 indicates EOF was reached.
  * @throws std::runtime_error if an error with the read operation was
- *         encountered.  EOF is _not_ considered an error.
+ *         encountered, or if too large of a buffer was requested.
  */
 template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
 inline BufferView FillBuffer(BUFFERED_READER &bufReader, const size_t size)
@@ -452,6 +460,18 @@ inline size_t Read(uint8_t *outDest, const size_t count, READER &reader)
     return count;
 }
 
+/**
+ * @brief Read data from the current offset, inserting it into the passed
+ *        buffer.  Calls LexIO::RawRead as many times as necessary to fill
+ *        the output buffer until EOF is hit.
+ *
+ * @param outArray Output buffer array.
+ * @param reader Reader to operate on.
+ * @return Actual number of bytes read, or 0 if EOF-like condition was
+ *         encountered.
+ * @throws std::runtime_error if an error with the read operation was
+ *         encountered.  EOF is _not_ considered an error.
+ */
 template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
 inline size_t Read(uint8_t (&outArray)[N], READER &reader)
 {
@@ -471,6 +491,19 @@ inline size_t Read(uint8_t (&outArray)[N], READER &reader)
     return N;
 }
 
+/**
+ * @brief Read data from the current offset, inserting it into the passed
+ *        buffer.  Calls LexIO::RawRead as many times as necessary to fill
+ *        the output buffer until EOF is hit.
+ *
+ * @param outStart Iterator to start byte of output buffer.
+ * @param outEnd Iterator to end byte of output buffer.
+ * @param reader Reader to operate on.
+ * @return Actual number of bytes read, or 0 if EOF-like condition was
+ *         encountered.
+ * @throws std::runtime_error if an error with the read operation was
+ *         encountered.  EOF is _not_ considered an error.
+ */
 template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<READER>>>
 inline size_t Read(IT outStart, IT outEnd, READER &reader)
 {
