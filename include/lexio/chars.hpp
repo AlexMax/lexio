@@ -36,7 +36,7 @@ namespace LexIO
 template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 inline size_t ReadChars(char *outDest, const size_t count, READER &reader)
 {
-    uint8_t *outDestByte = reinterpret_cast<uint8_t *>(outDest);
+    uint8_t *outDestByte = Detail::BitCast<uint8_t *>(outDest);
     return Read<READER>(outDestByte, count, reader);
 }
 
@@ -54,7 +54,7 @@ inline size_t ReadChars(char *outDest, const size_t count, READER &reader)
 template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
 inline size_t ReadChars(char (&outArray)[N], READER &reader)
 {
-    uint8_t *outDestByte = reinterpret_cast<uint8_t *>(&outArray[0]);
+    uint8_t *outDestByte = Detail::BitCast<uint8_t *>(&outArray[0]);
     return Read<READER>(outDestByte, N, reader);
 }
 
@@ -78,7 +78,7 @@ inline size_t ReadChars(IT outStart, IT outEnd, READER &reader)
         return 0;
     }
 
-    uint8_t *outDestByte = reinterpret_cast<uint8_t *>(std::addressof(*outStart));
+    uint8_t *outDestByte = Detail::BitCast<uint8_t *>(std::addressof(*outStart));
     const size_t count = std::distance(outStart, outEnd);
     return Read<READER>(outDestByte, count, reader);
 }
@@ -97,7 +97,7 @@ inline size_t ReadChars(IT outStart, IT outEnd, READER &reader)
 template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline size_t WriteChars(WRITER &writer, const char *src, const size_t count)
 {
-    const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(src);
+    const uint8_t *srcByte = Detail::BitCast<const uint8_t *>(src);
     return Write<WRITER>(writer, srcByte, count);
 }
 
@@ -114,7 +114,7 @@ inline size_t WriteChars(WRITER &writer, const char *src, const size_t count)
 template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
 inline size_t WriteChars(WRITER &writer, const char (&array)[N])
 {
-    const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(&array[0]);
+    const uint8_t *srcByte = Detail::BitCast<const uint8_t *>(&array[0]);
     return Write<WRITER>(writer, srcByte, N);
 }
 
@@ -137,7 +137,7 @@ inline size_t WriteChars(WRITER &writer, IT start, IT end)
         return 0;
     }
 
-    const uint8_t *src = reinterpret_cast<const uint8_t *>(std::addressof(*start));
+    const uint8_t *src = Detail::BitCast<const uint8_t *>(std::addressof(*start));
     const size_t count = std::distance(start, end);
     return Write<WRITER>(writer, src, count);
 }
