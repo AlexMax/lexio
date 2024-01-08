@@ -64,7 +64,7 @@ If `count` is less than or equal to the current size of the buffer, this method 
 
 Otherwise, the method should read and append data to the internal buffer until it is at most `count` bytes or EOF is hit, and then return the buffer view.  For example, if the buffer size was previously 2 and this method is called with a `count` is 8, 6 bytes are read and appended to the original 2, and a view of the resulting buffer of size 8 is returned.
 
-Note that the size of the buffer has no bearing on the allocated size of the buffer itself - that detail is left to the implementation's discretion.
+Note that any read that is done in service of filling the buffer must adjust any underlying offset, so calls to `LexIO::Write` and `LexIO::Seek` after a call to `LexIO::FillBuffer` should behave as expected.  Also note that the size of the buffer has no bearing on the allocated size of the buffer itself - that detail is left to the implementation's discretion.
 
 #### LexConsumeBuffer
 
@@ -92,9 +92,13 @@ This method should write `count` bytes from the buffer pointed to by `src`.
 
 If the write operation encounters a temporary error that implies the operation can be retried - such as `EINTR` - the operation shuold be retried until a result is returned.  If the write operation is successful, return the number of bytes that were actually written.  If a condition tantamount to EOF was hit, such as reaching the end of a fixed-length stream, return 0 bytes.  If an error was encountered, throw an exception.
 
+If your **Writer** is also a **BufferedReader**, you should ensure the buffer is empty after a call to this method.
+
 #### LexFlush
 
 This method should flush any data held in any buffers.  If the implementation has no flush behavior, a no-op is a valid implementation of this method.  For example, POSIX uses `fsync` for file descriptiors.
+
+If your **Writer** is also a **BufferedReader**, you should leave the buffer alone.
 
 ### Seekable
 
@@ -109,4 +113,4 @@ This method should seek to a position in the implementation based on the `pos` p
 
 The return value of this method should be the absolute stream position in the implementation where the seek operation ended up.  A value of 0 for the offset and `current` for the whence is an acceptable way to get the current stream position from the implementation, and is in fact how `LexIO::Tell()` is implemented.
 
-Seeking past the start of the stream implementation should throw an exception.  Seeking past the end of the stream is fine.
+Seeking past the start of the stream implementation should throw an exception.  Seeking past the end of the stream is fine.  If your **Seekable** is also a **BufferedReader**, you should ensure the buffer is empty after a call to this method.

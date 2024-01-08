@@ -221,6 +221,51 @@ TEST(GenericBufReader, FillBufferTooLarge)
 #endif
 #endif
 
+TEST(GenericBufReader, FillBufferWrite)
+{
+    auto bufReader = VectorBufReader{GetVectorStream()};
+
+    auto view = LexIO::FillBuffer(bufReader, 4);
+    EXPECT_EQ(view.second, 4);
+    LexIO::Write(bufReader, {'X', 'Y', 'Z', 'Z'});
+    view = LexIO::FillBuffer(bufReader, 4);
+    EXPECT_EQ(view.first[0], 'k');
+    EXPECT_EQ(view.first[1], ' ');
+    EXPECT_EQ(view.first[2], 'b');
+    EXPECT_EQ(view.first[3], 'r');
+    EXPECT_EQ(view.second, 4);
+}
+
+TEST(GenericBufReader, FillBufferFlush)
+{
+    auto bufReader = VectorBufReader{GetVectorStream()};
+
+    auto view = LexIO::FillBuffer(bufReader, 4);
+    EXPECT_EQ(view.second, 4);
+    LexIO::Flush(bufReader);
+    view = LexIO::FillBuffer(bufReader, 4);
+    EXPECT_EQ(view.first[0], 'T');
+    EXPECT_EQ(view.first[1], 'h');
+    EXPECT_EQ(view.first[2], 'e');
+    EXPECT_EQ(view.first[3], ' ');
+    EXPECT_EQ(view.second, 4);
+}
+
+TEST(GenericBufReader, FillBufferSeek)
+{
+    auto bufReader = VectorBufReader{GetVectorStream()};
+
+    auto view = LexIO::FillBuffer(bufReader, 4);
+    EXPECT_EQ(view.second, 4);
+    LexIO::Seek(bufReader, 4, LexIO::Whence::current);
+    view = LexIO::FillBuffer(bufReader, 4);
+    EXPECT_EQ(view.first[0], 'k');
+    EXPECT_EQ(view.first[1], ' ');
+    EXPECT_EQ(view.first[2], 'b');
+    EXPECT_EQ(view.first[3], 'r');
+    EXPECT_EQ(view.second, 4);
+}
+
 TEST(GenericBufReader, ConsumeBufferSingle)
 {
     auto bufReader = VectorBufReader{GetVectorStream()};

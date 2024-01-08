@@ -55,36 +55,37 @@ class ViewStream
 
     BufferView LexFillBuffer(const size_t count)
     {
-        if (m_offset == Size())
+        if (m_bufferOffset == Size())
         {
             // EOF, return nullptr to avoid OOB subscript.
             return BufferView{nullptr, 0};
         }
-        if (count <= m_bufferLength)
+
+        size_t bufferLength = BufferSize();
+        if (count <= bufferLength)
         {
             // Return view to current buffer.
-            return BufferView{&m_start[m_offset], m_bufferLength};
+            return BufferView{&m_start[m_bufferOffset], bufferLength};
         }
 
-        // Grow the buffer, if possible.
-        const size_t wantedOffset = m_offset + count;
-        const size_t destOffset = std::min(wantedOffset, Size());
-        m_bufferLength = destOffset - m_offset;
+        // Grow the buffer by reading into it.
+        const size_t wantedOffset = m_bufferOffset + count;
+        m_offset = std::min(wantedOffset, Size());
+        bufferLength = BufferSize();
 
         // Return view to new buffer.
-        return BufferView{&m_start[m_offset], m_bufferLength};
+        return BufferView{&m_start[m_bufferOffset], bufferLength};
     }
 
     void LexConsumeBuffer(const size_t count)
     {
-        if (count > m_bufferLength)
+        if (count > BufferSize())
         {
             throw new std::runtime_error("can't consume more bytes than buffer size");
         }
 
-        // Advance the offset and shrink the buffer.
-        m_offset += count;
-        m_bufferLength -= count;
+        // Shrink the buffer.
+        m_bufferOffset += count;
     }
 
     size_t LexWrite(const uint8_t *src, const size_t count)
@@ -94,6 +95,7 @@ class ViewStream
         const size_t actualLength = destOffset - m_offset;
         std::memcpy(m_start + m_offset, src, actualLength);
         m_offset += actualLength;
+        m_bufferOffset = m_offset;
         return actualLength;
     }
 
@@ -122,6 +124,7 @@ class ViewStream
         }
 
         m_offset = static_cast<size_t>(offset);
+        m_bufferOffset = m_offset;
         return m_offset;
     }
 
@@ -129,9 +132,10 @@ class ViewStream
     uint8_t *m_start = nullptr;
     uint8_t *m_end = nullptr;
     size_t m_offset = 0;
-    size_t m_bufferLength = 0;
+    size_t m_bufferOffset = 0;
 
     size_t Size() const { return size_t(std::distance(m_start, m_end)); }
+    size_t BufferSize() const { return m_offset - m_bufferOffset; }
 };
 
 class ConstViewStream
@@ -164,36 +168,37 @@ class ConstViewStream
 
     BufferView LexFillBuffer(const size_t count)
     {
-        if (m_offset == Size())
+        if (m_bufferOffset == Size())
         {
             // EOF, return nullptr to avoid OOB subscript.
             return BufferView{nullptr, 0};
         }
-        if (count <= m_bufferLength)
+
+        size_t bufferLength = BufferSize();
+        if (count <= bufferLength)
         {
             // Return view to current buffer.
-            return BufferView{&m_start[m_offset], m_bufferLength};
+            return BufferView{&m_start[m_bufferOffset], bufferLength};
         }
 
-        // Grow the buffer, if possible.
-        const size_t wantedOffset = m_offset + count;
-        const size_t destOffset = std::min(wantedOffset, Size());
-        m_bufferLength = destOffset - m_offset;
+        // Grow the buffer by reading into it.
+        const size_t wantedOffset = m_bufferOffset + count;
+        m_offset = std::min(wantedOffset, Size());
+        bufferLength = BufferSize();
 
         // Return view to new buffer.
-        return BufferView{&m_start[m_offset], m_bufferLength};
+        return BufferView{&m_start[m_bufferOffset], bufferLength};
     }
 
     void LexConsumeBuffer(const size_t count)
     {
-        if (count > m_bufferLength)
+        if (count > BufferSize())
         {
             throw new std::runtime_error("can't consume more bytes than buffer size");
         }
 
-        // Advance the offset and shrink the buffer.
-        m_offset += count;
-        m_bufferLength -= count;
+        // Shrink the buffer.
+        m_bufferOffset += count;
     }
 
     size_t LexSeek(const SeekPos pos)
@@ -219,6 +224,7 @@ class ConstViewStream
         }
 
         m_offset = static_cast<size_t>(offset);
+        m_bufferOffset = m_offset;
         return m_offset;
     }
 
@@ -226,9 +232,10 @@ class ConstViewStream
     const uint8_t *m_start = nullptr;
     const uint8_t *m_end = nullptr;
     size_t m_offset = 0;
-    size_t m_bufferLength = 0;
+    size_t m_bufferOffset = 0;
 
     size_t Size() const { return size_t(std::distance(m_start, m_end)); }
+    size_t BufferSize() const { return m_offset - m_bufferOffset; }
 };
 
 } // namespace LexIO

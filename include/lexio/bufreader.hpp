@@ -201,7 +201,6 @@ class GenericBufReader
     template <typename WRITER = READER, typename = std::enable_if_t<IsWriterV<WRITER>>>
     void LexFlush()
     {
-        m_size = 0; // Invalidate buffer.
         Flush<READER>(m_reader);
     }
 

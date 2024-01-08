@@ -224,6 +224,54 @@ TEST(ViewStream, FillBufferZeroRead)
     EXPECT_EQ(test.second, 0);
 }
 
+TEST(ViewStream, FillBufferWrite)
+{
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto viewStream = GetViewStream(buffer);
+
+    auto view = LexIO::FillBuffer(viewStream, 4);
+    EXPECT_EQ(view.second, 4);
+    LexIO::Write(viewStream, {'X', 'Y', 'Z', 'Z'});
+    view = LexIO::FillBuffer(viewStream, 4);
+    EXPECT_EQ(view.first[0], 'k');
+    EXPECT_EQ(view.first[1], ' ');
+    EXPECT_EQ(view.first[2], 'b');
+    EXPECT_EQ(view.first[3], 'r');
+    EXPECT_EQ(view.second, 4);
+}
+
+TEST(ViewStream, FillBufferFlush)
+{
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto viewStream = GetViewStream(buffer);
+
+    auto view = LexIO::FillBuffer(viewStream, 4);
+    EXPECT_EQ(view.second, 4);
+    LexIO::Flush(viewStream);
+    view = LexIO::FillBuffer(viewStream, 4);
+    EXPECT_EQ(view.first[0], 'T');
+    EXPECT_EQ(view.first[1], 'h');
+    EXPECT_EQ(view.first[2], 'e');
+    EXPECT_EQ(view.first[3], ' ');
+    EXPECT_EQ(view.second, 4);
+}
+
+TEST(ViewStream, FillBufferSeek)
+{
+    uint8_t buffer[BUFFER_LENGTH] = {0};
+    auto viewStream = GetViewStream(buffer);
+
+    auto view = LexIO::FillBuffer(viewStream, 4);
+    EXPECT_EQ(view.second, 4);
+    LexIO::Seek(viewStream, 4, LexIO::Whence::current);
+    view = LexIO::FillBuffer(viewStream, 4);
+    EXPECT_EQ(view.first[0], 'k');
+    EXPECT_EQ(view.first[1], ' ');
+    EXPECT_EQ(view.first[2], 'b');
+    EXPECT_EQ(view.first[3], 'r');
+    EXPECT_EQ(view.second, 4);
+}
+
 TEST(ViewStream, ConsumeBufferSingle)
 {
     uint8_t buffer[BUFFER_LENGTH] = {0};
@@ -524,6 +572,21 @@ TEST(ConstViewStream, FillBufferZeroRead)
 
     auto test = LexIO::FillBuffer(viewStream, 0);
     EXPECT_EQ(test.second, 0);
+}
+
+TEST(ConstViewStream, FillBufferSeek)
+{
+    auto viewStream = GetConstViewStream();
+
+    auto view = LexIO::FillBuffer(viewStream, 4);
+    EXPECT_EQ(view.second, 4);
+    LexIO::Seek(viewStream, 4, LexIO::Whence::current);
+    view = LexIO::FillBuffer(viewStream, 4);
+    EXPECT_EQ(view.first[0], 'k');
+    EXPECT_EQ(view.first[1], ' ');
+    EXPECT_EQ(view.first[2], 'b');
+    EXPECT_EQ(view.first[3], 'r');
+    EXPECT_EQ(view.second, 4);
 }
 
 TEST(ConstViewStream, ConsumeBufferSingle)
