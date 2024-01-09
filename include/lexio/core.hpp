@@ -621,16 +621,17 @@ inline size_t ReadToEOF(OUT_ITER outIt, BUFFERED_READER &bufReader)
  * @param outIt Output iterator to write result into.
  * @param bufReader BufferedReader to operate on.
  * @param term Byte to stop at.
- * @param bufSize Number of bytes to buffer at a time.
  * @return Total number of bytes read.
  */
 template <typename BUFFERED_READER, typename OUT_ITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term, const size_t bufSize = 8192)
+inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
 {
+    constexpr size_t BUFFER_SIZE = 8192;
+
     size_t size = 0;
     for (;;)
     {
-        BufferView buf = FillBuffer(bufReader, bufSize);
+        BufferView buf = FillBuffer(bufReader, BUFFER_SIZE);
         if (buf.second == 0)
         {
             // Read all data there was to read.
@@ -653,8 +654,37 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
         }
 
         // Consume what we've read.
-        ConsumeBuffer(bufReader, bufSize);
-        size += bufSize;
+        ConsumeBuffer(bufReader, BUFFER_SIZE);
+        size += BUFFER_SIZE;
+    }
+}
+
+/**
+ * @brief Copy the contents of a buffered reader to a writer until EOF is hit
+ *        on the reader.
+ *
+ * @param writer Writer to copy to.
+ * @param bufReader Buffered read to read from.
+ * @return Number of bytes copied.
+ */
+template <typename WRITER, typename BUFFERED_READER, typename = std::enable_if_t<IsWriterV<WRITER>>,
+          typename = std::enable_if_t<IsReaderV<BUFFERED_READER>>>
+inline size_t Copy(WRITER &writer, BUFFERED_READER &bufReader)
+{
+    constexpr size_t BUFFER_SIZE = 8192;
+
+    size_t count = 0;
+    for (;;)
+    {
+        const BufferView buffer = FillBuffer<BUFFERED_READER>(bufReader, BUFFER_SIZE);
+        if (buffer.second == 0)
+        {
+            return count;
+        }
+
+        const size_t written = Write<WRITER>(writer, buffer.first, buffer.second);
+        ConsumeBuffer<BUFFERED_READER>(bufReader, written);
+        count += written;
     }
 }
 
@@ -795,40 +825,6 @@ inline size_t Length(SEEKABLE &seekable)
     const size_t len = Seek(seekable, 0, Whence::end);
     Seek(seekable, ptrdiff_t(old), Whence::start);
     return len;
-}
-
-//******************************************************************************
-//
-// Utility functions.
-//
-//******************************************************************************
-
-/**
- * @brief Copy the contents of a buffered reader to a writer until EOF is hit
- *        on the reader.
- *
- * @param writer Writer to copy to.
- * @param bufReader Buffered read to read from.
- * @param bufSize Number of bytes to buffer per individual copy.
- * @return Number of bytes copied.
- */
-template <typename WRITER, typename BUFFERED_READER, typename = std::enable_if_t<IsWriterV<WRITER>>,
-          typename = std::enable_if_t<IsReaderV<BUFFERED_READER>>>
-inline size_t Copy(WRITER &writer, BUFFERED_READER &bufReader, const size_t bufSize = 8192)
-{
-    size_t count = 0;
-    for (;;)
-    {
-        const BufferView buffer = FillBuffer<BUFFERED_READER>(bufReader, bufSize);
-        if (buffer.second == 0)
-        {
-            return count;
-        }
-
-        const size_t written = Write<WRITER>(writer, buffer.first, buffer.second);
-        ConsumeBuffer<BUFFERED_READER>(bufReader, written);
-        count += written;
-    }
 }
 
 } // namespace LexIO
