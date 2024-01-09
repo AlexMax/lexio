@@ -355,6 +355,25 @@ TEST(BufferedReader, ReadUntil)
     EXPECT_EQ(data.size(), 45);
 }
 
+TEST(BufferedReader, ReadUntilLarge)
+{
+    auto bufReader = LexIO::VectorStream{};
+    uint8_t writeData[] = {'X', 'Y', 'Z', 'Z', 'Y', 'F', 'O', 'O', 'B', 'A', 'R', ' '};
+
+    for (size_t i = 0; i < 9216; i += sizeof(writeData))
+    {
+        LexIO::Write(bufReader, writeData);
+    }
+    LexIO::Write(bufReader, {'\n', 'E', 'N', 'D'});
+    LexIO::Rewind(bufReader);
+
+    std::vector<uint8_t> data;
+    size_t bytes = LexIO::ReadUntil(std::back_inserter(data), bufReader, '\n');
+    EXPECT_EQ(bytes, 9217);
+    EXPECT_EQ(data.size(), 9217);
+    EXPECT_EQ(*(data.end() - 1), '\n');
+}
+
 TEST(BufferedReader, Copy)
 {
     LexIO::VectorStream src = GetVectorStream();
