@@ -17,6 +17,7 @@
 #include "lexio/core.hpp"
 
 #include "./test.h"
+#include "lexio/ref.hpp"
 #include "lexio/serialize/int.hpp"
 #include <array>
 
@@ -287,29 +288,49 @@ TEST(Core, ReadIteratorEmpty)
     EXPECT_EQ(0, LexIO::Read(buffer.begin(), buffer.begin(), stream));
 }
 
-TEST(Core, ReadToEOF)
+TEST(Core, Reader_ReadToEOF)
 {
     auto stream = GetVectorStream();
-    auto buffer = VectorBufReader(std::move(stream));
+    auto reader = LexIO::ReaderRef(stream);
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), buffer);
+    const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), reader);
     EXPECT_EQ(bytes, 45);
     EXPECT_EQ(data.size(), 45);
     EXPECT_EQ(*(data.end() - 1), '\n');
 }
 
-TEST(Core, ReadToEOFSmallBuffer)
+TEST(Core, Reader_ReadToEOFEmpty)
 {
-    LexIO::VectorStream stream = GetVectorStream();
-    auto buffer = VectorBufReader(std::move(stream));
+    auto stream = LexIO::VectorStream{};
+    auto reader = LexIO::ReaderRef{stream};
 
     std::vector<uint8_t> data;
-    const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), buffer, 4);
-    EXPECT_EQ(data[4], 'q'); // Check the buffer boundary.
-    EXPECT_EQ(data[8], 'k');
+    const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), reader);
+    EXPECT_EQ(bytes, 0);
+    EXPECT_EQ(data.size(), 0);
+}
+
+TEST(Core, Reader_ReadToEOFSmallBuffer)
+{
+    auto stream = LexIO::VectorStream{'X', 'Y', 'Z', 'Z', 'Y'};
+    auto reader = LexIO::ReaderRef{stream};
+
+    std::vector<uint8_t> data;
+    const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), reader);
+    EXPECT_EQ(bytes, 5);
+    EXPECT_EQ(data.size(), 5);
+}
+
+TEST(Core, BufReader_ReadToEOF)
+{
+    auto bufReader = GetVectorStream();
+
+    std::vector<uint8_t> data;
+    const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), bufReader);
     EXPECT_EQ(bytes, 45);
     EXPECT_EQ(data.size(), 45);
+    EXPECT_EQ(*(data.end() - 1), '\n');
 }
 
 TEST(Core, ReadUntil)

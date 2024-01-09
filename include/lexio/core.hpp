@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <stdexcept>
 #include <type_traits>
 
@@ -523,6 +524,53 @@ inline size_t Read(IT outStart, IT outEnd, READER &reader)
 }
 
 /**
+ * @brief Read the entire contents of the stream.  Uses an internal buffer.
+ *
+ * @param outIt Output iterator to write result into.
+ * @param reader Reader to operate on.
+ * @return Total number of bytes read.
+ */
+template <typename READER, typename OUT_ITER,
+          std::enable_if_t<IsReaderV<READER> && !IsBufferedReaderV<READER>> * = nullptr>
+inline size_t ReadToEOF(OUT_ITER outIt, READER &reader)
+{
+    constexpr size_t BUFFER_SIZE = 8192;
+
+    // Try and read on the stack first.
+    uint8_t shortData[32] = {0};
+    size_t count = Read(shortData, reader);
+    if (count == 0)
+    {
+        // Nothing to read.
+        return 0;
+    }
+
+    // Copy data into the iterator.
+    std::copy(&shortData[0], &shortData[0] + count, outIt);
+    if (count < 32)
+    {
+        return count;
+    }
+
+    // Allocate a temporary buffer to read into.
+    size_t total = count;
+    std::unique_ptr<uint8_t[]> data{::new uint8_t[BUFFER_SIZE]};
+    for (;;)
+    {
+        count = Read(data.get(), BUFFER_SIZE, reader);
+        if (count == 0)
+        {
+            // Read all data there was to read.
+            return total;
+        }
+
+        // Copy data into the iterator.
+        std::copy(data.get(), data.get() + count, outIt);
+        total += count;
+    }
+}
+
+/**
  * @brief Get the current contents of the buffer.
  *
  * @param bufReader BufferedReader to operate on.
@@ -535,27 +583,28 @@ inline BufferView GetBuffer(BUFFERED_READER &bufReader)
 }
 
 /**
- * @brief Read the entire contents of the stream using the buffer.
+ * @brief Read the entire contents of the stream.
  *
  * @param outIt Output iterator to write result into.
  * @param bufReader BufferedReader to operate on.
- * @param bufSize Number of bytes to buffer at a time.
  * @return Total number of bytes read.
  */
-template <typename BUFFERED_READER, typename OUT_ITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline size_t ReadToEOF(OUT_ITER outIt, BUFFERED_READER &bufReader, const size_t bufSize = 8192)
+template <typename BUFFERED_READER, typename OUT_ITER, std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>> * = nullptr>
+inline size_t ReadToEOF(OUT_ITER outIt, BUFFERED_READER &bufReader)
 {
+    constexpr size_t BUFFER_SIZE = 8192;
+
     size_t total = 0;
     for (;;)
     {
-        BufferView buf = FillBuffer(bufReader, bufSize);
+        BufferView buf = FillBuffer(bufReader, BUFFER_SIZE);
         if (buf.second == 0)
         {
             // Read all data there was to read.
             return total;
         }
 
-        // Copy the buffered data into the vector.
+        // Copy buffered data into the iterator.
         std::copy(buf.first, buf.first + buf.second, outIt);
 
         // Consume what we've read.
