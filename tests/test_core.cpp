@@ -337,33 +337,32 @@ TEST(BufferedReader, ReadToEOF)
 
 TEST(BufferedReader, ReadUntil)
 {
-    auto stream = GetVectorStream();
-    auto buffer = VectorBufReader(std::move(stream));
+    auto bufReader = GetVectorStream();
 
     std::vector<uint8_t> data;
-    size_t bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
+    size_t bytes = LexIO::ReadUntil(std::back_inserter(data), bufReader, '\n');
     EXPECT_EQ(bytes, 20);
     EXPECT_EQ(data.size(), 20);
     EXPECT_EQ(*(data.end() - 1), '\n');
 
-    bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
+    bytes = LexIO::ReadUntil(std::back_inserter(data), bufReader, '\n');
     EXPECT_EQ(bytes, 25);
     EXPECT_EQ(data.size(), 45);
     EXPECT_EQ(*(data.end() - 1), '\n');
 
-    bytes = LexIO::ReadUntil(std::back_inserter(data), buffer, '\n');
+    bytes = LexIO::ReadUntil(std::back_inserter(data), bufReader, '\n');
     EXPECT_EQ(bytes, 0);
     EXPECT_EQ(data.size(), 45);
 }
 
 TEST(BufferedReader, Copy)
 {
-    VectorBufReader src = VectorBufReader(GetVectorStream());
+    LexIO::VectorStream src = GetVectorStream();
     LexIO::VectorStream dest;
     const LexIO::VectorStream &cDest = dest;
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Copy(dest, src));
-    EXPECT_EQ(src.Reader().Container(), cDest.Container());
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Copy(dest, src));
+    EXPECT_EQ(src.Container(), cDest.Container());
 }
 
 //******************************************************************************
@@ -564,7 +563,7 @@ TEST(Seekable, Seek_Tell)
     EXPECT_EQ(LexIO::Tell(stream), 10);
 
     LexIO::Seek(stream, 5, LexIO::Whence::end);
-    EXPECT_EQ(LexIO::Tell(stream), BUFFER_LENGTH - 5);
+    EXPECT_EQ(LexIO::Tell(stream), TEST_TEXT_LENGTH - 5);
 }
 
 TEST(Seekable, Seek_Tell_SeekPos)
@@ -578,7 +577,7 @@ TEST(Seekable, Seek_Tell_SeekPos)
     EXPECT_EQ(LexIO::Tell(stream), 10);
 
     LexIO::Seek(stream, LexIO::SeekPos(5, LexIO::Whence::end));
-    EXPECT_EQ(LexIO::Tell(stream), BUFFER_LENGTH - 5);
+    EXPECT_EQ(LexIO::Tell(stream), TEST_TEXT_LENGTH - 5);
 }
 
 TEST(Seekable, TellAfterRewind)
@@ -594,5 +593,5 @@ TEST(Seekable, Length)
 {
     LexIO::VectorStream stream = GetVectorStream();
 
-    EXPECT_EQ(LexIO::Length(stream), BUFFER_LENGTH);
+    EXPECT_EQ(LexIO::Length(stream), TEST_TEXT_LENGTH);
 }

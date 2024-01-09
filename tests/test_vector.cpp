@@ -52,10 +52,10 @@ TEST(VectorStream, CopyCtor)
     auto copyStream = GetVectorStream();
     auto vecStream = LexIO::VectorStream{copyStream};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
     }
 }
 
@@ -65,10 +65,10 @@ TEST(VectorStream, CopyAssign)
     auto vecStream = LexIO::VectorStream{};
     vecStream = copyStream;
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
     }
 }
 
@@ -76,10 +76,10 @@ TEST(VectorStream, MoveCtor)
 {
     auto vecStream = LexIO::VectorStream{GetVectorStream()};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
     }
 }
 
@@ -88,86 +88,86 @@ TEST(VectorStream, MoveAssign)
     auto vecStream = LexIO::VectorStream{};
     vecStream = GetVectorStream();
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(VectorStream, VectorCopyCtor)
 {
-    auto copyVec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
+    auto copyVec = std::vector<uint8_t>{&TEST_TEXT_DATA[0], &TEST_TEXT_DATA[TEST_TEXT_LENGTH]};
     auto vecStream = LexIO::VectorStream{copyVec};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(VectorStream, VectorMoveCtor)
 {
-    auto moveVec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
+    auto moveVec = std::vector<uint8_t>{&TEST_TEXT_DATA[0], &TEST_TEXT_DATA[TEST_TEXT_LENGTH]};
     auto vecStream = LexIO::VectorStream{std::move(moveVec)};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(VectorStream, CopyFrom)
 {
     auto vecStream = LexIO::VectorStream{};
-    LexIO::Write(vecStream, &BUFFER_TEXT[0], BUFFER_LENGTH);
+    LexIO::Write(vecStream, &TEST_TEXT_DATA[0], TEST_TEXT_LENGTH);
 
     auto vec = vecStream.Container();
-    EXPECT_EQ(BUFFER_LENGTH, vec.size());
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, vec.size());
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vec[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vec[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(VectorStream, MoveFrom)
 {
     auto vecStream = LexIO::VectorStream{};
-    LexIO::Write(vecStream, &BUFFER_TEXT[0], BUFFER_LENGTH);
+    LexIO::Write(vecStream, &TEST_TEXT_DATA[0], TEST_TEXT_LENGTH);
 
     auto vec = std::move(vecStream).Container();
-    EXPECT_EQ(BUFFER_LENGTH, vec.size());
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, vec.size());
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vec[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vec[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(VectorStream, CopyTo)
 {
-    auto vec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
+    auto vec = std::vector<uint8_t>{&TEST_TEXT_DATA[0], &TEST_TEXT_DATA[TEST_TEXT_LENGTH]};
     auto vecStream = LexIO::VectorStream{};
 
     vecStream.Container(vec);
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(VectorStream, MoveTo)
 {
-    auto vec = std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
+    auto vec = std::vector<uint8_t>{&TEST_TEXT_DATA[0], &TEST_TEXT_DATA[TEST_TEXT_LENGTH]};
     auto vecStream = LexIO::VectorStream{};
 
     vecStream.Container(std::move(vec));
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
     }
 }
 
@@ -175,12 +175,12 @@ TEST(VectorStream, Read)
 {
     auto vecStream = GetVectorStream();
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
         uint8_t data[1] = {0};
         EXPECT_EQ(1, LexIO::Read(data, vecStream));
-        EXPECT_EQ(data[0], BUFFER_TEXT[i]);
+        EXPECT_EQ(data[0], TEST_TEXT_DATA[i]);
     }
 }
 
@@ -226,14 +226,14 @@ TEST(VectorStream, FillBufferEOF)
     // Buffer everything.
     auto test = LexIO::FillBuffer(bufReader, 64);
     EXPECT_EQ(test.first[0], 'T');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 
     // Buffer more than everything.
     test = LexIO::FillBuffer(bufReader, 96);
     EXPECT_EQ(test.first[0], 'T');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 }
 
 TEST(VectorStream, FillBufferEOFInitial)
@@ -250,8 +250,8 @@ TEST(VectorStream, FillBufferEOFInitial)
     EXPECT_EQ(test.first[0], 'T');
     EXPECT_EQ(test.first[3], ' ');
     EXPECT_EQ(test.first[4], 'q');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 }
 
 TEST(VectorStream, FillBufferZeroRead)
@@ -308,10 +308,10 @@ TEST(VectorStream, ConsumeBufferEOF)
     test = LexIO::GetBuffer(bufReader);
     EXPECT_EQ(test.first[0], 'q');
     EXPECT_EQ(test.first[3], 'c');
-    EXPECT_EQ(test.second, BUFFER_LENGTH - 4);
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH - 4);
 
     // Consume the rest of it.
-    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, BUFFER_LENGTH - 4));
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, TEST_TEXT_LENGTH - 4));
     test = LexIO::GetBuffer(bufReader);
     EXPECT_EQ(test.second, 0);
 }
@@ -373,12 +373,12 @@ TEST(VectorStream, Write)
 {
     auto vecStream = LexIO::VectorStream{};
 
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(1, LexIO::Write(vecStream, &BUFFER_TEXT[i], 1));
-        EXPECT_EQ(vecStream.Container()[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(1, LexIO::Write(vecStream, &TEST_TEXT_DATA[i], 1));
+        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
     }
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(vecStream));
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
 }
 
 TEST(VectorStream, Seek)
@@ -388,8 +388,8 @@ TEST(VectorStream, Seek)
     EXPECT_EQ(4, LexIO::Seek(vecStream, 4, LexIO::Whence::start));
     EXPECT_EQ(8, LexIO::Seek(vecStream, 4, LexIO::Whence::current));
 
-    EXPECT_EQ(BUFFER_LENGTH - 4, LexIO::Seek(vecStream, 4, LexIO::Whence::end));
-    EXPECT_EQ(BUFFER_LENGTH - 8, LexIO::Seek(vecStream, -4, LexIO::Whence::current));
+    EXPECT_EQ(TEST_TEXT_LENGTH - 4, LexIO::Seek(vecStream, 4, LexIO::Whence::end));
+    EXPECT_EQ(TEST_TEXT_LENGTH - 8, LexIO::Seek(vecStream, -4, LexIO::Whence::current));
 }
 
 TEST(VectorStream, Seek_Negative)

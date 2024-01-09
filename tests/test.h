@@ -27,32 +27,30 @@
 
 #include <gtest/gtest.h>
 
-using VectorBufReader = LexIO::GenericBufReader<LexIO::VectorStream>;
-
 template <typename T, std::size_t N>
 constexpr std::size_t CountOf(T const (&)[N]) noexcept
 {
     return N;
 }
 
-constexpr uint8_t BUFFER_TEXT[] = "The quick brown fox\njumps over the lazy dog.\n";
-constexpr size_t BUFFER_LENGTH = CountOf(BUFFER_TEXT) - sizeof('\0');
+constexpr uint8_t TEST_TEXT_DATA[] = "The quick brown fox\njumps over the lazy dog.\n";
+constexpr size_t TEST_TEXT_LENGTH = CountOf(TEST_TEXT_DATA) - sizeof('\0');
 
 inline LexIO::VectorStream GetVectorStream()
 {
-    return LexIO::VectorStream{std::vector<uint8_t>{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]}};
+    return LexIO::VectorStream{std::vector<uint8_t>{&TEST_TEXT_DATA[0], &TEST_TEXT_DATA[TEST_TEXT_LENGTH]}};
 }
 
 template <size_t N>
 inline LexIO::ViewStream GetViewStream(uint8_t (&array)[N])
 {
-    std::memcpy(&array[0], &BUFFER_TEXT[0], N);
+    std::memcpy(&array[0], &TEST_TEXT_DATA[0], N);
     return LexIO::ViewStream{&array[0], &array[N]};
 }
 
 inline LexIO::ConstViewStream GetConstViewStream()
 {
-    return LexIO::ConstViewStream{&BUFFER_TEXT[0], &BUFFER_TEXT[BUFFER_LENGTH]};
+    return LexIO::ConstViewStream{&TEST_TEXT_DATA[0], &TEST_TEXT_DATA[TEST_TEXT_LENGTH]};
 }
 
 template <typename STREAM>

@@ -211,7 +211,7 @@ TEST(File, WriteMode)
         EXPECT_ANY_THROW(LexIO::Read(readBuffer, file));
 
         // Test writing.
-        EXPECT_EQ(BUFFER_LENGTH, LexIO::Write(file, BUFFER_TEXT, BUFFER_LENGTH));
+        EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Write(file, TEST_TEXT_DATA, TEST_TEXT_LENGTH));
         EXPECT_NO_THROW(LexIO::Flush(file));
 
         // Test seeking.

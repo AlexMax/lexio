@@ -50,100 +50,100 @@ TEST(ViewStream, DefCtor)
 
 TEST(ViewStream, CopyCtor)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto copyStream = GetViewStream(buffer);
     auto viewStream = LexIO::ViewStream{copyStream};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(ViewStream, CopyAssign)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto copyStream = GetViewStream(buffer);
     auto viewStream = LexIO::ViewStream{};
     viewStream = copyStream;
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(ViewStream, MoveCtor)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto moveStream = GetViewStream(buffer);
     auto viewStream = LexIO::ViewStream{std::move(moveStream)};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(ViewStream, MoveAssign)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = LexIO::ViewStream{};
     viewStream = GetViewStream(buffer);
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(ViewStream, VectorIterCtor)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
-    std::memcpy(&buffer[0], &BUFFER_TEXT[0], BUFFER_LENGTH);
-    auto viewStream = LexIO::ViewStream{&buffer[0], &buffer[BUFFER_LENGTH]};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
+    std::memcpy(&buffer[0], &TEST_TEXT_DATA[0], TEST_TEXT_LENGTH);
+    auto viewStream = LexIO::ViewStream{&buffer[0], &buffer[TEST_TEXT_LENGTH]};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(ViewStream, VectorArrayCtor)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
-    std::memcpy(&buffer[0], &BUFFER_TEXT[0], BUFFER_LENGTH);
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
+    std::memcpy(&buffer[0], &TEST_TEXT_DATA[0], TEST_TEXT_LENGTH);
     auto viewStream = LexIO::ViewStream{buffer};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(buffer[i], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(ViewStream, Read)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
         uint8_t data[1] = {0};
         EXPECT_EQ(1, LexIO::Read(data, viewStream));
-        EXPECT_EQ(data[0], BUFFER_TEXT[i]);
+        EXPECT_EQ(data[0], TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(ViewStream, FillBufferSingle)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     auto test = LexIO::FillBuffer(viewStream, 8);
@@ -154,7 +154,7 @@ TEST(ViewStream, FillBufferSingle)
 
 TEST(ViewStream, FillBufferMultiple)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     // Buffer initial four bytes.
@@ -180,25 +180,25 @@ TEST(ViewStream, FillBufferMultiple)
 
 TEST(ViewStream, FillBufferEOF)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     // Buffer everything.
     auto test = LexIO::FillBuffer(viewStream, 64);
     EXPECT_EQ(test.first[0], 'T');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 
     // Buffer more than everything.
     test = LexIO::FillBuffer(viewStream, 96);
     EXPECT_EQ(test.first[0], 'T');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 }
 
 TEST(ViewStream, FillBufferEOFInitial)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     auto test = LexIO::FillBuffer(viewStream, 4);
@@ -211,13 +211,13 @@ TEST(ViewStream, FillBufferEOFInitial)
     EXPECT_EQ(test.first[0], 'T');
     EXPECT_EQ(test.first[3], ' ');
     EXPECT_EQ(test.first[4], 'q');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 }
 
 TEST(ViewStream, FillBufferZeroRead)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     auto test = LexIO::FillBuffer(viewStream, 0);
@@ -226,7 +226,7 @@ TEST(ViewStream, FillBufferZeroRead)
 
 TEST(ViewStream, FillBufferWrite)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     auto view = LexIO::FillBuffer(viewStream, 4);
@@ -242,7 +242,7 @@ TEST(ViewStream, FillBufferWrite)
 
 TEST(ViewStream, FillBufferFlush)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     auto view = LexIO::FillBuffer(viewStream, 4);
@@ -258,7 +258,7 @@ TEST(ViewStream, FillBufferFlush)
 
 TEST(ViewStream, FillBufferSeek)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     auto view = LexIO::FillBuffer(viewStream, 4);
@@ -274,7 +274,7 @@ TEST(ViewStream, FillBufferSeek)
 
 TEST(ViewStream, ConsumeBufferSingle)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     // Fill, then consume whole buffer.
@@ -293,7 +293,7 @@ TEST(ViewStream, ConsumeBufferSingle)
 
 TEST(ViewStream, ConsumeBufferMultiple)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     // Consume half the buffer.
@@ -312,7 +312,7 @@ TEST(ViewStream, ConsumeBufferMultiple)
 
 TEST(ViewStream, ConsumeBufferEOF)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     // Fill to EOF, consume part of it.
@@ -321,17 +321,17 @@ TEST(ViewStream, ConsumeBufferEOF)
     test = LexIO::GetBuffer(viewStream);
     EXPECT_EQ(test.first[0], 'q');
     EXPECT_EQ(test.first[3], 'c');
-    EXPECT_EQ(test.second, BUFFER_LENGTH - 4);
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH - 4);
 
     // Consume the rest of it.
-    EXPECT_NO_THROW(LexIO::ConsumeBuffer(viewStream, BUFFER_LENGTH - 4));
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(viewStream, TEST_TEXT_LENGTH - 4));
     test = LexIO::GetBuffer(viewStream);
     EXPECT_EQ(test.second, 0);
 }
 
 TEST(ViewStream, ConsumeBufferTooLarge)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     LexIO::FillBuffer(viewStream, 8);
@@ -340,20 +340,20 @@ TEST(ViewStream, ConsumeBufferTooLarge)
 
 TEST(ViewStream, Write)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = LexIO::ViewStream{buffer};
 
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(1, LexIO::Write(viewStream, &BUFFER_TEXT[i], 1));
-        EXPECT_EQ(buffer[i], BUFFER_TEXT[i]);
+        EXPECT_EQ(1, LexIO::Write(viewStream, &TEST_TEXT_DATA[i], 1));
+        EXPECT_EQ(buffer[i], TEST_TEXT_DATA[i]);
     }
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
 }
 
 TEST(ViewStream, Flush)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = LexIO::ViewStream{buffer};
 
     EXPECT_NO_THROW(LexIO::Flush(viewStream));
@@ -361,19 +361,19 @@ TEST(ViewStream, Flush)
 
 TEST(ViewStream, Seek)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     EXPECT_EQ(4, LexIO::Seek(viewStream, 4, LexIO::Whence::start));
     EXPECT_EQ(8, LexIO::Seek(viewStream, 4, LexIO::Whence::current));
 
-    EXPECT_EQ(BUFFER_LENGTH - 4, LexIO::Seek(viewStream, 4, LexIO::Whence::end));
-    EXPECT_EQ(BUFFER_LENGTH - 8, LexIO::Seek(viewStream, -4, LexIO::Whence::current));
+    EXPECT_EQ(TEST_TEXT_LENGTH - 4, LexIO::Seek(viewStream, 4, LexIO::Whence::end));
+    EXPECT_EQ(TEST_TEXT_LENGTH - 8, LexIO::Seek(viewStream, -4, LexIO::Whence::current));
 }
 
 TEST(ViewStream, Seek_Negative)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
     auto viewStream = GetViewStream(buffer);
 
     EXPECT_ANY_THROW(LexIO::Seek(viewStream, -1, LexIO::Whence::current));
@@ -413,10 +413,10 @@ TEST(ConstViewStream, CopyCtor)
     auto copyStream = GetConstViewStream();
     auto viewStream = LexIO::ConstViewStream{copyStream};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+        EXPECT_EQ(LexIO::ReadU8(viewStream), TEST_TEXT_DATA[i]);
     }
 }
 
@@ -426,10 +426,10 @@ TEST(ConstViewStream, CopyAssign)
     auto viewStream = LexIO::ConstViewStream{};
     viewStream = copyStream;
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+        EXPECT_EQ(LexIO::ReadU8(viewStream), TEST_TEXT_DATA[i]);
     }
 }
 
@@ -438,10 +438,10 @@ TEST(ConstViewStream, MoveCtor)
     auto moveStream = GetConstViewStream();
     auto viewStream = LexIO::ConstViewStream{std::move(moveStream)};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+        EXPECT_EQ(LexIO::ReadU8(viewStream), TEST_TEXT_DATA[i]);
     }
 }
 
@@ -450,36 +450,36 @@ TEST(ConstViewStream, MoveAssign)
     auto viewStream = LexIO::ConstViewStream{};
     viewStream = GetConstViewStream();
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+        EXPECT_EQ(LexIO::ReadU8(viewStream), TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(ConstViewStream, VectorIterCtor)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
-    std::memcpy(&buffer[0], &BUFFER_TEXT[0], BUFFER_LENGTH);
-    auto viewStream = LexIO::ConstViewStream{&buffer[0], &buffer[BUFFER_LENGTH]};
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
+    std::memcpy(&buffer[0], &TEST_TEXT_DATA[0], TEST_TEXT_LENGTH);
+    auto viewStream = LexIO::ConstViewStream{&buffer[0], &buffer[TEST_TEXT_LENGTH]};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+        EXPECT_EQ(LexIO::ReadU8(viewStream), TEST_TEXT_DATA[i]);
     }
 }
 
 TEST(ConstViewStream, VectorArrayCtor)
 {
-    uint8_t buffer[BUFFER_LENGTH] = {0};
-    std::memcpy(&buffer[0], &BUFFER_TEXT[0], BUFFER_LENGTH);
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
+    std::memcpy(&buffer[0], &TEST_TEXT_DATA[0], TEST_TEXT_LENGTH);
     auto viewStream = LexIO::ConstViewStream{buffer};
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
-        EXPECT_EQ(LexIO::ReadU8(viewStream), BUFFER_TEXT[i]);
+        EXPECT_EQ(LexIO::ReadU8(viewStream), TEST_TEXT_DATA[i]);
     }
 }
 
@@ -487,12 +487,12 @@ TEST(ConstViewStream, Read)
 {
     auto viewStream = GetConstViewStream();
 
-    EXPECT_EQ(BUFFER_LENGTH, LexIO::Length(viewStream));
-    for (size_t i = 0; i < BUFFER_LENGTH; i++)
+    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(viewStream));
+    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
     {
         uint8_t data[1] = {0};
         EXPECT_EQ(1, LexIO::Read(data, viewStream));
-        EXPECT_EQ(data[0], BUFFER_TEXT[i]);
+        EXPECT_EQ(data[0], TEST_TEXT_DATA[i]);
     }
 }
 
@@ -538,14 +538,14 @@ TEST(ConstViewStream, FillBufferEOF)
     // Buffer everything.
     auto test = LexIO::FillBuffer(viewStream, 64);
     EXPECT_EQ(test.first[0], 'T');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 
     // Buffer more than everything.
     test = LexIO::FillBuffer(viewStream, 96);
     EXPECT_EQ(test.first[0], 'T');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 }
 
 TEST(ConstViewStream, FillBufferEOFInitial)
@@ -562,8 +562,8 @@ TEST(ConstViewStream, FillBufferEOFInitial)
     EXPECT_EQ(test.first[0], 'T');
     EXPECT_EQ(test.first[3], ' ');
     EXPECT_EQ(test.first[4], 'q');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 }
 
 TEST(ConstViewStream, FillBufferZeroRead)
@@ -635,10 +635,10 @@ TEST(ConstViewStream, ConsumeBufferEOF)
     test = LexIO::GetBuffer(viewStream);
     EXPECT_EQ(test.first[0], 'q');
     EXPECT_EQ(test.first[3], 'c');
-    EXPECT_EQ(test.second, BUFFER_LENGTH - 4);
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH - 4);
 
     // Consume the rest of it.
-    EXPECT_NO_THROW(LexIO::ConsumeBuffer(viewStream, BUFFER_LENGTH - 4));
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(viewStream, TEST_TEXT_LENGTH - 4));
     test = LexIO::GetBuffer(viewStream);
     EXPECT_EQ(test.second, 0);
 }
@@ -658,8 +658,8 @@ TEST(ConstViewStream, Seek)
     EXPECT_EQ(4, LexIO::Seek(viewStream, 4, LexIO::Whence::start));
     EXPECT_EQ(8, LexIO::Seek(viewStream, 4, LexIO::Whence::current));
 
-    EXPECT_EQ(BUFFER_LENGTH - 4, LexIO::Seek(viewStream, 4, LexIO::Whence::end));
-    EXPECT_EQ(BUFFER_LENGTH - 8, LexIO::Seek(viewStream, -4, LexIO::Whence::current));
+    EXPECT_EQ(TEST_TEXT_LENGTH - 4, LexIO::Seek(viewStream, 4, LexIO::Whence::end));
+    EXPECT_EQ(TEST_TEXT_LENGTH - 8, LexIO::Seek(viewStream, -4, LexIO::Whence::current));
 }
 
 TEST(ConstViewStream, Seek_Negative)

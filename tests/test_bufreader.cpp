@@ -18,6 +18,7 @@
 
 #include "./test.h"
 
+using VectorBufReader = LexIO::GenericBufReader<LexIO::VectorStream>;
 using VectorBufReaderNoCopy = LexIO::GenericBufReader<NoCopyStream<LexIO::VectorStream>>;
 
 #if defined(__clang__)
@@ -172,14 +173,14 @@ TEST(GenericBufReader, FillBufferEOF)
     // Buffer everything.
     auto test = LexIO::FillBuffer(bufReader, 64);
     EXPECT_EQ(test.first[0], 'T');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 
     // Buffer more than everything.
     test = LexIO::FillBuffer(bufReader, 96);
     EXPECT_EQ(test.first[0], 'T');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 }
 
 TEST(GenericBufReader, FillBufferEOFInitial)
@@ -196,8 +197,8 @@ TEST(GenericBufReader, FillBufferEOFInitial)
     EXPECT_EQ(test.first[0], 'T');
     EXPECT_EQ(test.first[3], ' ');
     EXPECT_EQ(test.first[4], 'q');
-    EXPECT_EQ(test.first[BUFFER_LENGTH - 1], '\n');
-    EXPECT_EQ(test.second, BUFFER_LENGTH);
+    EXPECT_EQ(test.first[TEST_TEXT_LENGTH - 1], '\n');
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH);
 }
 
 TEST(GenericBufReader, FillBufferZeroRead)
@@ -312,10 +313,10 @@ TEST(GenericBufReader, ConsumeBufferEOF)
     test = LexIO::GetBuffer(bufReader);
     EXPECT_EQ(test.first[0], 'q');
     EXPECT_EQ(test.first[3], 'c');
-    EXPECT_EQ(test.second, BUFFER_LENGTH - 4);
+    EXPECT_EQ(test.second, TEST_TEXT_LENGTH - 4);
 
     // Consume the rest of it.
-    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, BUFFER_LENGTH - 4));
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(bufReader, TEST_TEXT_LENGTH - 4));
     test = LexIO::GetBuffer(bufReader);
     EXPECT_EQ(test.second, 0);
 }

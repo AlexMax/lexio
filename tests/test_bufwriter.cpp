@@ -125,11 +125,11 @@ TEST(FixedBufWriter, Write)
     auto stream = LexIO::VectorStream{};
 
     auto bufWriter = VectorBufWriter{std::move(stream)};
-    EXPECT_EQ(::BUFFER_LENGTH, LexIO::Write(bufWriter, ::BUFFER_TEXT, ::BUFFER_LENGTH));
+    EXPECT_EQ(::TEST_TEXT_LENGTH, LexIO::Write(bufWriter, ::TEST_TEXT_DATA, ::TEST_TEXT_LENGTH));
     LexIO::Flush(bufWriter);
 
     stream = std::move(bufWriter).Writer();
-    EXPECT_EQ(::BUFFER_LENGTH, LexIO::Length(stream));
+    EXPECT_EQ(::TEST_TEXT_LENGTH, LexIO::Length(stream));
 }
 
 TEST(FixedBufWriter, WriteSmallBuffer)
@@ -137,11 +137,11 @@ TEST(FixedBufWriter, WriteSmallBuffer)
     auto stream = LexIO::VectorStream{};
 
     auto bufWriter = VectorBufWriter{std::move(stream), 16};
-    EXPECT_EQ(::BUFFER_LENGTH, LexIO::Write(bufWriter, ::BUFFER_TEXT, ::BUFFER_LENGTH));
+    EXPECT_EQ(::TEST_TEXT_LENGTH, LexIO::Write(bufWriter, ::TEST_TEXT_DATA, ::TEST_TEXT_LENGTH));
     LexIO::Flush(bufWriter);
 
     stream = std::move(bufWriter).Writer();
-    EXPECT_EQ(::BUFFER_LENGTH, LexIO::Length(stream));
+    EXPECT_EQ(::TEST_TEXT_LENGTH, LexIO::Length(stream));
 }
 
 TEST(FixedBufWriter, WriteFlushThenBuffer)
@@ -150,9 +150,9 @@ TEST(FixedBufWriter, WriteFlushThenBuffer)
     const auto &cstream = stream;
 
     auto bufWriter = VectorBufWriter{std::move(stream), 16};
-    EXPECT_EQ(8, LexIO::Write(bufWriter, &::BUFFER_TEXT[0], 8));
-    EXPECT_EQ(8, LexIO::Write(bufWriter, &::BUFFER_TEXT[8], 8));
-    EXPECT_EQ(8, LexIO::Write(bufWriter, &::BUFFER_TEXT[16], 8));
+    EXPECT_EQ(8, LexIO::Write(bufWriter, &::TEST_TEXT_DATA[0], 8));
+    EXPECT_EQ(8, LexIO::Write(bufWriter, &::TEST_TEXT_DATA[8], 8));
+    EXPECT_EQ(8, LexIO::Write(bufWriter, &::TEST_TEXT_DATA[16], 8));
     LexIO::Flush(bufWriter);
 
     stream = std::move(bufWriter).Writer();
@@ -160,7 +160,7 @@ TEST(FixedBufWriter, WriteFlushThenBuffer)
     EXPECT_EQ(0, LexIO::Rewind(stream));
     for (size_t i = 0; i < 24; i++)
     {
-        EXPECT_EQ(cstream.Container()[i], ::BUFFER_TEXT[i]);
+        EXPECT_EQ(cstream.Container()[i], ::TEST_TEXT_DATA[i]);
     }
 }
 
