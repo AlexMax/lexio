@@ -52,7 +52,7 @@ inline void WrapConsumeBuffer(void *ptr, const size_t size)
 }
 
 template <typename WRITER>
-size_t WrapWrite(void *ptr, const uint8_t *src, const size_t count)
+inline size_t WrapWrite(void *ptr, const uint8_t *src, const size_t count)
 {
     return static_cast<WRITER *>(ptr)->LexWrite(src, count);
 }
