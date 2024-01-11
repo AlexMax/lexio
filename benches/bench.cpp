@@ -19,7 +19,58 @@
 #include "lexio/lexio.hpp"
 #include <sstream>
 
+constexpr size_t READ_ITERS = 128;
 constexpr size_t WRITE_ITERS = 128;
+
+static void Bench_ReadStringStream(benchmark::State &state)
+{
+    std::stringstream stream;
+    uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    for (size_t i = 0; i < WRITE_ITERS; i++)
+    {
+        stream.write((const char *)&data[0], sizeof(data));
+    }
+
+    for (auto _ : state)
+    {
+        state.PauseTiming();
+        stream.seekg(0);
+        std::memset(&data[0], 0x00, sizeof(data));
+        state.ResumeTiming();
+
+        for (size_t i = 0; i < READ_ITERS; i++)
+        {
+            stream.read((char *)&data[0], sizeof(data));
+        }
+        benchmark::DoNotOptimize((char *)&data[0]);
+    }
+}
+BENCHMARK(Bench_ReadStringStream);
+
+static void Bench_ReadLexIO(benchmark::State &state)
+{
+    LexIO::VectorStream stream;
+    uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    for (size_t i = 0; i < WRITE_ITERS; i++)
+    {
+        LexIO::Write(stream, data);
+    }
+
+    for (auto _ : state)
+    {
+        state.PauseTiming();
+        LexIO::Rewind(stream);
+        std::memset(&data[0], 0x00, sizeof(data));
+        state.ResumeTiming();
+
+        for (size_t i = 0; i < READ_ITERS; i++)
+        {
+            LexIO::Read(data, stream);
+        }
+        benchmark::DoNotOptimize((char *)&data[0]);
+    }
+}
+BENCHMARK(Bench_ReadLexIO);
 
 static void Bench_WriteStringStream(benchmark::State &state)
 {
