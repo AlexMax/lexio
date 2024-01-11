@@ -26,6 +26,9 @@ static void AcceptWriter(const LexIO::WriterRef &) {}
 static void AcceptSeekable(const LexIO::SeekableRef &) {}
 static void AcceptReaderSeekable(const LexIO::ReaderSeekableRef &) {}
 
+static void AmbiguousReader(const LexIO::UnbufferedReaderRef &) {}
+static void AmbiguousReader(const LexIO::BufferedReaderRef &) {}
+
 //******************************************************************************
 
 TEST(Ref, ReaderRef)
@@ -63,6 +66,24 @@ TEST(Ref, BufferedReaderRef)
 
     AcceptReader(ref);
     AcceptBufferedReader(ref);
+    AmbiguousReader(test);
+}
+
+TEST(Ref, UnbufferedReaderRef)
+{
+    struct GoodR
+    {
+        size_t LexRead(uint8_t *, const size_t) { return 0; }
+    };
+
+    uint8_t buffer[4];
+    auto test = GoodR{};
+    LexIO::UnbufferedReaderRef ref(test);
+
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+
+    AcceptReader(ref);
+    AmbiguousReader(test);
 }
 
 TEST(Ref, WriterRef)

@@ -81,7 +81,7 @@ class ReaderRef
     Detail::lexRead_t m_lexRead;
 
   public:
-    template <typename READER>
+    template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
     ReaderRef(READER &reader) : m_ptr(&reader), m_lexRead(Detail::WrapRead<READER>)
     {
     }
@@ -101,7 +101,7 @@ class BufferedReaderRef
     Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
 
   public:
-    template <typename BUFFERED_READER>
+    template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
     BufferedReaderRef(BUFFERED_READER &bufReader)
         : m_ptr(&bufReader), m_lexRead(Detail::WrapRead<BUFFERED_READER>),
           m_lexFillBuffer(Detail::WrapFillBuffer<BUFFERED_READER>),
@@ -112,6 +112,25 @@ class BufferedReaderRef
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
     BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
     void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements Reader, but not
+ *        BufferedReader.
+ */
+class UnbufferedReaderRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+
+  public:
+    template <typename READER, typename = std::enable_if_t<IsReaderV<READER> && !IsBufferedReaderV<READER>>>
+    UnbufferedReaderRef(READER &reader) : m_ptr(&reader), m_lexRead(Detail::WrapRead<READER>)
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
 };
 
 /**
