@@ -294,6 +294,326 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
     static_assert(LexIO::IsSeekableV<decltype(param)>, #param " does not conform to a LexIO::Seekable");               \
     static_assert(true, "")
 
+namespace Detail
+{
+
+using lexRead_t = size_t (*)(void *, uint8_t *, const size_t);
+using lexFillBuffer_t = BufferView (*)(void *, const size_t);
+using lexConsumeBuffer_t = void (*)(void *, const size_t);
+using lexWrite_t = size_t (*)(void *, const uint8_t *, const size_t);
+using lexFlush_t = void (*)(void *);
+using lexSeek_t = size_t (*)(void *, const SeekPos);
+
+template <typename READER>
+inline size_t WrapRead(void *ptr, uint8_t *outDest, const size_t count)
+{
+    return static_cast<READER *>(ptr)->LexRead(outDest, count);
+}
+
+template <typename BUFFERED_READER>
+inline BufferView WrapFillBuffer(void *ptr, const size_t size)
+{
+    return static_cast<BUFFERED_READER *>(ptr)->LexFillBuffer(size);
+}
+
+template <typename BUFFERED_READER>
+inline void WrapConsumeBuffer(void *ptr, const size_t size)
+{
+    static_cast<BUFFERED_READER *>(ptr)->LexConsumeBuffer(size);
+}
+
+template <typename WRITER>
+inline size_t WrapWrite(void *ptr, const uint8_t *src, const size_t count)
+{
+    return static_cast<WRITER *>(ptr)->LexWrite(src, count);
+}
+
+template <typename WRITER>
+inline void WrapFlush(void *ptr)
+{
+    static_cast<WRITER *>(ptr)->LexFlush();
+}
+
+template <typename SEEKABLE>
+inline size_t WrapSeek(void *ptr, const SeekPos pos)
+{
+    return static_cast<SEEKABLE *>(ptr)->LexSeek(pos);
+}
+
+} // namespace Detail
+
+/**
+ * @brief A type-erased reference to a stream that implements Reader.
+ */
+class ReaderRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+
+  public:
+    template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
+    ReaderRef(READER &reader) : m_ptr(&reader), m_lexRead(Detail::WrapRead<READER>)
+    {
+    }
+
+    ReaderRef(void *ptr, Detail::lexRead_t lexRead) : m_ptr(ptr), m_lexRead(lexRead) {}
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements BufferedReader.
+ */
+class BufferedReaderRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexFillBuffer_t m_lexFillBuffer;
+    Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
+
+  public:
+    template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
+    BufferedReaderRef(BUFFERED_READER &bufReader)
+        : m_ptr(&bufReader), m_lexRead(Detail::WrapRead<BUFFERED_READER>),
+          m_lexFillBuffer(Detail::WrapFillBuffer<BUFFERED_READER>),
+          m_lexConsumeBuffer(Detail::WrapConsumeBuffer<BUFFERED_READER>)
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; };
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements Reader, but not
+ *        BufferedReader.
+ */
+class UnbufferedReaderRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+
+  public:
+    template <typename READER, typename = std::enable_if_t<IsReaderV<READER> && !IsBufferedReaderV<READER>>>
+    UnbufferedReaderRef(READER &reader) : m_ptr(&reader), m_lexRead(Detail::WrapRead<READER>)
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; };
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements Writer.
+ */
+class WriterRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexWrite_t m_lexWrite;
+    Detail::lexFlush_t m_lexFlush;
+
+  public:
+    template <typename WRITER>
+    WriterRef(WRITER &writer)
+        : m_ptr(&writer), m_lexWrite(Detail::WrapWrite<WRITER>), m_lexFlush(Detail::WrapFlush<WRITER>)
+    {
+    }
+
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements Seekable.
+ */
+class SeekableRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexSeek_t m_lexSeek;
+
+  public:
+    template <typename SEEKABLE>
+    SeekableRef(SEEKABLE &seekable) : m_ptr(&seekable), m_lexSeek(Detail::WrapSeek<SEEKABLE>)
+    {
+    }
+
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements Reader,
+ *        and Writer.
+ */
+class ReaderWriterRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexWrite_t m_lexWrite;
+    Detail::lexFlush_t m_lexFlush;
+
+  public:
+    template <typename STREAM>
+    ReaderWriterRef(STREAM &readerWriter)
+        : m_ptr(&readerWriter), m_lexRead(Detail::WrapRead<STREAM>), m_lexWrite(Detail::WrapWrite<STREAM>),
+          m_lexFlush(Detail::WrapFlush<STREAM>)
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements BufferedReader,
+ *        and Writer.
+ */
+class BufferedReaderWriterRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexFillBuffer_t m_lexFillBuffer;
+    Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
+    Detail::lexWrite_t m_lexWrite;
+    Detail::lexFlush_t m_lexFlush;
+
+  public:
+    template <typename STREAM>
+    BufferedReaderWriterRef(STREAM &bufferedReaderWriter)
+        : m_ptr(&bufferedReaderWriter), m_lexRead(Detail::WrapRead<STREAM>),
+          m_lexFillBuffer(Detail::WrapFillBuffer<STREAM>), m_lexConsumeBuffer(Detail::WrapConsumeBuffer<STREAM>),
+          m_lexWrite(Detail::WrapWrite<STREAM>), m_lexFlush(Detail::WrapFlush<STREAM>)
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements Reader,
+ *        and Seekable.
+ */
+class ReaderSeekableRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexSeek_t m_lexSeek;
+
+  public:
+    template <typename STREAM>
+    ReaderSeekableRef(STREAM &readerSeekable)
+        : m_ptr(&readerSeekable), m_lexRead(Detail::WrapRead<STREAM>), m_lexSeek(Detail::WrapSeek<STREAM>)
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements BufferedReader,
+ *        and Seekable.
+ */
+class BufferedReaderSeekableRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexFillBuffer_t m_lexFillBuffer;
+    Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
+    Detail::lexSeek_t m_lexSeek;
+
+  public:
+    template <typename STREAM>
+    BufferedReaderSeekableRef(STREAM &bufferedReaderSeekable)
+        : m_ptr(&bufferedReaderSeekable), m_lexRead(Detail::WrapRead<STREAM>),
+          m_lexFillBuffer(Detail::WrapFillBuffer<STREAM>), m_lexConsumeBuffer(Detail::WrapConsumeBuffer<STREAM>),
+          m_lexSeek(Detail::WrapSeek<STREAM>)
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements Reader, Writer,
+ *        and Seekable.
+ */
+class ReaderWriterSeekableRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexWrite_t m_lexWrite;
+    Detail::lexFlush_t m_lexFlush;
+    Detail::lexSeek_t m_lexSeek;
+
+  public:
+    template <typename STREAM>
+    ReaderWriterSeekableRef(STREAM &readerWriterSeekable)
+        : m_ptr(&readerWriterSeekable), m_lexRead(Detail::WrapRead<STREAM>), m_lexWrite(Detail::WrapWrite<STREAM>),
+          m_lexFlush(Detail::WrapFlush<STREAM>), m_lexSeek(Detail::WrapSeek<STREAM>)
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
+};
+
+/**
+ * @brief A type-erased reference to a stream that implements BufferedReader,
+ *        Writer, and Seekable.
+ */
+class BufferedReaderWriterSeekableRef
+{
+  protected:
+    void *m_ptr;
+    Detail::lexRead_t m_lexRead;
+    Detail::lexFillBuffer_t m_lexFillBuffer;
+    Detail::lexConsumeBuffer_t m_lexConsumeBuffer;
+    Detail::lexWrite_t m_lexWrite;
+    Detail::lexFlush_t m_lexFlush;
+    Detail::lexSeek_t m_lexSeek;
+
+  public:
+    template <typename STREAM>
+    BufferedReaderWriterSeekableRef(STREAM &bufferedReaderWriterSeekable)
+        : m_ptr(&bufferedReaderWriterSeekable), m_lexRead(Detail::WrapRead<STREAM>),
+          m_lexFillBuffer(Detail::WrapFillBuffer<STREAM>), m_lexConsumeBuffer(Detail::WrapConsumeBuffer<STREAM>),
+          m_lexWrite(Detail::WrapWrite<STREAM>), m_lexFlush(Detail::WrapFlush<STREAM>),
+          m_lexSeek(Detail::WrapSeek<STREAM>)
+    {
+    }
+
+    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    void LexFlush() const { m_lexFlush(m_ptr); }
+    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
+};
+
 //******************************************************************************
 //
 // The following functions are used to call basic stream functionality that
@@ -321,8 +641,7 @@ LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t RawRead(uint8_t *outDest, const size_t count, READER &reader)
+inline size_t RawRead(uint8_t *outDest, const size_t count, const LexIO::ReaderRef &reader)
 {
     return reader.LexRead(outDest, count);
 }
@@ -340,8 +659,7 @@ inline size_t RawRead(uint8_t *outDest, const size_t count, READER &reader)
  * @throws std::runtime_error if an error with the read operation was
  *         encountered, or if too large of a buffer was requested.
  */
-template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline BufferView FillBuffer(BUFFERED_READER &bufReader, const size_t size)
+inline BufferView FillBuffer(const BufferedReaderRef &bufReader, const size_t size)
 {
     return bufReader.LexFillBuffer(size);
 }
@@ -356,8 +674,7 @@ inline BufferView FillBuffer(BUFFERED_READER &bufReader, const size_t size)
  * @throws std::runtime_error if a size greater than the amount of data
  *         in the visible buffer is passed to the function.
  */
-template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
+inline void ConsumeBuffer(const BufferedReaderRef &bufReader, const size_t size)
 {
     bufReader.LexConsumeBuffer(size);
 }
@@ -373,8 +690,7 @@ inline void ConsumeBuffer(BUFFERED_READER &bufReader, const size_t size)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t RawWrite(WRITER &writer, const uint8_t *src, const size_t count)
+inline size_t RawWrite(const WriterRef &writer, const uint8_t *src, const size_t count)
 {
     return writer.LexWrite(src, count);
 }
@@ -384,8 +700,7 @@ inline size_t RawWrite(WRITER &writer, const uint8_t *src, const size_t count)
  *
  * @param writer Writer to operate on.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void Flush(WRITER &writer)
+inline void Flush(const WriterRef &writer)
 {
     return writer.LexFlush();
 }
@@ -399,8 +714,7 @@ inline void Flush(WRITER &writer)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-inline size_t Seek(SEEKABLE &seekable, const SeekPos pos)
+inline size_t Seek(const SeekableRef &seekable, const SeekPos pos)
 {
     return seekable.LexSeek(pos);
 }
@@ -415,8 +729,7 @@ inline size_t Seek(SEEKABLE &seekable, const SeekPos pos)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const Whence whence)
+inline size_t Seek(const SeekableRef &seekable, const ptrdiff_t offset, const Whence whence)
 {
     return seekable.LexSeek(SeekPos(offset, whence));
 }
@@ -442,13 +755,12 @@ inline size_t Seek(SEEKABLE &seekable, const ptrdiff_t offset, const Whence when
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t Read(uint8_t *outDest, const size_t count, READER &reader)
+inline size_t Read(uint8_t *outDest, const size_t count, const ReaderRef &reader)
 {
     size_t offset = 0, remain = count;
     while (offset != count)
     {
-        const size_t read = RawRead<READER>(outDest + offset, remain, reader);
+        const size_t read = RawRead(outDest + offset, remain, reader);
         if (read == 0)
         {
             return offset;
@@ -473,13 +785,13 @@ inline size_t Read(uint8_t *outDest, const size_t count, READER &reader)
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-template <typename READER, size_t N, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t Read(uint8_t (&outArray)[N], READER &reader)
+template <size_t N>
+inline size_t Read(uint8_t (&outArray)[N], const ReaderRef &reader)
 {
     size_t offset = 0, remain = N;
     while (offset != N)
     {
-        const size_t read = RawRead<READER>(&outArray[offset], remain, reader);
+        const size_t read = RawRead(&outArray[offset], remain, reader);
         if (read == 0)
         {
             return offset;
@@ -505,13 +817,13 @@ inline size_t Read(uint8_t (&outArray)[N], READER &reader)
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-template <typename READER, typename IT, typename = std::enable_if_t<IsReaderV<READER>>>
-inline size_t Read(IT outStart, IT outEnd, READER &reader)
+template <typename IT>
+inline size_t Read(IT outStart, IT outEnd, const ReaderRef &reader)
 {
     IT iter = outStart;
     while (iter != outEnd)
     {
-        const size_t read = RawRead<READER>(&(*iter), std::distance(iter, outEnd), reader);
+        const size_t read = RawRead(&(*iter), std::distance(iter, outEnd), reader);
         if (read == 0)
         {
             return std::distance(outStart, iter);
@@ -530,9 +842,8 @@ inline size_t Read(IT outStart, IT outEnd, READER &reader)
  * @param reader Reader to operate on.
  * @return Total number of bytes read.
  */
-template <typename READER, typename OUT_ITER,
-          std::enable_if_t<IsReaderV<READER> && !IsBufferedReaderV<READER>> * = nullptr>
-inline size_t ReadToEOF(OUT_ITER outIt, READER &reader)
+template <typename OUT_ITER>
+inline size_t ReadToEOF(OUT_ITER outIt, const UnbufferedReaderRef &reader)
 {
     constexpr size_t BUFFER_SIZE = 8192;
 
@@ -576,8 +887,7 @@ inline size_t ReadToEOF(OUT_ITER outIt, READER &reader)
  * @param bufReader BufferedReader to operate on.
  * @return Span view of the internal buffer.
  */
-template <typename BUFFERED_READER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline BufferView GetBuffer(BUFFERED_READER &bufReader)
+inline BufferView GetBuffer(const BufferedReaderRef &bufReader)
 {
     return FillBuffer(bufReader, 0);
 }
@@ -589,8 +899,8 @@ inline BufferView GetBuffer(BUFFERED_READER &bufReader)
  * @param bufReader BufferedReader to operate on.
  * @return Total number of bytes read.
  */
-template <typename BUFFERED_READER, typename OUT_ITER, std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>> * = nullptr>
-inline size_t ReadToEOF(OUT_ITER outIt, BUFFERED_READER &bufReader)
+template <typename OUT_ITER>
+inline size_t ReadToEOF(OUT_ITER outIt, const BufferedReaderRef &bufReader)
 {
     constexpr size_t BUFFER_SIZE = 8192;
 
@@ -623,8 +933,8 @@ inline size_t ReadToEOF(OUT_ITER outIt, BUFFERED_READER &bufReader)
  * @param term Byte to stop at.
  * @return Total number of bytes read.
  */
-template <typename BUFFERED_READER, typename OUT_ITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_t term)
+template <typename OUT_ITER>
+inline size_t ReadUntil(OUT_ITER outIt, const BufferedReaderRef &bufReader, const uint8_t term)
 {
     constexpr size_t BUFFER_SIZE = 8192;
 
@@ -660,35 +970,6 @@ inline size_t ReadUntil(OUT_ITER outIt, BUFFERED_READER &bufReader, const uint8_
 }
 
 /**
- * @brief Copy the contents of a buffered reader to a writer until EOF is hit
- *        on the reader.
- *
- * @param writer Writer to copy to.
- * @param bufReader Buffered read to read from.
- * @return Number of bytes copied.
- */
-template <typename WRITER, typename BUFFERED_READER, typename = std::enable_if_t<IsWriterV<WRITER>>,
-          typename = std::enable_if_t<IsReaderV<BUFFERED_READER>>>
-inline size_t Copy(WRITER &writer, BUFFERED_READER &bufReader)
-{
-    constexpr size_t BUFFER_SIZE = 8192;
-
-    size_t count = 0;
-    for (;;)
-    {
-        const BufferView buffer = FillBuffer<BUFFERED_READER>(bufReader, BUFFER_SIZE);
-        if (buffer.second == 0)
-        {
-            return count;
-        }
-
-        const size_t written = Write<WRITER>(writer, buffer.first, buffer.second);
-        ConsumeBuffer<BUFFERED_READER>(bufReader, written);
-        count += written;
-    }
-}
-
-/**
  * @brief Write a buffer of data at the current offset.  Calls LexIO::RawWrite
  *        as many times as necessary to write the entire buffer unless EOF
  *        is hit.
@@ -701,13 +982,12 @@ inline size_t Copy(WRITER &writer, BUFFERED_READER &bufReader)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, const uint8_t *src, const size_t count)
+inline size_t Write(const WriterRef &writer, const uint8_t *src, const size_t count)
 {
     size_t offset = 0, remain = count;
     while (offset != count)
     {
-        const size_t written = RawWrite<WRITER>(writer, src + offset, remain);
+        const size_t written = RawWrite(writer, src + offset, remain);
         if (written == 0)
         {
             return offset;
@@ -732,13 +1012,13 @@ inline size_t Write(WRITER &writer, const uint8_t *src, const size_t count)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-template <typename WRITER, size_t N, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, const uint8_t (&array)[N])
+template <size_t N>
+inline size_t Write(const WriterRef &writer, const uint8_t (&array)[N])
 {
     size_t offset = 0, remain = N;
     while (offset != N)
     {
-        const size_t written = RawWrite<WRITER>(writer, &array[offset], remain);
+        const size_t written = RawWrite(writer, &array[offset], remain);
         if (written == 0)
         {
             return offset;
@@ -764,13 +1044,13 @@ inline size_t Write(WRITER &writer, const uint8_t (&array)[N])
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-template <typename WRITER, typename IT, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline size_t Write(WRITER &writer, IT start, IT end)
+template <typename IT>
+inline size_t Write(const WriterRef &writer, IT start, IT end)
 {
     IT iter = start;
     while (iter != end)
     {
-        const size_t written = RawWrite<WRITER>(writer, &(*iter), std::distance(iter, end));
+        const size_t written = RawWrite(writer, &(*iter), std::distance(iter, end));
         if (written == 0)
         {
             return std::distance(start, iter);
@@ -783,6 +1063,33 @@ inline size_t Write(WRITER &writer, IT start, IT end)
 }
 
 /**
+ * @brief Copy the contents of a buffered reader to a writer until EOF is hit
+ *        on the reader.
+ *
+ * @param writer Writer to copy to.
+ * @param bufReader Buffered read to read from.
+ * @return Number of bytes copied.
+ */
+inline size_t Copy(const WriterRef &writer, const BufferedReaderRef &bufReader)
+{
+    constexpr size_t BUFFER_SIZE = 8192;
+
+    size_t count = 0;
+    for (;;)
+    {
+        const BufferView buffer = FillBuffer(bufReader, BUFFER_SIZE);
+        if (buffer.second == 0)
+        {
+            return count;
+        }
+
+        const size_t written = Write(writer, buffer.first, buffer.second);
+        ConsumeBuffer(bufReader, written);
+        count += written;
+    }
+}
+
+/**
  * @brief Return the current offset position.
  *
  * @param seekable Seekable to operate on.
@@ -790,8 +1097,7 @@ inline size_t Write(WRITER &writer, IT start, IT end)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-inline size_t Tell(SEEKABLE &seekable)
+inline size_t Tell(const SeekableRef &seekable)
 {
     return Seek(seekable, 0, Whence::current);
 }
@@ -804,8 +1110,7 @@ inline size_t Tell(SEEKABLE &seekable)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-inline size_t Rewind(SEEKABLE &seekable)
+inline size_t Rewind(const SeekableRef &seekable)
 {
     return Seek(seekable, 0, Whence::start);
 }
@@ -818,8 +1123,7 @@ inline size_t Rewind(SEEKABLE &seekable)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-template <typename SEEKABLE, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-inline size_t Length(SEEKABLE &seekable)
+inline size_t Length(const SeekableRef &seekable)
 {
     const size_t old = Seek(seekable, 0, Whence::current);
     const size_t len = Seek(seekable, 0, Whence::end);

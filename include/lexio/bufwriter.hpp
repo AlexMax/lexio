@@ -46,7 +46,7 @@ class FixedBufWriter
         const size_t totalSize = m_size;
         while (offset < totalSize)
         {
-            const size_t written = Write<WRITER>(m_writer, m_buffer + offset, countLeft);
+            const size_t written = Write(m_writer, m_buffer + offset, countLeft);
             offset += written;
             countLeft -= written;
         }
@@ -159,19 +159,19 @@ class FixedBufWriter
     template <typename READER = WRITER, typename = std::enable_if_t<IsReaderV<READER>>>
     size_t LexRead(uint8_t *outDest, const size_t count)
     {
-        return Read<WRITER>(m_writer, outDest, count);
+        return Read(m_writer, outDest, count);
     }
 
     template <typename BUFFERED_READER = WRITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
     BufferView LexFillBuffer(const size_t count)
     {
-        return FillBuffer<WRITER>(m_writer, count);
+        return FillBuffer(m_writer, count);
     }
 
     template <typename BUFFERED_READER = WRITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
     void LexConsumeBuffer(const size_t count)
     {
-        ConsumeBuffer<WRITER>(m_writer, count);
+        ConsumeBuffer(m_writer, count);
     }
 
     size_t LexWrite(const uint8_t *src, const size_t count)
@@ -197,20 +197,20 @@ class FixedBufWriter
         }
 
         // Write is too large for buffer, pass through.
-        return Write<WRITER>(m_writer, src, count);
+        return Write(m_writer, src, count);
     }
 
     void LexFlush()
     {
         FlushBuffer();
-        Flush<WRITER>(m_writer);
+        Flush(m_writer);
     }
 
     template <typename SEEKABLE = WRITER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
     size_t LexSeek(const SeekPos pos)
     {
         LexFlush();
-        return Seek<WRITER>(m_writer, pos);
+        return Seek(m_writer, pos);
     }
 };
 

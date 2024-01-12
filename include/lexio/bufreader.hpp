@@ -176,7 +176,7 @@ class GenericBufReader
 
         // Read into the buffer.
         const size_t wanted = count - m_size;
-        const size_t actual = Read<READER>(&m_buffer[m_size], wanted, m_reader);
+        const size_t actual = Read(&m_buffer[m_size], wanted, m_reader);
         m_size += actual;
         return BufferView{m_buffer, m_size};
     }
@@ -195,20 +195,20 @@ class GenericBufReader
     size_t LexWrite(const uint8_t *src, const size_t count)
     {
         m_size = 0; // Invalidate buffer.
-        return Write<READER>(m_reader, src, count);
+        return Write(m_reader, src, count);
     }
 
     template <typename WRITER = READER, typename = std::enable_if_t<IsWriterV<WRITER>>>
     void LexFlush()
     {
-        Flush<READER>(m_reader);
+        Flush(m_reader);
     }
 
     template <typename SEEKABLE = READER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
     size_t LexSeek(const SeekPos pos)
     {
         m_size = 0; // Invalidate buffer.
-        return Seek<READER>(m_reader, pos);
+        return Seek(m_reader, pos);
     }
 };
 
