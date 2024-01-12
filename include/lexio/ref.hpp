@@ -86,6 +86,8 @@ class ReaderRef
     {
     }
 
+    ReaderRef(void *ptr, Detail::lexRead_t lexRead) : m_ptr(ptr), m_lexRead(lexRead) {}
+
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
 };
 
@@ -112,6 +114,8 @@ class BufferedReaderRef
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
     BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
     void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; };
 };
 
 /**
@@ -131,6 +135,8 @@ class UnbufferedReaderRef
     }
 
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; };
 };
 
 /**

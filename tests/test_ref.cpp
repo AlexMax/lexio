@@ -21,7 +21,14 @@
 #include <memory>
 
 static void AcceptReader(const LexIO::ReaderRef &) {}
-static void AcceptBufferedReader(const LexIO::BufferedReaderRef &) {}
+static void AcceptBufferedReader(const LexIO::BufferedReaderRef &ref)
+{
+    AcceptReader(ref);
+}
+static void AcceptUnbufferedReader(const LexIO::UnbufferedReaderRef &ref)
+{
+    AcceptReader(ref);
+}
 static void AcceptWriter(const LexIO::WriterRef &) {}
 static void AcceptSeekable(const LexIO::SeekableRef &) {}
 static void AcceptReaderSeekable(const LexIO::ReaderSeekableRef &) {}
@@ -83,6 +90,7 @@ TEST(Ref, UnbufferedReaderRef)
     EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
 
     AcceptReader(ref);
+    AcceptUnbufferedReader(ref);
     AmbiguousReader(test);
 }
 
