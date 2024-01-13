@@ -34,8 +34,8 @@ namespace Detail
 
 //******************************************************************************
 
-template <typename TYPE, typename READER, typename TRY_READ>
-inline constexpr TYPE ReadWithExcept(READER &reader, TRY_READ &tryRead)
+template <typename TYPE, typename TRY_READ>
+inline constexpr TYPE ReadWithExcept(const ReaderRef &reader, TRY_READ &tryRead)
 {
     TYPE rvo;
     if (!tryRead(rvo, reader))
@@ -45,8 +45,8 @@ inline constexpr TYPE ReadWithExcept(READER &reader, TRY_READ &tryRead)
     return rvo;
 }
 
-template <typename TYPE, typename WRITER, typename TRY_WRITE>
-inline constexpr void WriteWithExcept(WRITER &writer, const TYPE &value, TRY_WRITE &tryWrite)
+template <typename TYPE, typename TRY_WRITE>
+inline constexpr void WriteWithExcept(const WriterRef &writer, const TYPE &value, TRY_WRITE &tryWrite)
 {
     if (!tryWrite(writer, value))
     {
@@ -65,10 +65,9 @@ inline constexpr void WriteWithExcept(WRITER &writer, const TYPE &value, TRY_WRI
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint8_t ReadU8(READER &reader)
+inline uint8_t ReadU8(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint8_t>(reader, TryReadU8<READER>);
+    return Detail::ReadWithExcept<uint8_t>(reader, TryReadU8);
 }
 
 /**
@@ -78,10 +77,9 @@ inline uint8_t ReadU8(READER &reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteU8(WRITER &writer, const uint8_t value)
+inline void WriteU8(const WriterRef &writer, const uint8_t value)
 {
-    Detail::WriteWithExcept<uint8_t>(writer, value, TryWriteU8<WRITER>);
+    Detail::WriteWithExcept<uint8_t>(writer, value, TryWriteU8);
 }
 
 //******************************************************************************
@@ -93,10 +91,9 @@ inline void WriteU8(WRITER &writer, const uint8_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int8_t Read8(READER &reader)
+inline int8_t Read8(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int8_t>(reader, TryRead8<READER>);
+    return Detail::ReadWithExcept<int8_t>(reader, TryRead8);
 }
 
 /**
@@ -106,10 +103,9 @@ inline int8_t Read8(READER &reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void Write8(WRITER &writer, const int8_t value)
+inline void Write8(const WriterRef &writer, const int8_t value)
 {
-    Detail::WriteWithExcept<int8_t>(writer, value, TryWrite8<WRITER>);
+    Detail::WriteWithExcept<int8_t>(writer, value, TryWrite8);
 }
 
 //******************************************************************************
@@ -121,10 +117,9 @@ inline void Write8(WRITER &writer, const int8_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint16_t ReadU16LE(READER &reader)
+inline uint16_t ReadU16LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint16_t>(reader, TryReadU16LE<READER>);
+    return Detail::ReadWithExcept<uint16_t>(reader, TryReadU16LE);
 }
 
 /**
@@ -134,10 +129,9 @@ inline uint16_t ReadU16LE(READER &reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint16_t ReadU16BE(READER &reader)
+inline uint16_t ReadU16BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint16_t>(reader, TryReadU16BE<READER>);
+    return Detail::ReadWithExcept<uint16_t>(reader, TryReadU16BE);
 }
 
 /**
@@ -147,10 +141,9 @@ inline uint16_t ReadU16BE(READER &reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteU16LE(WRITER &writer, const uint16_t value)
+inline void WriteU16LE(const WriterRef &writer, const uint16_t value)
 {
-    Detail::WriteWithExcept<uint16_t>(writer, value, TryWriteU16LE<WRITER>);
+    Detail::WriteWithExcept<uint16_t>(writer, value, TryWriteU16LE);
 }
 
 /**
@@ -160,10 +153,9 @@ inline void WriteU16LE(WRITER &writer, const uint16_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteU16BE(WRITER &writer, const uint16_t value)
+inline void WriteU16BE(const WriterRef &writer, const uint16_t value)
 {
-    Detail::WriteWithExcept<uint16_t>(writer, value, TryWriteU16BE<WRITER>);
+    Detail::WriteWithExcept<uint16_t>(writer, value, TryWriteU16BE);
 }
 
 //******************************************************************************
@@ -175,10 +167,9 @@ inline void WriteU16BE(WRITER &writer, const uint16_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int16_t Read16LE(READER &reader)
+inline int16_t Read16LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int16_t>(reader, TryRead16LE<READER>);
+    return Detail::ReadWithExcept<int16_t>(reader, TryRead16LE);
 }
 
 /**
@@ -188,10 +179,9 @@ inline int16_t Read16LE(READER &reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int16_t Read16BE(READER &reader)
+inline int16_t Read16BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int16_t>(reader, TryRead16BE<READER>);
+    return Detail::ReadWithExcept<int16_t>(reader, TryRead16BE);
 }
 
 /**
@@ -201,10 +191,9 @@ inline int16_t Read16BE(READER &reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void Write16LE(WRITER &writer, const int16_t value)
+inline void Write16LE(const WriterRef &writer, const int16_t value)
 {
-    Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16LE<WRITER>);
+    Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16LE);
 }
 
 /**
@@ -214,10 +203,9 @@ inline void Write16LE(WRITER &writer, const int16_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void Write16BE(WRITER &writer, const int16_t value)
+inline void Write16BE(const WriterRef &writer, const int16_t value)
 {
-    Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16BE<WRITER>);
+    Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16BE);
 }
 
 //******************************************************************************
@@ -229,10 +217,9 @@ inline void Write16BE(WRITER &writer, const int16_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint32_t ReadU32LE(READER &reader)
+inline uint32_t ReadU32LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint32_t>(reader, TryReadU32LE<READER>);
+    return Detail::ReadWithExcept<uint32_t>(reader, TryReadU32LE);
 }
 
 /**
@@ -242,10 +229,9 @@ inline uint32_t ReadU32LE(READER &reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint32_t ReadU32BE(READER &reader)
+inline uint32_t ReadU32BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint32_t>(reader, TryReadU32BE<READER>);
+    return Detail::ReadWithExcept<uint32_t>(reader, TryReadU32BE);
 }
 
 /**
@@ -255,10 +241,9 @@ inline uint32_t ReadU32BE(READER &reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteU32LE(WRITER &writer, const uint32_t value)
+inline void WriteU32LE(const WriterRef &writer, const uint32_t value)
 {
-    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32LE<WRITER>);
+    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32LE);
 }
 
 /**
@@ -268,10 +253,9 @@ inline void WriteU32LE(WRITER &writer, const uint32_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteU32BE(WRITER &writer, const uint32_t value)
+inline void WriteU32BE(const WriterRef &writer, const uint32_t value)
 {
-    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32BE<WRITER>);
+    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32BE);
 }
 
 //******************************************************************************
@@ -283,10 +267,9 @@ inline void WriteU32BE(WRITER &writer, const uint32_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int32_t Read32LE(READER &reader)
+inline int32_t Read32LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int32_t>(reader, TryRead32LE<READER>);
+    return Detail::ReadWithExcept<int32_t>(reader, TryRead32LE);
 }
 
 /**
@@ -296,10 +279,9 @@ inline int32_t Read32LE(READER &reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int32_t Read32BE(READER &reader)
+inline int32_t Read32BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int32_t>(reader, TryRead32BE<READER>);
+    return Detail::ReadWithExcept<int32_t>(reader, TryRead32BE);
 }
 
 /**
@@ -309,10 +291,9 @@ inline int32_t Read32BE(READER &reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void Write32LE(WRITER &writer, const int32_t value)
+inline void Write32LE(const WriterRef &writer, const int32_t value)
 {
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32LE<WRITER>);
+    Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32LE);
 }
 
 /**
@@ -322,10 +303,9 @@ inline void Write32LE(WRITER &writer, const int32_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void Write32BE(WRITER &writer, const int32_t value)
+inline void Write32BE(const WriterRef &writer, const int32_t value)
 {
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32BE<WRITER>);
+    Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32BE);
 }
 
 //******************************************************************************
@@ -337,10 +317,9 @@ inline void Write32BE(WRITER &writer, const int32_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint64_t ReadU64LE(READER &reader)
+inline uint64_t ReadU64LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint64_t>(reader, TryReadU64LE<READER>);
+    return Detail::ReadWithExcept<uint64_t>(reader, TryReadU64LE);
 }
 
 /**
@@ -350,10 +329,9 @@ inline uint64_t ReadU64LE(READER &reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint64_t ReadU64BE(READER &reader)
+inline uint64_t ReadU64BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint64_t>(reader, TryReadU64BE<READER>);
+    return Detail::ReadWithExcept<uint64_t>(reader, TryReadU64BE);
 }
 
 /**
@@ -363,10 +341,9 @@ inline uint64_t ReadU64BE(READER &reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteU64LE(WRITER &writer, const uint64_t value)
+inline void WriteU64LE(const WriterRef &writer, const uint64_t value)
 {
-    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteU64LE<WRITER>);
+    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteU64LE);
 }
 
 /**
@@ -376,10 +353,9 @@ inline void WriteU64LE(WRITER &writer, const uint64_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteU64BE(WRITER &writer, const uint64_t value)
+inline void WriteU64BE(const WriterRef &writer, const uint64_t value)
 {
-    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteU64BE<WRITER>);
+    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteU64BE);
 }
 
 //******************************************************************************
@@ -391,10 +367,9 @@ inline void WriteU64BE(WRITER &writer, const uint64_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int64_t Read64LE(READER &reader)
+inline int64_t Read64LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int64_t>(reader, TryRead64LE<READER>);
+    return Detail::ReadWithExcept<int64_t>(reader, TryRead64LE);
 }
 
 /**
@@ -404,10 +379,9 @@ inline int64_t Read64LE(READER &reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int64_t Read64BE(READER &reader)
+inline int64_t Read64BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int64_t>(reader, TryRead64BE<READER>);
+    return Detail::ReadWithExcept<int64_t>(reader, TryRead64BE);
 }
 
 /**
@@ -417,10 +391,9 @@ inline int64_t Read64BE(READER &reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void Write64LE(WRITER &writer, const int64_t value)
+inline void Write64LE(const WriterRef &writer, const int64_t value)
 {
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64LE<WRITER>);
+    Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64LE);
 }
 
 /**
@@ -430,10 +403,9 @@ inline void Write64LE(WRITER &writer, const int64_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void Write64BE(WRITER &writer, const int64_t value)
+inline void Write64BE(const WriterRef &writer, const int64_t value)
 {
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64BE<WRITER>);
+    Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64BE);
 }
 
 } // namespace LexIO

@@ -57,8 +57,8 @@ namespace Detail
 
 //******************************************************************************
 
-template <typename TYPE, typename READER, typename TRY_READ>
-inline constexpr bool ReadSigned(TYPE &out, READER &reader, TRY_READ &tryRead)
+template <typename TYPE, typename TRY_READ>
+inline constexpr bool ReadSigned(TYPE &out, const ReaderRef &reader, TRY_READ &tryRead)
 {
     using UNSIGNED_TYPE = std::make_unsigned_t<TYPE>;
     UNSIGNED_TYPE outVal;
@@ -70,8 +70,8 @@ inline constexpr bool ReadSigned(TYPE &out, READER &reader, TRY_READ &tryRead)
     return true;
 }
 
-template <typename TYPE, typename WRITER, typename TRY_WRITE>
-inline constexpr bool WriteSigned(WRITER &writer, const TYPE &value, TRY_WRITE &tryWrite)
+template <typename TYPE, typename TRY_WRITE>
+inline constexpr bool WriteSigned(const WriterRef &writer, const TYPE &value, TRY_WRITE &tryWrite)
 {
     return tryWrite(writer, static_cast<TYPE>(value));
 }
@@ -87,8 +87,7 @@ inline constexpr bool WriteSigned(WRITER &writer, const TYPE &value, TRY_WRITE &
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadU8(uint8_t &out, READER &reader)
+inline bool TryReadU8(uint8_t &out, const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint8_t)] = {0};
     const size_t count = Read(buf, reader);
@@ -107,8 +106,7 @@ inline bool TryReadU8(uint8_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteU8(WRITER &writer, const uint8_t value)
+inline bool TryWriteU8(const WriterRef &writer, const uint8_t value)
 {
     const uint8_t buf[sizeof(uint8_t)] = {value};
     const size_t count = Write(writer, buf, sizeof(buf));
@@ -124,10 +122,9 @@ inline bool TryWriteU8(WRITER &writer, const uint8_t value)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryRead8(int8_t &out, READER &reader)
+inline bool TryRead8(int8_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int8_t>(out, reader, TryReadU8<READER>);
+    return Detail::ReadSigned<int8_t>(out, reader, TryReadU8);
 }
 
 /**
@@ -137,10 +134,9 @@ inline bool TryRead8(int8_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWrite8(WRITER &writer, const int8_t value)
+inline bool TryWrite8(const WriterRef &writer, const int8_t value)
 {
-    return Detail::WriteSigned<int8_t>(writer, value, TryWriteU8<WRITER>);
+    return Detail::WriteSigned<int8_t>(writer, value, TryWriteU8);
 }
 
 //******************************************************************************
@@ -152,8 +148,7 @@ inline bool TryWrite8(WRITER &writer, const int8_t value)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadU16LE(uint16_t &out, READER &reader)
+inline bool TryReadU16LE(uint16_t &out, const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
     const size_t count = Read(buf, reader);
@@ -174,8 +169,7 @@ inline bool TryReadU16LE(uint16_t &out, READER &reader)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadU16BE(uint16_t &out, READER &reader)
+inline bool TryReadU16BE(uint16_t &out, const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
     const size_t count = Read(buf, reader);
@@ -196,8 +190,7 @@ inline bool TryReadU16BE(uint16_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteU16LE(WRITER &writer, uint16_t value)
+inline bool TryWriteU16LE(const WriterRef &writer, uint16_t value)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
     value = LEXIO_IF_BE_BSWAP16_(value);
@@ -214,8 +207,7 @@ inline bool TryWriteU16LE(WRITER &writer, uint16_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteU16BE(WRITER &writer, uint16_t value)
+inline bool TryWriteU16BE(const WriterRef &writer, uint16_t value)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
     value = LEXIO_IF_LE_BSWAP16_(value);
@@ -234,10 +226,9 @@ inline bool TryWriteU16BE(WRITER &writer, uint16_t value)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryRead16LE(int16_t &out, READER &reader)
+inline bool TryRead16LE(int16_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int16_t>(out, reader, TryReadU16LE<READER>);
+    return Detail::ReadSigned<int16_t>(out, reader, TryReadU16LE);
 }
 
 /**
@@ -247,10 +238,9 @@ inline bool TryRead16LE(int16_t &out, READER &reader)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryRead16BE(int16_t &out, READER &reader)
+inline bool TryRead16BE(int16_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int16_t>(out, reader, TryReadU16BE<READER>);
+    return Detail::ReadSigned<int16_t>(out, reader, TryReadU16BE);
 }
 
 /**
@@ -260,10 +250,9 @@ inline bool TryRead16BE(int16_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWrite16LE(WRITER &writer, const int16_t value)
+inline bool TryWrite16LE(const WriterRef &writer, const int16_t value)
 {
-    return Detail::WriteSigned<int16_t>(writer, value, TryWriteU16LE<WRITER>);
+    return Detail::WriteSigned<int16_t>(writer, value, TryWriteU16LE);
 }
 
 /**
@@ -273,10 +262,9 @@ inline bool TryWrite16LE(WRITER &writer, const int16_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWrite16BE(WRITER &writer, const int16_t value)
+inline bool TryWrite16BE(const WriterRef &writer, const int16_t value)
 {
-    return Detail::WriteSigned<int16_t>(writer, value, TryWriteU16BE<WRITER>);
+    return Detail::WriteSigned<int16_t>(writer, value, TryWriteU16BE);
 }
 
 //******************************************************************************
@@ -288,8 +276,7 @@ inline bool TryWrite16BE(WRITER &writer, const int16_t value)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadU32LE(uint32_t &out, READER &reader)
+inline bool TryReadU32LE(uint32_t &out, const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
     const size_t count = Read(buf, reader);
@@ -310,8 +297,7 @@ inline bool TryReadU32LE(uint32_t &out, READER &reader)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadU32BE(uint32_t &out, READER &reader)
+inline bool TryReadU32BE(uint32_t &out, const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
     const size_t count = Read(buf, reader);
@@ -332,8 +318,7 @@ inline bool TryReadU32BE(uint32_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteU32LE(WRITER &writer, uint32_t value)
+inline bool TryWriteU32LE(const WriterRef &writer, uint32_t value)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
     value = LEXIO_IF_BE_BSWAP32_(value);
@@ -350,8 +335,7 @@ inline bool TryWriteU32LE(WRITER &writer, uint32_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteU32BE(WRITER &writer, uint32_t value)
+inline bool TryWriteU32BE(const WriterRef &writer, uint32_t value)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
     value = LEXIO_IF_LE_BSWAP32_(value);
@@ -370,10 +354,9 @@ inline bool TryWriteU32BE(WRITER &writer, uint32_t value)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryRead32LE(int32_t &out, READER &reader)
+inline bool TryRead32LE(int32_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int32_t>(out, reader, TryReadU32LE<READER>);
+    return Detail::ReadSigned<int32_t>(out, reader, TryReadU32LE);
 }
 
 /**
@@ -383,10 +366,9 @@ inline bool TryRead32LE(int32_t &out, READER &reader)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryRead32BE(int32_t &out, READER &reader)
+inline bool TryRead32BE(int32_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int32_t>(out, reader, TryReadU32BE<READER>);
+    return Detail::ReadSigned<int32_t>(out, reader, TryReadU32BE);
 }
 
 /**
@@ -396,10 +378,9 @@ inline bool TryRead32BE(int32_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWrite32LE(WRITER &writer, const int32_t value)
+inline bool TryWrite32LE(const WriterRef &writer, const int32_t value)
 {
-    return Detail::WriteSigned<int32_t>(writer, value, TryWriteU32LE<WRITER>);
+    return Detail::WriteSigned<int32_t>(writer, value, TryWriteU32LE);
 }
 
 /**
@@ -409,10 +390,9 @@ inline bool TryWrite32LE(WRITER &writer, const int32_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWrite32BE(WRITER &writer, const int32_t value)
+inline bool TryWrite32BE(const WriterRef &writer, const int32_t value)
 {
-    return Detail::WriteSigned<int32_t>(writer, value, TryWriteU32BE<WRITER>);
+    return Detail::WriteSigned<int32_t>(writer, value, TryWriteU32BE);
 }
 
 //******************************************************************************
@@ -424,8 +404,7 @@ inline bool TryWrite32BE(WRITER &writer, const int32_t value)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadU64LE(uint64_t &out, READER &reader)
+inline bool TryReadU64LE(uint64_t &out, const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
     const size_t count = Read(buf, reader);
@@ -446,8 +425,7 @@ inline bool TryReadU64LE(uint64_t &out, READER &reader)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadU64BE(uint64_t &out, READER &reader)
+inline bool TryReadU64BE(uint64_t &out, const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
     const size_t count = Read(buf, reader);
@@ -468,8 +446,7 @@ inline bool TryReadU64BE(uint64_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteU64LE(WRITER &writer, uint64_t value)
+inline bool TryWriteU64LE(const WriterRef &writer, uint64_t value)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
     value = LEXIO_IF_BE_BSWAP64_(value);
@@ -486,8 +463,7 @@ inline bool TryWriteU64LE(WRITER &writer, uint64_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteU64BE(WRITER &writer, uint64_t value)
+inline bool TryWriteU64BE(const WriterRef &writer, uint64_t value)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
     value = LEXIO_IF_LE_BSWAP64_(value);
@@ -506,10 +482,9 @@ inline bool TryWriteU64BE(WRITER &writer, uint64_t value)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryRead64LE(int64_t &out, READER &reader)
+inline bool TryRead64LE(int64_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int64_t>(out, reader, TryReadU64LE<READER>);
+    return Detail::ReadSigned<int64_t>(out, reader, TryReadU64LE);
 }
 
 /**
@@ -519,10 +494,9 @@ inline bool TryRead64LE(int64_t &out, READER &reader)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryRead64BE(int64_t &out, READER &reader)
+inline bool TryRead64BE(int64_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int64_t>(out, reader, TryReadU64BE<READER>);
+    return Detail::ReadSigned<int64_t>(out, reader, TryReadU64BE);
 }
 
 /**
@@ -532,10 +506,9 @@ inline bool TryRead64BE(int64_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWrite64LE(WRITER &writer, const int64_t value)
+inline bool TryWrite64LE(const WriterRef &writer, const int64_t value)
 {
-    return Detail::WriteSigned<int64_t>(writer, value, TryWriteU64LE<WRITER>);
+    return Detail::WriteSigned<int64_t>(writer, value, TryWriteU64LE);
 }
 
 /**
@@ -545,10 +518,9 @@ inline bool TryWrite64LE(WRITER &writer, const int64_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWrite64BE(WRITER &writer, const int64_t value)
+inline bool TryWrite64BE(const WriterRef &writer, const int64_t value)
 {
-    return Detail::WriteSigned<int64_t>(writer, value, TryWriteU64BE<WRITER>);
+    return Detail::WriteSigned<int64_t>(writer, value, TryWriteU64BE);
 }
 
 } // namespace LexIO

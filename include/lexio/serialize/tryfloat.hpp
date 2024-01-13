@@ -31,11 +31,10 @@ using float64_t = double;
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadFloat32LE(float32_t &out, READER &reader)
+inline bool TryReadFloat32LE(float32_t &out, const ReaderRef &reader)
 {
     uint32_t bits = 0;
-    if (!TryReadU32LE<READER>(bits, reader))
+    if (!TryReadU32LE(bits, reader))
     {
         return false;
     }
@@ -50,11 +49,10 @@ inline bool TryReadFloat32LE(float32_t &out, READER &reader)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadFloat32BE(float32_t &out, READER &reader)
+inline bool TryReadFloat32BE(float32_t &out, const ReaderRef &reader)
 {
     uint32_t bits = 0;
-    if (!TryReadU32BE<READER>(bits, reader))
+    if (!TryReadU32BE(bits, reader))
     {
         return false;
     }
@@ -69,11 +67,10 @@ inline bool TryReadFloat32BE(float32_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteFloat32LE(WRITER &writer, const float32_t value)
+inline bool TryWriteFloat32LE(const WriterRef &writer, const float32_t value)
 {
     const uint32_t bits = Detail::BitCast<uint32_t>(value);
-    return TryWriteU32LE<WRITER>(writer, bits);
+    return TryWriteU32LE(writer, bits);
 }
 
 /**
@@ -83,11 +80,10 @@ inline bool TryWriteFloat32LE(WRITER &writer, const float32_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteFloat32BE(WRITER &writer, const float32_t value)
+inline bool TryWriteFloat32BE(const WriterRef &writer, const float32_t value)
 {
     const uint32_t bits = Detail::BitCast<uint32_t>(value);
-    return TryWriteU32BE<WRITER>(writer, bits);
+    return TryWriteU32BE(writer, bits);
 }
 
 //******************************************************************************
@@ -99,11 +95,10 @@ inline bool TryWriteFloat32BE(WRITER &writer, const float32_t value)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadFloat64LE(float64_t &out, READER &reader)
+inline bool TryReadFloat64LE(float64_t &out, const ReaderRef &reader)
 {
     uint64_t bits = 0;
-    if (!TryReadU64LE<READER>(bits, reader))
+    if (!TryReadU64LE(bits, reader))
     {
         return false;
     }
@@ -118,11 +113,10 @@ inline bool TryReadFloat64LE(float64_t &out, READER &reader)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadFloat64BE(float64_t &out, READER &reader)
+inline bool TryReadFloat64BE(float64_t &out, const ReaderRef &reader)
 {
     uint64_t bits = 0;
-    if (!TryReadU64BE<READER>(bits, reader))
+    if (!TryReadU64BE(bits, reader))
     {
         return false;
     }
@@ -137,11 +131,10 @@ inline bool TryReadFloat64BE(float64_t &out, READER &reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteFloat64LE(WRITER &writer, const float64_t value)
+inline bool TryWriteFloat64LE(const WriterRef &writer, const float64_t value)
 {
     const uint64_t bits = Detail::BitCast<uint64_t>(value);
-    return TryWriteU64LE<WRITER>(writer, bits);
+    return TryWriteU64LE(writer, bits);
 }
 
 /**
@@ -151,11 +144,10 @@ inline bool TryWriteFloat64LE(WRITER &writer, const float64_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteFloat64BE(WRITER &writer, const float64_t value)
+inline bool TryWriteFloat64BE(const WriterRef &writer, const float64_t value)
 {
     const uint64_t bits = Detail::BitCast<uint64_t>(value);
-    return TryWriteU64BE<WRITER>(writer, bits);
+    return TryWriteU64BE(writer, bits);
 }
 
 } // namespace LexIO

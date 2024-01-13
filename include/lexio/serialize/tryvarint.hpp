@@ -23,8 +23,7 @@ namespace LexIO
 
 //******************************************************************************
 
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadUVarint32(uint32_t &out, READER &reader)
+inline bool TryReadUVarint32(uint32_t &out, const ReaderRef &reader)
 {
     constexpr int MAX_BYTES = 5;
     uint32_t rvo = 0;
@@ -36,7 +35,7 @@ inline bool TryReadUVarint32(uint32_t &out, READER &reader)
         {
             return false;
         }
-        else if (!TryReadU8<READER>(b, reader))
+        else if (!TryReadU8(b, reader))
         {
             return false;
         }
@@ -53,19 +52,18 @@ inline bool TryReadUVarint32(uint32_t &out, READER &reader)
     return true;
 }
 
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteUVarint32(WRITER &writer, const uint32_t value)
+inline bool TryWriteUVarint32(const WriterRef &writer, const uint32_t value)
 {
     uint32_t v = value;
     while (v >= 0x80)
     {
-        if (!TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v | 0x80)))
+        if (!TryWriteU8(writer, static_cast<uint8_t>(v | 0x80)))
         {
             return false;
         }
         v >>= 7;
     }
-    return TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v));
+    return TryWriteU8(writer, static_cast<uint8_t>(v));
 }
 
 constexpr size_t UVarint32Bytes(const uint32_t value)
@@ -82,16 +80,14 @@ constexpr size_t UVarint32Bytes(const uint32_t value)
 
 //******************************************************************************
 
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadVarint32(int32_t &out, READER &reader)
+inline bool TryReadVarint32(int32_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int32_t>(out, reader, TryReadUVarint32<READER>);
+    return Detail::ReadSigned<int32_t>(out, reader, TryReadUVarint32);
 }
 
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteVarint32(WRITER &writer, const int32_t value)
+inline bool TryWriteVarint32(const WriterRef &writer, const int32_t value)
 {
-    return Detail::WriteSigned<int32_t>(writer, value, TryWriteUVarint32<WRITER>);
+    return Detail::WriteSigned<int32_t>(writer, value, TryWriteUVarint32);
 }
 
 constexpr size_t Varint32Bytes(const int32_t value)
@@ -108,11 +104,10 @@ constexpr size_t Varint32Bytes(const int32_t value)
 
 //******************************************************************************
 
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadSVarint32(int32_t &out, READER &reader)
+inline bool TryReadSVarint32(int32_t &out, const ReaderRef &reader)
 {
     uint32_t outVal;
-    if (!TryReadUVarint32<READER>(outVal, reader))
+    if (!TryReadUVarint32(outVal, reader))
     {
         return false;
     }
@@ -120,11 +115,10 @@ inline bool TryReadSVarint32(int32_t &out, READER &reader)
     return true;
 }
 
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteSVarint32(WRITER &writer, const int32_t value)
+inline bool TryWriteSVarint32(const WriterRef &writer, const int32_t value)
 {
     const uint32_t var = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 31);
-    return TryWriteUVarint32<WRITER>(writer, var);
+    return TryWriteUVarint32(writer, var);
 }
 
 constexpr size_t SVarint32Bytes(const int32_t value)
@@ -141,8 +135,7 @@ constexpr size_t SVarint32Bytes(const int32_t value)
 
 //******************************************************************************
 
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadUVarint64(uint64_t &out, READER &reader)
+inline bool TryReadUVarint64(uint64_t &out, const ReaderRef &reader)
 {
     constexpr int MAX_BYTES = 10;
     uint64_t rvo = 0;
@@ -154,7 +147,7 @@ inline bool TryReadUVarint64(uint64_t &out, READER &reader)
         {
             return false;
         }
-        if (!TryReadU8<READER>(b, reader))
+        if (!TryReadU8(b, reader))
         {
             return false;
         }
@@ -171,19 +164,18 @@ inline bool TryReadUVarint64(uint64_t &out, READER &reader)
     return true;
 }
 
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteUVarint64(WRITER &writer, const uint64_t value)
+inline bool TryWriteUVarint64(const WriterRef &writer, const uint64_t value)
 {
     uint64_t v = value;
     while (v >= 0x80)
     {
-        if (!TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v | 0x80)))
+        if (!TryWriteU8(writer, static_cast<uint8_t>(v | 0x80)))
         {
             return false;
         }
         v >>= 7;
     }
-    return TryWriteU8<WRITER>(writer, static_cast<uint8_t>(v));
+    return TryWriteU8(writer, static_cast<uint8_t>(v));
 }
 
 constexpr size_t UVarint64Bytes(const uint64_t value)
@@ -200,16 +192,14 @@ constexpr size_t UVarint64Bytes(const uint64_t value)
 
 //******************************************************************************
 
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadVarint64(int64_t &out, READER &reader)
+inline bool TryReadVarint64(int64_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int64_t>(out, reader, TryReadUVarint64<READER>);
+    return Detail::ReadSigned<int64_t>(out, reader, TryReadUVarint64);
 }
 
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteVarint64(WRITER &writer, const int64_t value)
+inline bool TryWriteVarint64(const WriterRef &writer, const int64_t value)
 {
-    return Detail::WriteSigned<int64_t>(writer, value, TryWriteUVarint64<WRITER>);
+    return Detail::WriteSigned<int64_t>(writer, value, TryWriteUVarint64);
 }
 
 constexpr size_t Varint64Bytes(const int64_t value)
@@ -226,11 +216,10 @@ constexpr size_t Varint64Bytes(const int64_t value)
 
 //******************************************************************************
 
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline bool TryReadSVarint64(int64_t &out, READER &reader)
+inline bool TryReadSVarint64(int64_t &out, const ReaderRef &reader)
 {
     uint64_t outVal;
-    if (!TryReadUVarint64<READER>(outVal, reader))
+    if (!TryReadUVarint64(outVal, reader))
     {
         return false;
     }
@@ -238,11 +227,10 @@ inline bool TryReadSVarint64(int64_t &out, READER &reader)
     return true;
 }
 
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline bool TryWriteSVarint64(WRITER &writer, const int64_t value)
+inline bool TryWriteSVarint64(const WriterRef &writer, const int64_t value)
 {
     const uint64_t var = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
-    return TryWriteUVarint64<WRITER>(writer, var);
+    return TryWriteUVarint64(writer, var);
 }
 
 constexpr size_t SVarint64Bytes(const int64_t value)

@@ -33,10 +33,9 @@ namespace LexIO
  * @return An unsigned 32-bit integer from the Reader.
  * @throws std::runtime_error if there are too many varint bytes for a 64-bit integer.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint32_t ReadUVarint32(READER &reader)
+inline uint32_t ReadUVarint32(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint32_t>(reader, TryReadUVarint32<READER>);
+    return Detail::ReadWithExcept<uint32_t>(reader, TryReadUVarint32);
 }
 
 /**
@@ -49,10 +48,9 @@ inline uint32_t ReadUVarint32(READER &reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 32-bit integer to write to the Writer.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteUVarint32(WRITER &writer, const uint32_t value)
+inline void WriteUVarint32(const WriterRef &writer, const uint32_t value)
 {
-    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteUVarint32<WRITER>);
+    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteUVarint32);
 }
 
 /**
@@ -63,10 +61,9 @@ inline void WriteUVarint32(WRITER &writer, const uint32_t value)
  * @param reader Reader to operate on.
  * @return An signed 32-bit integer from the Reader.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int32_t ReadVarint32(READER &reader)
+inline int32_t ReadVarint32(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int32_t>(reader, TryReadVarint32<READER>);
+    return Detail::ReadWithExcept<int32_t>(reader, TryReadVarint32);
 }
 
 /**
@@ -77,10 +74,9 @@ inline int32_t ReadVarint32(READER &reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 32-bit integer to write to the Writer.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteVarint32(WRITER &writer, const int32_t value)
+inline void WriteVarint32(const WriterRef &writer, const int32_t value)
 {
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteVarint32<WRITER>);
+    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteVarint32);
 }
 
 /**
@@ -91,10 +87,9 @@ inline void WriteVarint32(WRITER &writer, const int32_t value)
  * @param reader Reader to operate on.
  * @return An signed 32-bit integer from the Reader.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int32_t ReadSVarint32(READER &reader)
+inline int32_t ReadSVarint32(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int32_t>(reader, TryReadSVarint32<READER>);
+    return Detail::ReadWithExcept<int32_t>(reader, TryReadSVarint32);
 }
 
 /**
@@ -105,10 +100,9 @@ inline int32_t ReadSVarint32(READER &reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 32-bit integer to write to the Writer.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteSVarint32(WRITER &writer, const int32_t value)
+inline void WriteSVarint32(const WriterRef &writer, const int32_t value)
 {
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteSVarint32<WRITER>);
+    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteSVarint32);
 }
 
 /**
@@ -122,10 +116,9 @@ inline void WriteSVarint32(WRITER &writer, const int32_t value)
  * @return An unsigned 64-bit integer from the Reader.
  * @throws std::runtime_error if there are too many varint bytes for a 64-bit integer.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline uint64_t ReadUVarint64(READER &reader)
+inline uint64_t ReadUVarint64(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint64_t>(reader, TryReadUVarint64<READER>);
+    return Detail::ReadWithExcept<uint64_t>(reader, TryReadUVarint64);
 }
 
 /**
@@ -138,10 +131,9 @@ inline uint64_t ReadUVarint64(READER &reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 64-bit integer to write to the Writer.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteUVarint64(WRITER &writer, const uint64_t value)
+inline void WriteUVarint64(const WriterRef &writer, const uint64_t value)
 {
-    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteUVarint64<WRITER>);
+    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteUVarint64);
 }
 
 /**
@@ -152,10 +144,9 @@ inline void WriteUVarint64(WRITER &writer, const uint64_t value)
  * @param reader Reader to operate on.
  * @return An signed 64-bit integer from the Reader.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int64_t ReadVarint64(READER &reader)
+inline int64_t ReadVarint64(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int64_t>(reader, TryReadVarint64<READER>);
+    return Detail::ReadWithExcept<int64_t>(reader, TryReadVarint64);
 }
 
 /**
@@ -166,10 +157,9 @@ inline int64_t ReadVarint64(READER &reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 64-bit integer to write to the Writer.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteVarint64(WRITER &writer, const int64_t value)
+inline void WriteVarint64(const WriterRef &writer, const int64_t value)
 {
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteVarint64<WRITER>);
+    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteVarint64);
 }
 
 /**
@@ -180,10 +170,9 @@ inline void WriteVarint64(WRITER &writer, const int64_t value)
  * @param reader Reader to operate on.
  * @return An signed 64-bit integer from the Reader.
  */
-template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
-inline int64_t ReadSVarint64(READER &reader)
+inline int64_t ReadSVarint64(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int64_t>(reader, TryReadSVarint64<READER>);
+    return Detail::ReadWithExcept<int64_t>(reader, TryReadSVarint64);
 }
 
 /**
@@ -194,10 +183,9 @@ inline int64_t ReadSVarint64(READER &reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 64-bit integer to write to the Writer.
  */
-template <typename WRITER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-inline void WriteSVarint64(WRITER &writer, const int64_t value)
+inline void WriteSVarint64(const WriterRef &writer, const int64_t value)
 {
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteSVarint64<WRITER>);
+    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteSVarint64);
 }
 
 } // namespace LexIO
