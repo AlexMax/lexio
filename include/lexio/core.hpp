@@ -313,16 +313,26 @@ using IsSeekable = Detail::IsDetected<Detail::SeekableType, T>;
 template <typename T>
 LEXIO_INLINE_VAR constexpr bool IsSeekableV = IsSeekable<T>::value;
 
+template <typename T>
+struct IsRef : std::false_type
+{
+};
+
+template <typename T>
+LEXIO_INLINE_VAR constexpr bool IsRefV = IsRef<T>::value;
+
 /**
  * @brief A type-erased reference to a stream that implements Reader.
  */
 class ReaderRef
 {
+    friend class UnbufferedReaderRef;
+
   public:
     using WrapReadFunc = size_t (*)(void *, uint8_t *, const size_t);
 
     template <typename READER>
-    using EnableIfWrappable = std::enable_if_t<!Detail::IsSameV<ReaderRef, READER> && IsReaderV<READER>>;
+    using EnableIfWrappable = std::enable_if_t<!IsRefV<READER> && IsReaderV<READER>>;
 
     ReaderRef() = delete;
 
@@ -362,6 +372,11 @@ class ReaderRef
     WrapReadFunc m_lexRead;
 };
 
+template <>
+struct IsRef<ReaderRef> : std::true_type
+{
+};
+
 /**
  * @brief A type-erased reference to a stream that implements BufferedReader.
  */
@@ -372,8 +387,7 @@ class BufferedReaderRef
     using WrapConsumeBufferFunc = void (*)(void *, const size_t);
 
     template <typename BUFFERED_READER>
-    using EnableIfWrappable =
-        std::enable_if_t<!Detail::IsSameV<BufferedReaderRef, BUFFERED_READER> && IsBufferedReaderV<BUFFERED_READER>>;
+    using EnableIfWrappable = std::enable_if_t<!IsRefV<BUFFERED_READER> && IsBufferedReaderV<BUFFERED_READER>>;
 
     BufferedReaderRef() = delete;
 
@@ -434,16 +448,21 @@ class BufferedReaderRef
     WrapConsumeBufferFunc m_lexConsumeBuffer;
 };
 
+template <>
+struct IsRef<BufferedReaderRef> : std::true_type
+{
+};
+
 /**
  * @brief A type-erased reference to a stream that implements Reader, but not
- *        BufferedReader.
+ *        BufferedReader.  Useful if you want to make functions that overload
+ *        based on the presence or absence of BufferedReader.
  */
 class UnbufferedReaderRef
 {
   public:
     template <typename READER>
-    using EnableIfWrappable = std::enable_if_t<!Detail::IsSameV<UnbufferedReaderRef, READER> && IsReaderV<READER> &&
-                                               !IsBufferedReaderV<READER>>;
+    using EnableIfWrappable = std::enable_if_t<!IsRefV<READER> && IsReaderV<READER> && !IsBufferedReaderV<READER>>;
 
     UnbufferedReaderRef() = delete;
 
@@ -453,6 +472,11 @@ class UnbufferedReaderRef
     UnbufferedReaderRef(READER &reader) : m_ptr(&reader), m_lexRead(Detail::WrapRead<READER>)
     {
     }
+
+    /**
+     * @brief Construct from a Reader.
+     */
+    UnbufferedReaderRef(const ReaderRef &reader) : m_ptr(reader.m_ptr), m_lexRead(reader.m_lexRead) {}
 
     UnbufferedReaderRef(void *ptr, ReaderRef::WrapReadFunc lexRead) : m_ptr(ptr), m_lexRead(lexRead) {}
 
@@ -488,6 +512,11 @@ class UnbufferedReaderRef
     ReaderRef::WrapReadFunc m_lexRead;
 };
 
+template <>
+struct IsRef<UnbufferedReaderRef> : std::true_type
+{
+};
+
 /**
  * @brief A type-erased reference to a stream that implements Writer.
  */
@@ -498,7 +527,7 @@ class WriterRef
     using WrapFlushFunc = void (*)(void *);
 
     template <typename WRITER>
-    using EnableIfWrappable = std::enable_if_t<!Detail::IsSameV<WriterRef, WRITER> && IsWriterV<WRITER>>;
+    using EnableIfWrappable = std::enable_if_t<!IsRefV<WRITER> && IsWriterV<WRITER>>;
 
     WriterRef() = delete;
 
@@ -548,6 +577,11 @@ class WriterRef
     WrapFlushFunc m_lexFlush;
 };
 
+template <>
+struct IsRef<WriterRef> : std::true_type
+{
+};
+
 /**
  * @brief A type-erased reference to a stream that implements Seekable.
  */
@@ -557,7 +591,7 @@ class SeekableRef
     using WrapSeekFunc = size_t (*)(void *, const SeekPos);
 
     template <typename SEEKABLE>
-    using EnableIfWrappable = std::enable_if_t<!Detail::IsSameV<SeekableRef, SEEKABLE> && IsSeekableV<SEEKABLE>>;
+    using EnableIfWrappable = std::enable_if_t<!IsRefV<SEEKABLE> && IsSeekableV<SEEKABLE>>;
 
     SeekableRef() = delete;
 
@@ -595,6 +629,11 @@ class SeekableRef
   protected:
     void *m_ptr;
     WrapSeekFunc m_lexSeek;
+};
+
+template <>
+struct IsRef<SeekableRef> : std::true_type
+{
 };
 
 //******************************************************************************

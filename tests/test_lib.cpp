@@ -21,7 +21,7 @@
 TEST(Lib, ReadToEOF)
 {
     auto stream = GetVectorStream();
-    auto reader = LexIO::ReaderRef(stream);
+    auto reader = LexIO::UnbufferedReaderRef{stream};
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), reader);
@@ -33,7 +33,7 @@ TEST(Lib, ReadToEOF)
 TEST(Lib, ReadToEOFEmpty)
 {
     auto stream = LexIO::VectorStream{};
-    auto reader = LexIO::ReaderRef{stream};
+    auto reader = LexIO::UnbufferedReaderRef{stream};
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), reader);
@@ -44,7 +44,7 @@ TEST(Lib, ReadToEOFEmpty)
 TEST(Lib, ReadToEOFSmallBuffer)
 {
     auto stream = LexIO::VectorStream{'X', 'Y', 'Z', 'Z', 'Y'};
-    auto reader = LexIO::ReaderRef{stream};
+    auto reader = LexIO::UnbufferedReaderRef{stream};
 
     std::vector<uint8_t> data;
     const size_t bytes = LexIO::ReadToEOF(std::back_inserter(data), reader);

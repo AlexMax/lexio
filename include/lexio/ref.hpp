@@ -49,6 +49,11 @@ class ReaderWriterRef
     void LexFlush() const { m_lexFlush(m_ptr); }
 };
 
+template <>
+struct IsRef<ReaderWriterRef> : std::true_type
+{
+};
+
 /**
  * @brief A type-erased reference to a stream that implements BufferedReader,
  *        and Writer.
@@ -84,6 +89,11 @@ class BufferedReaderWriterRef
     void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
     size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
     void LexFlush() const { m_lexFlush(m_ptr); }
+};
+
+template <>
+struct IsRef<BufferedReaderWriterRef> : std::true_type
+{
 };
 
 /**
@@ -146,6 +156,11 @@ class BufferedReaderSeekableRef
     size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
 };
 
+template <>
+struct IsRef<BufferedReaderSeekableRef> : std::true_type
+{
+};
+
 /**
  * @brief A type-erased reference to a stream that implements Reader, Writer,
  *        and Seekable.
@@ -175,6 +190,11 @@ class ReaderWriterSeekableRef
     size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
     void LexFlush() const { m_lexFlush(m_ptr); }
     size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
+};
+
+template <>
+struct IsRef<ReaderWriterSeekableRef> : std::true_type
+{
 };
 
 /**
@@ -216,6 +236,11 @@ class BufferedReaderWriterSeekableRef
     size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
     void LexFlush() const { m_lexFlush(m_ptr); }
     size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
+};
+
+template <>
+struct IsRef<BufferedReaderWriterSeekableRef> : std::true_type
+{
 };
 
 } // namespace LexIO
