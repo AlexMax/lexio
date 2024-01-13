@@ -176,7 +176,7 @@ class GenericBufReader
 
         // Read into the buffer.
         const size_t wanted = count - m_size;
-        const size_t actual = Read(&m_buffer[m_size], wanted, m_reader);
+        const size_t actual = Read(&m_buffer[m_size], m_reader, wanted);
         m_size += actual;
         return BufferView{m_buffer, m_size};
     }

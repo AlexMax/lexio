@@ -62,7 +62,7 @@ inline size_t ReadToEOF(OUT_ITER outIt, UnbufferedReaderRef reader)
     std::unique_ptr<uint8_t[]> data{::new uint8_t[BUFFER_SIZE]};
     for (;;)
     {
-        count = Read(data.get(), BUFFER_SIZE, reader);
+        count = Read(data.get(), reader, BUFFER_SIZE);
         if (count == 0)
         {
             // Read all data there was to read.

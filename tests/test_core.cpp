@@ -166,7 +166,7 @@ TEST(ReaderRef, Call)
     auto test = GoodReader{};
     LexIO::ReaderRef ref(test);
 
-    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], ref, sizeof(buffer)), 0);
 }
 
 //******************************************************************************
@@ -216,7 +216,7 @@ TEST(BufferedReaderRef, Call)
     auto test = GoodBufferedReader{};
     LexIO::BufferedReaderRef ref(test);
 
-    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], ref, sizeof(buffer)), 0);
     EXPECT_EQ(ref.LexRead(&buffer[0], sizeof(buffer)), 0);
     EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     EXPECT_NO_THROW(LexIO::ConsumeBuffer(ref, 0));
@@ -267,7 +267,7 @@ TEST(UnbufferedReaderRef, Call)
     auto test = GoodReader{};
     LexIO::UnbufferedReaderRef ref(test);
 
-    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], ref, sizeof(buffer)), 0);
     EXPECT_EQ(ref.LexRead(&buffer[0], sizeof(buffer)), 0);
 }
 
@@ -365,7 +365,7 @@ TEST(Reader, RawRead)
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
-    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), stream), 5);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], stream, sizeof(buffer)), 5);
     EXPECT_EQ(buffer[i++], 'T');
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
@@ -380,19 +380,34 @@ TEST(Reader, RawReadTrunc)
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
-    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), stream), 4);
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], stream, sizeof(buffer)), 4);
     EXPECT_EQ(buffer[i++], 'T');
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
     EXPECT_EQ(buffer[i++], ' ');
 }
+
 TEST(Reader, ReadPtrLen)
 {
     auto stream = GetVectorStream();
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), stream), 5);
+    EXPECT_EQ(LexIO::Read(&buffer[0], stream, sizeof(buffer)), 5);
+    EXPECT_EQ(buffer[i++], 'T');
+    EXPECT_EQ(buffer[i++], 'h');
+    EXPECT_EQ(buffer[i++], 'e');
+    EXPECT_EQ(buffer[i++], ' ');
+    EXPECT_EQ(buffer[i++], 'q');
+}
+
+TEST(Reader, ReadCharPtrLen)
+{
+    auto stream = GetVectorStream();
+
+    size_t i = 0;
+    int8_t buffer[5] = {0};
+    EXPECT_EQ(LexIO::Read(&buffer[0], stream, sizeof(buffer)), 5);
     EXPECT_EQ(buffer[i++], 'T');
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
@@ -406,7 +421,7 @@ TEST(Reader, ReadPtrLenPartial)
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), stream), 5);
+    EXPECT_EQ(LexIO::Read(&buffer[0], stream, sizeof(buffer)), 5);
     EXPECT_EQ(buffer[i++], 'T');
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
@@ -421,7 +436,7 @@ TEST(Reader, ReadPtrLenTrunc)
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
-    EXPECT_EQ(LexIO::Read(&buffer[0], sizeof(buffer), stream), 4);
+    EXPECT_EQ(LexIO::Read(&buffer[0], stream, sizeof(buffer)), 4);
     EXPECT_EQ(buffer[i++], 'T');
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
@@ -434,6 +449,20 @@ TEST(Reader, ReadArray)
 
     size_t i = 0;
     uint8_t buffer[5] = {0};
+    EXPECT_EQ(LexIO::Read(buffer, stream), 5);
+    EXPECT_EQ(buffer[i++], 'T');
+    EXPECT_EQ(buffer[i++], 'h');
+    EXPECT_EQ(buffer[i++], 'e');
+    EXPECT_EQ(buffer[i++], ' ');
+    EXPECT_EQ(buffer[i++], 'q');
+}
+
+TEST(Reader, ReadCharArray)
+{
+    auto stream = GetVectorStream();
+
+    size_t i = 0;
+    int8_t buffer[5] = {0};
     EXPECT_EQ(LexIO::Read(buffer, stream), 5);
     EXPECT_EQ(buffer[i++], 'T');
     EXPECT_EQ(buffer[i++], 'h');
@@ -468,56 +497,6 @@ TEST(Reader, ReadArrayTrunc)
     EXPECT_EQ(buffer[i++], 'h');
     EXPECT_EQ(buffer[i++], 'e');
     EXPECT_EQ(buffer[i++], ' ');
-}
-
-TEST(Reader, ReadIterator)
-{
-    auto stream = GetVectorStream();
-
-    size_t i = 0;
-    uint8_t buffer[5] = {0};
-    EXPECT_EQ(LexIO::Read(&buffer[0], &buffer[5], stream), 5);
-    EXPECT_EQ(buffer[i++], 'T');
-    EXPECT_EQ(buffer[i++], 'h');
-    EXPECT_EQ(buffer[i++], 'e');
-    EXPECT_EQ(buffer[i++], ' ');
-    EXPECT_EQ(buffer[i++], 'q');
-}
-
-TEST(Reader, ReadIteratorPartial)
-{
-    auto stream = PartialVectorStream(GetVectorStream());
-
-    size_t i = 0;
-    uint8_t buffer[5] = {0};
-    EXPECT_EQ(LexIO::Read(&buffer[0], &buffer[5], stream), 5);
-    EXPECT_EQ(buffer[i++], 'T');
-    EXPECT_EQ(buffer[i++], 'h');
-    EXPECT_EQ(buffer[i++], 'e');
-    EXPECT_EQ(buffer[i++], ' ');
-    EXPECT_EQ(buffer[i++], 'q');
-}
-
-TEST(Reader, ReadIteratorTrunc)
-{
-    uint8_t streamBuf[4] = {0};
-    auto stream = GetViewStream(streamBuf);
-
-    size_t i = 0;
-    uint8_t buffer[5] = {0};
-    EXPECT_EQ(LexIO::Read(&buffer[0], &buffer[5], stream), 4);
-    EXPECT_EQ(buffer[i++], 'T');
-    EXPECT_EQ(buffer[i++], 'h');
-    EXPECT_EQ(buffer[i++], 'e');
-    EXPECT_EQ(buffer[i++], ' ');
-}
-
-TEST(Reader, ReadIteratorEmpty)
-{
-    auto stream = GetVectorStream();
-
-    std::array<uint8_t, 5> buffer = {0};
-    EXPECT_EQ(0, LexIO::Read(buffer.begin(), buffer.begin(), stream));
 }
 
 //******************************************************************************
@@ -558,6 +537,21 @@ TEST(Writer, WritePtrLen)
 
     size_t i = 0;
     const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    EXPECT_EQ(LexIO::Write(stream, &data[0], sizeof(data)), 5);
+    EXPECT_EQ(cstream.Container()[i++], 'X');
+    EXPECT_EQ(cstream.Container()[i++], 'Y');
+    EXPECT_EQ(cstream.Container()[i++], 'Z');
+    EXPECT_EQ(cstream.Container()[i++], 'Z');
+    EXPECT_EQ(cstream.Container()[i++], 'Y');
+}
+
+TEST(Writer, WriteCharPtrLen)
+{
+    auto stream = LexIO::VectorStream{};
+    const auto &cstream = stream;
+
+    size_t i = 0;
+    const int8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
     EXPECT_EQ(LexIO::Write(stream, &data[0], sizeof(data)), 5);
     EXPECT_EQ(cstream.Container()[i++], 'X');
     EXPECT_EQ(cstream.Container()[i++], 'Y');
@@ -610,6 +604,21 @@ TEST(Writer, WriteArray)
     EXPECT_EQ(cstream.Container()[i++], 'Y');
 }
 
+TEST(Writer, WriteCharArray)
+{
+    auto stream = LexIO::VectorStream{};
+    const auto &cstream = stream;
+
+    size_t i = 0;
+    const int8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
+    EXPECT_EQ(LexIO::Write(stream, data), 5);
+    EXPECT_EQ(cstream.Container()[i++], 'X');
+    EXPECT_EQ(cstream.Container()[i++], 'Y');
+    EXPECT_EQ(cstream.Container()[i++], 'Z');
+    EXPECT_EQ(cstream.Container()[i++], 'Z');
+    EXPECT_EQ(cstream.Container()[i++], 'Y');
+}
+
 TEST(Writer, WriteArrayPartial)
 {
     auto stream = PartialVectorStream{LexIO::VectorStream{}};
@@ -637,59 +646,6 @@ TEST(Writer, WriteArrayTrunc)
     EXPECT_EQ(streamBuf[i++], 'Y');
     EXPECT_EQ(streamBuf[i++], 'Z');
     EXPECT_EQ(streamBuf[i++], 'Z');
-}
-
-TEST(Writer, WriteIterator)
-{
-    auto stream = LexIO::VectorStream{};
-    const auto &cstream = stream;
-
-    size_t i = 0;
-    const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    EXPECT_EQ(LexIO::Write(stream, &data[0], &data[5]), 5);
-    EXPECT_EQ(cstream.Container()[i++], 'X');
-    EXPECT_EQ(cstream.Container()[i++], 'Y');
-    EXPECT_EQ(cstream.Container()[i++], 'Z');
-    EXPECT_EQ(cstream.Container()[i++], 'Z');
-    EXPECT_EQ(cstream.Container()[i++], 'Y');
-}
-
-TEST(Writer, WriteIteratorPartial)
-{
-    auto stream = PartialVectorStream{LexIO::VectorStream{}};
-    const auto &cstream = stream;
-
-    size_t i = 0;
-    const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    EXPECT_EQ(LexIO::Write(stream, &data[0], &data[5]), 5);
-    EXPECT_EQ(cstream.Stream().Container()[i++], 'X');
-    EXPECT_EQ(cstream.Stream().Container()[i++], 'Y');
-    EXPECT_EQ(cstream.Stream().Container()[i++], 'Z');
-    EXPECT_EQ(cstream.Stream().Container()[i++], 'Z');
-    EXPECT_EQ(cstream.Stream().Container()[i++], 'Y');
-}
-
-TEST(Writer, WriteIteratorTrunc)
-{
-    uint8_t streamBuf[4] = {0};
-    auto stream = GetViewStream(streamBuf);
-
-    size_t i = 0;
-    const uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    EXPECT_EQ(LexIO::Write(stream, &data[0], &data[5]), 4);
-    EXPECT_EQ(streamBuf[i++], 'X');
-    EXPECT_EQ(streamBuf[i++], 'Y');
-    EXPECT_EQ(streamBuf[i++], 'Z');
-    EXPECT_EQ(streamBuf[i++], 'Z');
-}
-
-TEST(Writer, WriteIteratorEmpty)
-{
-    uint8_t streamBuf[4] = {0};
-    auto stream = GetViewStream(streamBuf);
-
-    const std::vector<uint8_t> data = {'X', 'Y', 'Z', 'Z', 'Y'};
-    EXPECT_EQ(0, LexIO::Write(stream, data.begin(), data.begin()));
 }
 
 //******************************************************************************

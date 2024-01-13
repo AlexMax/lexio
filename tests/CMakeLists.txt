@@ -15,7 +15,6 @@ enable_testing()
 set(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/test_bufreader.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_bufwriter.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test_chars.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_core.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_file.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_float.cpp"

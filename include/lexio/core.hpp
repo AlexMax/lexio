@@ -119,10 +119,10 @@ namespace Detail
 {
 
 /**
- * @see https://en.cppreference.com/w/cpp/types/is_same
+ * @see https://en.cppreference.com/w/cpp/types/is_const
  */
-template <typename TYPE1, typename TYPE2>
-LEXIO_INLINE_VAR constexpr bool IsSameV = std::is_same<TYPE1, TYPE2>::value;
+template <typename TYPE>
+LEXIO_INLINE_VAR constexpr bool IsConstV = std::is_const<TYPE>::value;
 
 /**
  * @see https://en.cppreference.com/w/cpp/algorithm/min
@@ -665,14 +665,14 @@ struct IsRef<SeekableRef> : std::true_type
  *         FillBuffer and ConsumeBuffer.
  *
  * @param outDest Pointer to starting byte of output buffer.
- * @param count Size of output buffer in bytes.
  * @param reader Reader to operate on.
+ * @param count Number of bytes to attempt to read.
  * @return Actual number of bytes read, or 0 if EOF-like condition was
  *         encountered.
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-inline size_t RawRead(uint8_t *outDest, size_t count, ReaderRef reader)
+inline size_t RawRead(uint8_t *outDest, ReaderRef reader, size_t count)
 {
     return reader.LexRead(outDest, count);
 }
@@ -771,19 +771,21 @@ inline size_t Seek(SeekableRef seekable, const ptrdiff_t offset, const Whence wh
  *        the output buffer until EOF is hit.
  *
  * @param outDest Pointer to starting byte of output buffer.
- * @param count Size of output buffer in bytes.
  * @param reader Reader to operate on.
+ * @param count Number of bytes to attempt to read.
  * @return Actual number of bytes read, or 0 if EOF-like condition was
  *         encountered.
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-inline size_t Read(uint8_t *outDest, size_t count, ReaderRef reader)
+template <typename BYTE, typename = std::enable_if_t<!Detail::IsConstV<BYTE> && sizeof(BYTE) == 1>>
+inline size_t Read(BYTE *outDest, ReaderRef reader, size_t count)
 {
+    uint8_t *dest = reinterpret_cast<uint8_t *>(outDest);
     size_t offset = 0, remain = count;
     while (offset != count)
     {
-        const size_t read = reader.LexRead(outDest + offset, remain);
+        const size_t read = reader.LexRead(dest + offset, remain);
         if (read == 0)
         {
             return offset;
@@ -808,13 +810,14 @@ inline size_t Read(uint8_t *outDest, size_t count, ReaderRef reader)
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-template <size_t N>
-inline size_t Read(uint8_t (&outArray)[N], ReaderRef reader)
+template <typename BYTE, size_t N, typename = std::enable_if_t<!Detail::IsConstV<BYTE> && sizeof(BYTE) == 1>>
+inline size_t Read(BYTE (&outArray)[N], ReaderRef reader)
 {
+    uint8_t *dest = reinterpret_cast<uint8_t *>(&outArray[0]);
     size_t offset = 0, remain = N;
     while (offset != N)
     {
-        const size_t read = reader.LexRead(&outArray[offset], remain);
+        const size_t read = reader.LexRead(dest + offset, remain);
         if (read == 0)
         {
             return offset;
@@ -825,37 +828,6 @@ inline size_t Read(uint8_t (&outArray)[N], ReaderRef reader)
     }
 
     return N;
-}
-
-/**
- * @brief Read data from the current offset, inserting it into the passed
- *        buffer.  Calls LexIO::RawRead as many times as necessary to fill
- *        the output buffer until EOF is hit.
- *
- * @param outStart Iterator to start byte of output buffer.
- * @param outEnd Iterator to end byte of output buffer.
- * @param reader Reader to operate on.
- * @return Actual number of bytes read, or 0 if EOF-like condition was
- *         encountered.
- * @throws std::runtime_error if an error with the read operation was
- *         encountered.  EOF is _not_ considered an error.
- */
-template <typename IT>
-inline size_t Read(IT outStart, IT outEnd, ReaderRef reader)
-{
-    IT iter = outStart;
-    while (iter != outEnd)
-    {
-        const size_t read = reader.LexRead(&(*iter), std::distance(iter, outEnd));
-        if (read == 0)
-        {
-            return std::distance(outStart, iter);
-        }
-
-        iter += read;
-    }
-
-    return std::distance(outStart, outEnd);
 }
 
 /**
@@ -882,12 +854,14 @@ inline BufferView GetBuffer(BufferedReaderRef bufReader)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-inline size_t Write(WriterRef writer, const uint8_t *src, size_t count)
+template <typename BYTE, typename = std::enable_if_t<sizeof(BYTE) == 1>>
+inline size_t Write(WriterRef writer, const BYTE *src, size_t count)
 {
+    const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(src);
     size_t offset = 0, remain = count;
     while (offset != count)
     {
-        const size_t written = writer.LexWrite(src + offset, remain);
+        const size_t written = writer.LexWrite(srcByte + offset, remain);
         if (written == 0)
         {
             return offset;
@@ -912,13 +886,14 @@ inline size_t Write(WriterRef writer, const uint8_t *src, size_t count)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-template <size_t N>
-inline size_t Write(WriterRef writer, const uint8_t (&array)[N])
+template <typename BYTE, size_t N, typename = std::enable_if_t<sizeof(BYTE) == 1>>
+inline size_t Write(WriterRef writer, const BYTE (&array)[N])
 {
+    const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(&array[0]);
     size_t offset = 0, remain = N;
     while (offset != N)
     {
-        const size_t written = writer.LexWrite(&array[offset], remain);
+        const size_t written = writer.LexWrite(srcByte + offset, remain);
         if (written == 0)
         {
             return offset;
@@ -929,37 +904,6 @@ inline size_t Write(WriterRef writer, const uint8_t (&array)[N])
     }
 
     return N;
-}
-
-/**
- * @brief Write a buffer of data at the current offset.  Calls LexIO::RawWrite
- *        as many times as necessary to write the entire buffer unless EOF
- *        is hit.
- *
- * @param writer Writer to operate on.
- * @param start Iterator to start byte of input buffer.
- * @param end Iterator to end byte of input buffer.
- * @return Actual number of bytes written, or 0 if EOF-like condition was
- *         encountered.
- * @throws std::runtime_error if an error with the write operation was
- *         encountered.  A partial write is _not_ considered an error.
- */
-template <typename IT>
-inline size_t Write(WriterRef writer, IT start, IT end)
-{
-    IT iter = start;
-    while (iter != end)
-    {
-        const size_t written = writer.LexWrite(&(*iter), std::distance(iter, end));
-        if (written == 0)
-        {
-            return std::distance(start, iter);
-        }
-
-        iter += written;
-    }
-
-    return std::distance(start, end);
 }
 
 /**
