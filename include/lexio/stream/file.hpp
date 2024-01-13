@@ -254,6 +254,7 @@ inline File Open(const char *path, const OpenMode mode)
 
 #else
 
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 
