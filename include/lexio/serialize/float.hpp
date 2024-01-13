@@ -29,7 +29,7 @@ namespace LexIO
  * @return Float that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline float32_t ReadFloat32LE(const ReaderRef &reader)
+inline float32_t ReadFloat32LE(ReaderRef reader)
 {
     return Detail::ReadWithExcept<float32_t>(reader, TryReadFloat32LE);
 }
@@ -41,7 +41,7 @@ inline float32_t ReadFloat32LE(const ReaderRef &reader)
  * @return Float that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline float32_t ReadFloat32BE(const ReaderRef &reader)
+inline float32_t ReadFloat32BE(ReaderRef reader)
 {
     return Detail::ReadWithExcept<float32_t>(reader, TryReadFloat32BE);
 }
@@ -53,7 +53,7 @@ inline float32_t ReadFloat32BE(const ReaderRef &reader)
  * @param value Float to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteFloat32LE(const WriterRef &writer, const float32_t value)
+inline void WriteFloat32LE(WriterRef writer, const float32_t value)
 {
     Detail::WriteWithExcept<float32_t>(writer, value, TryWriteFloat32LE);
 }
@@ -65,7 +65,7 @@ inline void WriteFloat32LE(const WriterRef &writer, const float32_t value)
  * @param value Float to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteFloat32BE(const WriterRef &writer, const float32_t value)
+inline void WriteFloat32BE(WriterRef writer, const float32_t value)
 {
     Detail::WriteWithExcept<float32_t>(writer, value, TryWriteFloat32BE);
 }
@@ -79,7 +79,7 @@ inline void WriteFloat32BE(const WriterRef &writer, const float32_t value)
  * @return Float that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline float64_t ReadFloat64LE(const ReaderRef &reader)
+inline float64_t ReadFloat64LE(ReaderRef reader)
 {
     return Detail::ReadWithExcept<float64_t>(reader, TryReadFloat64LE);
 }
@@ -91,7 +91,7 @@ inline float64_t ReadFloat64LE(const ReaderRef &reader)
  * @return Float that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline float64_t ReadFloat64BE(const ReaderRef &reader)
+inline float64_t ReadFloat64BE(ReaderRef reader)
 {
     return Detail::ReadWithExcept<float64_t>(reader, TryReadFloat64BE);
 }
@@ -103,7 +103,7 @@ inline float64_t ReadFloat64BE(const ReaderRef &reader)
  * @param value Float to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteFloat64LE(const WriterRef &writer, const float64_t value)
+inline void WriteFloat64LE(WriterRef writer, const float64_t value)
 {
     Detail::WriteWithExcept<float64_t>(writer, value, TryWriteFloat64LE);
 }
@@ -115,7 +115,7 @@ inline void WriteFloat64LE(const WriterRef &writer, const float64_t value)
  * @param value Float to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteFloat64BE(const WriterRef &writer, const float64_t value)
+inline void WriteFloat64BE(WriterRef writer, const float64_t value)
 {
     Detail::WriteWithExcept<float64_t>(writer, value, TryWriteFloat64BE);
 }

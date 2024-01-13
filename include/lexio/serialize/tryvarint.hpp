@@ -23,7 +23,7 @@ namespace LexIO
 
 //******************************************************************************
 
-inline bool TryReadUVarint32(uint32_t &out, const ReaderRef &reader)
+inline bool TryReadUVarint32(uint32_t &out, ReaderRef reader)
 {
     constexpr int MAX_BYTES = 5;
     uint32_t rvo = 0;
@@ -52,7 +52,7 @@ inline bool TryReadUVarint32(uint32_t &out, const ReaderRef &reader)
     return true;
 }
 
-inline bool TryWriteUVarint32(const WriterRef &writer, const uint32_t value)
+inline bool TryWriteUVarint32(WriterRef writer, const uint32_t value)
 {
     uint32_t v = value;
     while (v >= 0x80)
@@ -80,12 +80,12 @@ constexpr size_t UVarint32Bytes(const uint32_t value)
 
 //******************************************************************************
 
-inline bool TryReadVarint32(int32_t &out, const ReaderRef &reader)
+inline bool TryReadVarint32(int32_t &out, ReaderRef reader)
 {
     return Detail::ReadSigned<int32_t>(out, reader, TryReadUVarint32);
 }
 
-inline bool TryWriteVarint32(const WriterRef &writer, const int32_t value)
+inline bool TryWriteVarint32(WriterRef writer, const int32_t value)
 {
     return Detail::WriteSigned<int32_t>(writer, value, TryWriteUVarint32);
 }
@@ -104,7 +104,7 @@ constexpr size_t Varint32Bytes(const int32_t value)
 
 //******************************************************************************
 
-inline bool TryReadSVarint32(int32_t &out, const ReaderRef &reader)
+inline bool TryReadSVarint32(int32_t &out, ReaderRef reader)
 {
     uint32_t outVal;
     if (!TryReadUVarint32(outVal, reader))
@@ -115,7 +115,7 @@ inline bool TryReadSVarint32(int32_t &out, const ReaderRef &reader)
     return true;
 }
 
-inline bool TryWriteSVarint32(const WriterRef &writer, const int32_t value)
+inline bool TryWriteSVarint32(WriterRef writer, const int32_t value)
 {
     const uint32_t var = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 31);
     return TryWriteUVarint32(writer, var);
@@ -135,7 +135,7 @@ constexpr size_t SVarint32Bytes(const int32_t value)
 
 //******************************************************************************
 
-inline bool TryReadUVarint64(uint64_t &out, const ReaderRef &reader)
+inline bool TryReadUVarint64(uint64_t &out, ReaderRef reader)
 {
     constexpr int MAX_BYTES = 10;
     uint64_t rvo = 0;
@@ -164,7 +164,7 @@ inline bool TryReadUVarint64(uint64_t &out, const ReaderRef &reader)
     return true;
 }
 
-inline bool TryWriteUVarint64(const WriterRef &writer, const uint64_t value)
+inline bool TryWriteUVarint64(WriterRef writer, const uint64_t value)
 {
     uint64_t v = value;
     while (v >= 0x80)
@@ -192,12 +192,12 @@ constexpr size_t UVarint64Bytes(const uint64_t value)
 
 //******************************************************************************
 
-inline bool TryReadVarint64(int64_t &out, const ReaderRef &reader)
+inline bool TryReadVarint64(int64_t &out, ReaderRef reader)
 {
     return Detail::ReadSigned<int64_t>(out, reader, TryReadUVarint64);
 }
 
-inline bool TryWriteVarint64(const WriterRef &writer, const int64_t value)
+inline bool TryWriteVarint64(WriterRef writer, const int64_t value)
 {
     return Detail::WriteSigned<int64_t>(writer, value, TryWriteUVarint64);
 }
@@ -216,7 +216,7 @@ constexpr size_t Varint64Bytes(const int64_t value)
 
 //******************************************************************************
 
-inline bool TryReadSVarint64(int64_t &out, const ReaderRef &reader)
+inline bool TryReadSVarint64(int64_t &out, ReaderRef reader)
 {
     uint64_t outVal;
     if (!TryReadUVarint64(outVal, reader))
@@ -227,7 +227,7 @@ inline bool TryReadSVarint64(int64_t &out, const ReaderRef &reader)
     return true;
 }
 
-inline bool TryWriteSVarint64(const WriterRef &writer, const int64_t value)
+inline bool TryWriteSVarint64(WriterRef writer, const int64_t value)
 {
     const uint64_t var = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
     return TryWriteUVarint64(writer, var);

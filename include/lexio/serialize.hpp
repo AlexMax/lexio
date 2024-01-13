@@ -19,8 +19,8 @@
 #include "./serialize/int.hpp"
 #include "./serialize/tryint.hpp"
 
-#include "./serialize/varint.hpp"
 #include "./serialize/tryvarint.hpp"
+#include "./serialize/varint.hpp"
 
 #include "./serialize/float.hpp"
 #include "./serialize/tryfloat.hpp"
