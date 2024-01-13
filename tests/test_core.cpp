@@ -20,6 +20,11 @@
 #include "lexio/serialize/int.hpp"
 #include <array>
 
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#pragma clang diagnostic ignored "-Wself-move"
+#endif
+
 using PartialVectorStream = PartialStream<LexIO::VectorStream>;
 using PartialViewStream = PartialStream<LexIO::ViewStream>;
 
@@ -137,6 +142,15 @@ TEST(ReaderRef, CopyCtor)
     LexIO::ReaderRef copy(ref);
 }
 
+TEST(ReaderRef, CopyAssign)
+{
+    auto test = GoodReader{};
+    LexIO::ReaderRef ref(test);
+    LexIO::ReaderRef copy(test);
+    copy = ref;
+    copy = copy;
+}
+
 TEST(ReaderRef, Accept)
 {
     auto test = GoodReader{};
@@ -167,6 +181,15 @@ TEST(BufferedReaderRef, CopyCtor)
     auto test = GoodBufferedReader{};
     LexIO::BufferedReaderRef ref(test);
     LexIO::BufferedReaderRef copy(ref);
+}
+
+TEST(BufferedReaderRef, CopyAssign)
+{
+    auto test = GoodBufferedReader{};
+    LexIO::BufferedReaderRef ref(test);
+    LexIO::BufferedReaderRef copy(test);
+    copy = ref;
+    copy = copy;
 }
 
 TEST(BufferedReaderRef, Accept)
@@ -204,6 +227,15 @@ TEST(UnbufferedReaderRef, CopyCtor)
     LexIO::UnbufferedReaderRef copy(ref);
 }
 
+TEST(UnbufferedReaderRef, CopyAssign)
+{
+    auto test = GoodReader{};
+    LexIO::UnbufferedReaderRef ref(test);
+    LexIO::UnbufferedReaderRef copy(test);
+    copy = ref;
+    copy = copy;
+}
+
 TEST(UnbufferedReaderRef, Accept)
 {
     auto test = GoodReader{};
@@ -234,6 +266,15 @@ TEST(WriterRef, CopyCtor)
     LexIO::WriterRef copy(ref);
 }
 
+TEST(WriterRef, CopyAssign)
+{
+    auto test = GoodWriter{};
+    LexIO::WriterRef ref(test);
+    LexIO::WriterRef copy(test);
+    copy = ref;
+    copy = copy;
+}
+
 TEST(WriterRef, Accept)
 {
     auto test = GoodWriter{};
@@ -261,6 +302,15 @@ TEST(SeekableRef, CopyCtor)
     auto test = GoodSeekable{};
     LexIO::SeekableRef ref(test);
     LexIO::SeekableRef copy(ref);
+}
+
+TEST(SeekableRef, CopyAssign)
+{
+    auto test = GoodSeekable{};
+    LexIO::SeekableRef ref(test);
+    LexIO::SeekableRef copy(test);
+    copy = ref;
+    copy = copy;
 }
 
 TEST(SeekableRef, Accept)

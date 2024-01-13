@@ -18,13 +18,13 @@
 
 #include "./test.h"
 
-using VectorBufReader = LexIO::GenericBufReader<LexIO::VectorStream>;
-using VectorBufReaderNoCopy = LexIO::GenericBufReader<NoCopyStream<LexIO::VectorStream>>;
-
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wself-assign-overloaded"
 #pragma clang diagnostic ignored "-Wself-move"
 #endif
+
+using VectorBufReader = LexIO::GenericBufReader<LexIO::VectorStream>;
+using VectorBufReaderNoCopy = LexIO::GenericBufReader<NoCopyStream<LexIO::VectorStream>>;
 
 //******************************************************************************
 
