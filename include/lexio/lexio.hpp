@@ -21,6 +21,7 @@
 #include "./bufreader.hpp"
 #include "./bufwriter.hpp"
 #include "./chars.hpp"
+#include "./lib.hpp"
 #include "./ref.hpp"
 #include "./serialize.hpp"
 #include "./stream.hpp"

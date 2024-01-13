@@ -25,6 +25,7 @@
 #include "../core.hpp"
 
 #include "./tryint.hpp"
+#include <stdexcept>
 
 namespace LexIO
 {

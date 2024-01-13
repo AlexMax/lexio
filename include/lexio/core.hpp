@@ -15,7 +15,7 @@
 //
 
 /**
- * @file core.h
+ * @file core.hpp
  * Core interfaces and functions needed by LexIO streams.
  *
  * LexIO streams are not derived from abstract classes, but by classes that
@@ -31,12 +31,11 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cstdint>
 #include <cstring>
-#include <memory>
-#include <stdexcept>
+#include <iterator>
 #include <type_traits>
+#include <utility>
 
 // Feature detection - since we support C++14 use cppreference to see when
 // features were added to the compiler.
@@ -718,14 +717,6 @@ inline size_t Seek(SeekableRef seekable, const ptrdiff_t offset, const Whence wh
     return seekable.LexSeek(SeekPos(offset, whence));
 }
 
-//******************************************************************************
-//
-// The following functions are default implementations of common stream
-// functionality that builds off of the basic functions.  It is expected that
-// these functions can be specialized if need be.
-//
-//******************************************************************************
-
 /**
  * @brief Read data from the current offset, inserting it into the passed
  *        buffer.  Calls LexIO::RawRead as many times as necessary to fill
@@ -744,7 +735,7 @@ inline size_t Read(uint8_t *outDest, const size_t count, ReaderRef reader)
     size_t offset = 0, remain = count;
     while (offset != count)
     {
-        const size_t read = RawRead(outDest + offset, remain, reader);
+        const size_t read = reader.LexRead(outDest + offset, remain);
         if (read == 0)
         {
             return offset;
@@ -775,7 +766,7 @@ inline size_t Read(uint8_t (&outArray)[N], ReaderRef reader)
     size_t offset = 0, remain = N;
     while (offset != N)
     {
-        const size_t read = RawRead(&outArray[offset], remain, reader);
+        const size_t read = reader.LexRead(&outArray[offset], remain);
         if (read == 0)
         {
             return offset;
@@ -807,7 +798,7 @@ inline size_t Read(IT outStart, IT outEnd, ReaderRef reader)
     IT iter = outStart;
     while (iter != outEnd)
     {
-        const size_t read = RawRead(&(*iter), std::distance(iter, outEnd), reader);
+        const size_t read = reader.LexRead(&(*iter), std::distance(iter, outEnd));
         if (read == 0)
         {
             return std::distance(outStart, iter);
@@ -820,52 +811,6 @@ inline size_t Read(IT outStart, IT outEnd, ReaderRef reader)
 }
 
 /**
- * @brief Read the entire contents of the stream.  Uses an internal buffer.
- *
- * @param outIt Output iterator to write result into.
- * @param reader Reader to operate on.
- * @return Total number of bytes read.
- */
-template <typename OUT_ITER>
-inline size_t ReadToEOF(OUT_ITER outIt, UnbufferedReaderRef reader)
-{
-    constexpr size_t BUFFER_SIZE = 8192;
-
-    // Try and read on the stack first.
-    uint8_t shortData[32] = {0};
-    size_t count = Read(shortData, reader);
-    if (count == 0)
-    {
-        // Nothing to read.
-        return 0;
-    }
-
-    // Copy data into the iterator.
-    std::copy(&shortData[0], &shortData[0] + count, outIt);
-    if (count < 32)
-    {
-        return count;
-    }
-
-    // Allocate a temporary buffer to read into.
-    size_t total = count;
-    std::unique_ptr<uint8_t[]> data{::new uint8_t[BUFFER_SIZE]};
-    for (;;)
-    {
-        count = Read(data.get(), BUFFER_SIZE, reader);
-        if (count == 0)
-        {
-            // Read all data there was to read.
-            return total;
-        }
-
-        // Copy data into the iterator.
-        std::copy(data.get(), data.get() + count, outIt);
-        total += count;
-    }
-}
-
-/**
  * @brief Get the current contents of the buffer.
  *
  * @param bufReader BufferedReader to operate on.
@@ -874,83 +819,6 @@ inline size_t ReadToEOF(OUT_ITER outIt, UnbufferedReaderRef reader)
 inline BufferView GetBuffer(BufferedReaderRef bufReader)
 {
     return FillBuffer(bufReader, 0);
-}
-
-/**
- * @brief Read the entire contents of the stream.
- *
- * @param outIt Output iterator to write result into.
- * @param bufReader BufferedReader to operate on.
- * @return Total number of bytes read.
- */
-template <typename OUT_ITER>
-inline size_t ReadToEOF(OUT_ITER outIt, BufferedReaderRef bufReader)
-{
-    constexpr size_t BUFFER_SIZE = 8192;
-
-    size_t total = 0;
-    for (;;)
-    {
-        BufferView buf = FillBuffer(bufReader, BUFFER_SIZE);
-        if (buf.second == 0)
-        {
-            // Read all data there was to read.
-            return total;
-        }
-
-        // Copy buffered data into the iterator.
-        std::copy(buf.first, buf.first + buf.second, outIt);
-
-        // Consume what we've read.
-        ConsumeBuffer(bufReader, buf.second);
-        total += buf.second;
-    }
-}
-
-/**
- * @brief Read the entire contents of the stream until we hit a terminating byte
- *        or until EOF is hit.  The output will contain the terminator as the
- *        last character, if seen.
- *
- * @param outIt Output iterator to write result into.
- * @param bufReader BufferedReader to operate on.
- * @param term Byte to stop at.
- * @return Total number of bytes read.
- */
-template <typename OUT_ITER>
-inline size_t ReadUntil(OUT_ITER outIt, BufferedReaderRef bufReader, const uint8_t term)
-{
-    constexpr size_t BUFFER_SIZE = 8192;
-
-    size_t size = 0;
-    for (;;)
-    {
-        BufferView buf = FillBuffer(bufReader, BUFFER_SIZE);
-        if (buf.second == 0)
-        {
-            // Read all data there was to read.
-            return size;
-        }
-
-        // Copy the buffered data into the iterator until we hit the passed byte.
-        const uint8_t *it = buf.first;
-        for (size_t i = 0; i < buf.second; i++)
-        {
-            if (*it == term)
-            {
-                // Found the terminator, append it and stop.
-                *outIt++ = *it++;
-                ConsumeBuffer(bufReader, i + 1);
-                size += i + 1;
-                return size;
-            }
-            *outIt++ = *it++;
-        }
-
-        // Consume what we've read.
-        ConsumeBuffer(bufReader, BUFFER_SIZE);
-        size += BUFFER_SIZE;
-    }
 }
 
 /**
@@ -971,7 +839,7 @@ inline size_t Write(WriterRef writer, const uint8_t *src, const size_t count)
     size_t offset = 0, remain = count;
     while (offset != count)
     {
-        const size_t written = RawWrite(writer, src + offset, remain);
+        const size_t written = writer.LexWrite(src + offset, remain);
         if (written == 0)
         {
             return offset;
@@ -1002,7 +870,7 @@ inline size_t Write(WriterRef writer, const uint8_t (&array)[N])
     size_t offset = 0, remain = N;
     while (offset != N)
     {
-        const size_t written = RawWrite(writer, &array[offset], remain);
+        const size_t written = writer.LexWrite(&array[offset], remain);
         if (written == 0)
         {
             return offset;
@@ -1034,7 +902,7 @@ inline size_t Write(WriterRef writer, IT start, IT end)
     IT iter = start;
     while (iter != end)
     {
-        const size_t written = RawWrite(writer, &(*iter), std::distance(iter, end));
+        const size_t written = writer.LexWrite(&(*iter), std::distance(iter, end));
         if (written == 0)
         {
             return std::distance(start, iter);
@@ -1044,33 +912,6 @@ inline size_t Write(WriterRef writer, IT start, IT end)
     }
 
     return std::distance(start, end);
-}
-
-/**
- * @brief Copy the contents of a buffered reader to a writer until EOF is hit
- *        on the reader.
- *
- * @param writer Writer to copy to.
- * @param bufReader Buffered read to read from.
- * @return Number of bytes copied.
- */
-inline size_t Copy(WriterRef writer, BufferedReaderRef bufReader)
-{
-    constexpr size_t BUFFER_SIZE = 8192;
-
-    size_t count = 0;
-    for (;;)
-    {
-        const BufferView buffer = FillBuffer(bufReader, BUFFER_SIZE);
-        if (buffer.second == 0)
-        {
-            return count;
-        }
-
-        const size_t written = Write(writer, buffer.first, buffer.second);
-        ConsumeBuffer(bufReader, written);
-        count += written;
-    }
 }
 
 /**

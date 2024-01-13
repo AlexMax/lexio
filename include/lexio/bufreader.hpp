@@ -18,7 +18,7 @@
 
 #include "./core.hpp"
 
-#include <utility>
+#include <stdexcept>
 
 namespace LexIO
 {
