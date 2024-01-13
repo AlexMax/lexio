@@ -96,7 +96,7 @@ class VectorStream
 
         // Grow the buffer by reading into it.
         const size_t wantedOffset = m_bufferOffset + count;
-        m_offset = std::min(wantedOffset, m_container.size());
+        m_offset = Detail::Min(wantedOffset, m_container.size());
         bufferLength = BufferSize();
 
         // Return view to new buffer.

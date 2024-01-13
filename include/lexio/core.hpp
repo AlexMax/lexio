@@ -119,10 +119,19 @@ namespace Detail
 {
 
 /**
- * @brief https://en.cppreference.com/w/cpp/types/is_same
+ * @see https://en.cppreference.com/w/cpp/types/is_same
  */
-template <class TYPE1, class TYPE2>
+template <typename TYPE1, typename TYPE2>
 LEXIO_INLINE_VAR constexpr bool IsSameV = std::is_same<TYPE1, TYPE2>::value;
+
+/**
+ * @see https://en.cppreference.com/w/cpp/algorithm/min
+ */
+template <typename TYPE>
+constexpr const TYPE &Min(const TYPE &a, const TYPE &b)
+{
+    return a < b ? a : b;
+}
 
 /**
  * @see https://en.cppreference.com/w/cpp/numeric/bit_cast

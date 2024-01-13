@@ -72,7 +72,7 @@ class ViewStream
 
         // Grow the buffer by reading into it.
         const size_t wantedOffset = m_bufferOffset + count;
-        m_offset = std::min(wantedOffset, Size());
+        m_offset = Detail::Min(wantedOffset, Size());
         bufferLength = BufferSize();
 
         // Return view to new buffer.
@@ -93,7 +93,7 @@ class ViewStream
     size_t LexWrite(const uint8_t *src, size_t count)
     {
         const size_t wantedOffset = m_offset + count;
-        const size_t destOffset = std::min(wantedOffset, Size());
+        const size_t destOffset = Detail::Min(wantedOffset, Size());
         const size_t actualLength = destOffset - m_offset;
         std::memcpy(m_start + m_offset, src, actualLength);
         m_offset += actualLength;
@@ -185,7 +185,7 @@ class ConstViewStream
 
         // Grow the buffer by reading into it.
         const size_t wantedOffset = m_bufferOffset + count;
-        m_offset = std::min(wantedOffset, Size());
+        m_offset = Detail::Min(wantedOffset, Size());
         bufferLength = BufferSize();
 
         // Return view to new buffer.

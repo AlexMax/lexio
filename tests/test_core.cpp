@@ -183,6 +183,14 @@ TEST(BufferedReaderRef, CopyCtor)
     LexIO::BufferedReaderRef copy(ref);
 }
 
+TEST(BufferedReaderRef, ManualCtor)
+{
+    auto test = GoodBufferedReader{};
+    LexIO::BufferedReaderRef ref(&test, LexIO::Detail::WrapRead<GoodBufferedReader>,
+                                 LexIO::Detail::WrapFillBuffer<GoodBufferedReader>,
+                                 LexIO::Detail::WrapConsumeBuffer<GoodBufferedReader>);
+}
+
 TEST(BufferedReaderRef, CopyAssign)
 {
     auto test = GoodBufferedReader{};
@@ -209,6 +217,7 @@ TEST(BufferedReaderRef, Call)
     LexIO::BufferedReaderRef ref(test);
 
     EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(ref.LexRead(&buffer[0], sizeof(buffer)), 0);
     EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
     EXPECT_NO_THROW(LexIO::ConsumeBuffer(ref, 0));
 }
@@ -225,6 +234,12 @@ TEST(UnbufferedReaderRef, CopyCtor)
     auto test = GoodReader{};
     LexIO::UnbufferedReaderRef ref(test);
     LexIO::UnbufferedReaderRef copy(ref);
+}
+
+TEST(UnbufferedReaderRef, ManualCtor)
+{
+    auto test = GoodReader{};
+    LexIO::UnbufferedReaderRef ref(&test, LexIO::Detail::WrapRead<GoodReader>);
 }
 
 TEST(UnbufferedReaderRef, CopyAssign)
@@ -253,6 +268,7 @@ TEST(UnbufferedReaderRef, Call)
     LexIO::UnbufferedReaderRef ref(test);
 
     EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(ref.LexRead(&buffer[0], sizeof(buffer)), 0);
 }
 
 //******************************************************************************
@@ -264,6 +280,12 @@ TEST(WriterRef, CopyCtor)
     auto test = GoodWriter{};
     LexIO::WriterRef ref(test);
     LexIO::WriterRef copy(ref);
+}
+
+TEST(WriterRef, ManualCtor)
+{
+    auto test = GoodWriter{};
+    LexIO::WriterRef ref(&test, LexIO::Detail::WrapWrite<GoodWriter>, LexIO::Detail::WrapFlush<GoodWriter>);
 }
 
 TEST(WriterRef, CopyAssign)
@@ -302,6 +324,12 @@ TEST(SeekableRef, CopyCtor)
     auto test = GoodSeekable{};
     LexIO::SeekableRef ref(test);
     LexIO::SeekableRef copy(ref);
+}
+
+TEST(WriterRef, SeekableCtor)
+{
+    auto test = GoodSeekable{};
+    LexIO::SeekableRef ref(&test, LexIO::Detail::WrapSeek<GoodSeekable>);
 }
 
 TEST(SeekableRef, CopyAssign)
