@@ -43,7 +43,7 @@ class GenericBufReader
      * @param wantSize Wanted capacity of buffer.
      * @return Calculated capacity of allocation.
      */
-    size_t CalcGrowth(const size_t wantSize)
+    size_t CalcGrowth(size_t wantSize)
     {
         const size_t oldSize = m_allocSize;
         if (oldSize > SIZE_MAX - (oldSize / 2))
@@ -147,7 +147,7 @@ class GenericBufReader
      */
     READER Reader() && { return m_reader; }
 
-    size_t LexRead(uint8_t *outDest, const size_t count)
+    size_t LexRead(uint8_t *outDest, size_t count)
     {
         BufferView data = LexFillBuffer(count);
         std::memcpy(outDest, data.first, data.second);
@@ -155,7 +155,7 @@ class GenericBufReader
         return data.second;
     }
 
-    BufferView LexFillBuffer(const size_t count)
+    BufferView LexFillBuffer(size_t count)
     {
         if (count <= m_size)
         {
@@ -181,7 +181,7 @@ class GenericBufReader
         return BufferView{m_buffer, m_size};
     }
 
-    void LexConsumeBuffer(const size_t count)
+    void LexConsumeBuffer(size_t count)
     {
         if (count > m_size)
         {
@@ -192,7 +192,7 @@ class GenericBufReader
     }
 
     template <typename WRITER = READER, typename = std::enable_if_t<IsWriterV<WRITER>>>
-    size_t LexWrite(const uint8_t *src, const size_t count)
+    size_t LexWrite(const uint8_t *src, size_t count)
     {
         m_size = 0; // Invalidate buffer.
         return Write(m_reader, src, count);
@@ -205,7 +205,7 @@ class GenericBufReader
     }
 
     template <typename SEEKABLE = READER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-    size_t LexSeek(const SeekPos pos)
+    size_t LexSeek(SeekPos pos)
     {
         m_size = 0; // Invalidate buffer.
         return Seek(m_reader, pos);

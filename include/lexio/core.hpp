@@ -216,25 +216,25 @@ using SeekableType = decltype(std::declval<size_t &>() = std::declval<T>().LexSe
  * @brief Function that calls a wrapped LexRead.
  */
 template <typename READER>
-inline size_t WrapRead(void *ptr, uint8_t *outDest, const size_t count)
+inline size_t WrapRead(void *ptr, uint8_t *outDest, size_t count)
 {
     return static_cast<READER *>(ptr)->LexRead(outDest, count);
 }
 
 template <typename BUFFERED_READER>
-inline BufferView WrapFillBuffer(void *ptr, const size_t size)
+inline BufferView WrapFillBuffer(void *ptr, size_t size)
 {
     return static_cast<BUFFERED_READER *>(ptr)->LexFillBuffer(size);
 }
 
 template <typename BUFFERED_READER>
-inline void WrapConsumeBuffer(void *ptr, const size_t size)
+inline void WrapConsumeBuffer(void *ptr, size_t size)
 {
     static_cast<BUFFERED_READER *>(ptr)->LexConsumeBuffer(size);
 }
 
 template <typename WRITER>
-inline size_t WrapWrite(void *ptr, const uint8_t *src, const size_t count)
+inline size_t WrapWrite(void *ptr, const uint8_t *src, size_t count)
 {
     return static_cast<WRITER *>(ptr)->LexWrite(src, count);
 }
@@ -246,7 +246,7 @@ inline void WrapFlush(void *ptr)
 }
 
 template <typename SEEKABLE>
-inline size_t WrapSeek(void *ptr, const SeekPos pos)
+inline size_t WrapSeek(void *ptr, SeekPos pos)
 {
     return static_cast<SEEKABLE *>(ptr)->LexSeek(pos);
 }
@@ -329,7 +329,7 @@ class ReaderRef
     friend class UnbufferedReaderRef;
 
   public:
-    using WrapReadFunc = size_t (*)(void *, uint8_t *, const size_t);
+    using WrapReadFunc = size_t (*)(void *, uint8_t *, size_t);
 
     template <typename READER>
     using EnableIfWrappable = std::enable_if_t<!IsRefV<READER> && IsReaderV<READER>>;
@@ -365,7 +365,7 @@ class ReaderRef
         return *this;
     }
 
-    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    size_t LexRead(uint8_t *outDest, size_t count) const { return m_lexRead(m_ptr, outDest, count); }
 
   protected:
     void *m_ptr;
@@ -383,8 +383,8 @@ struct IsRef<ReaderRef> : std::true_type
 class BufferedReaderRef
 {
   public:
-    using WrapFillBufferFunc = BufferView (*)(void *, const size_t);
-    using WrapConsumeBufferFunc = void (*)(void *, const size_t);
+    using WrapFillBufferFunc = BufferView (*)(void *, size_t);
+    using WrapConsumeBufferFunc = void (*)(void *, size_t);
 
     template <typename BUFFERED_READER>
     using EnableIfWrappable = std::enable_if_t<!IsRefV<BUFFERED_READER> && IsBufferedReaderV<BUFFERED_READER>>;
@@ -437,9 +437,9 @@ class BufferedReaderRef
 
     operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; };
 
-    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
-    BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
-    void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
+    size_t LexRead(uint8_t *outDest, size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    BufferView LexFillBuffer(size_t size) const { return m_lexFillBuffer(m_ptr, size); }
+    void LexConsumeBuffer(size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
 
   protected:
     void *m_ptr;
@@ -505,7 +505,7 @@ class UnbufferedReaderRef
      */
     operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; };
 
-    size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
+    size_t LexRead(uint8_t *outDest, size_t count) const { return m_lexRead(m_ptr, outDest, count); }
 
   protected:
     void *m_ptr;
@@ -523,7 +523,7 @@ struct IsRef<UnbufferedReaderRef> : std::true_type
 class WriterRef
 {
   public:
-    using WrapWriteFunc = size_t (*)(void *, const uint8_t *, const size_t);
+    using WrapWriteFunc = size_t (*)(void *, const uint8_t *, size_t);
     using WrapFlushFunc = void (*)(void *);
 
     template <typename WRITER>
@@ -568,7 +568,7 @@ class WriterRef
         return *this;
     }
 
-    size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
+    size_t LexWrite(const uint8_t *src, size_t count) const { return m_lexWrite(m_ptr, src, count); }
     void LexFlush() const { m_lexFlush(m_ptr); }
 
   protected:
@@ -663,7 +663,7 @@ struct IsRef<SeekableRef> : std::true_type
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-inline size_t RawRead(uint8_t *outDest, const size_t count, ReaderRef reader)
+inline size_t RawRead(uint8_t *outDest, size_t count, ReaderRef reader)
 {
     return reader.LexRead(outDest, count);
 }
@@ -681,7 +681,7 @@ inline size_t RawRead(uint8_t *outDest, const size_t count, ReaderRef reader)
  * @throws std::runtime_error if an error with the read operation was
  *         encountered, or if too large of a buffer was requested.
  */
-inline BufferView FillBuffer(BufferedReaderRef bufReader, const size_t size)
+inline BufferView FillBuffer(BufferedReaderRef bufReader, size_t size)
 {
     return bufReader.LexFillBuffer(size);
 }
@@ -696,7 +696,7 @@ inline BufferView FillBuffer(BufferedReaderRef bufReader, const size_t size)
  * @throws std::runtime_error if a size greater than the amount of data
  *         in the visible buffer is passed to the function.
  */
-inline void ConsumeBuffer(BufferedReaderRef bufReader, const size_t size)
+inline void ConsumeBuffer(BufferedReaderRef bufReader, size_t size)
 {
     bufReader.LexConsumeBuffer(size);
 }
@@ -712,7 +712,7 @@ inline void ConsumeBuffer(BufferedReaderRef bufReader, const size_t size)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-inline size_t RawWrite(WriterRef writer, const uint8_t *src, const size_t count)
+inline size_t RawWrite(WriterRef writer, const uint8_t *src, size_t count)
 {
     return writer.LexWrite(src, count);
 }
@@ -769,7 +769,7 @@ inline size_t Seek(SeekableRef seekable, const ptrdiff_t offset, const Whence wh
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-inline size_t Read(uint8_t *outDest, const size_t count, ReaderRef reader)
+inline size_t Read(uint8_t *outDest, size_t count, ReaderRef reader)
 {
     size_t offset = 0, remain = count;
     while (offset != count)
@@ -873,7 +873,7 @@ inline BufferView GetBuffer(BufferedReaderRef bufReader)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-inline size_t Write(WriterRef writer, const uint8_t *src, const size_t count)
+inline size_t Write(WriterRef writer, const uint8_t *src, size_t count)
 {
     size_t offset = 0, remain = count;
     while (offset != count)

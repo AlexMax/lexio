@@ -17,7 +17,6 @@
 #include "lexio/core.hpp"
 
 #include "./test.h"
-#include "lexio/ref.hpp"
 #include "lexio/serialize/int.hpp"
 #include <array>
 
@@ -123,6 +122,161 @@ struct BadReaderBadReturn
 TEST(Reader, IsReaderVBadReturn)
 {
     EXPECT_FALSE(LexIO::IsReaderV<BadReaderBadReturn>);
+}
+
+//******************************************************************************
+
+static void AcceptReader(LexIO::ReaderRef) {}
+static void AmbiguousReader(LexIO::UnbufferedReaderRef) {}
+static void AmbiguousReader(LexIO::BufferedReaderRef) {}
+
+TEST(ReaderRef, CopyCtor)
+{
+    auto test = GoodReader{};
+    LexIO::ReaderRef ref(test);
+    LexIO::ReaderRef copy(ref);
+}
+
+TEST(ReaderRef, Accept)
+{
+    auto test = GoodReader{};
+    LexIO::ReaderRef ref(test);
+
+    EXPECT_NO_THROW(AcceptReader(ref));
+    EXPECT_NO_THROW(AmbiguousReader(ref));
+}
+
+TEST(ReaderRef, Call)
+{
+    uint8_t buffer[4];
+    auto test = GoodReader{};
+    LexIO::ReaderRef ref(test);
+
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+}
+
+//******************************************************************************
+
+static void AcceptBufferedReader(LexIO::BufferedReaderRef ref)
+{
+    AcceptReader(ref);
+}
+
+TEST(BufferedReaderRef, CopyCtor)
+{
+    auto test = GoodBufferedReader{};
+    LexIO::BufferedReaderRef ref(test);
+    LexIO::BufferedReaderRef copy(ref);
+}
+
+TEST(BufferedReaderRef, Accept)
+{
+    auto test = GoodBufferedReader{};
+    LexIO::BufferedReaderRef ref(test);
+
+    EXPECT_NO_THROW(AcceptReader(ref));
+    EXPECT_NO_THROW(AcceptBufferedReader(ref));
+    EXPECT_NO_THROW(AmbiguousReader(test));
+}
+
+TEST(BufferedReaderRef, Call)
+{
+    uint8_t buffer[4] = {0};
+    auto test = GoodBufferedReader{};
+    LexIO::BufferedReaderRef ref(test);
+
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+    EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
+    EXPECT_NO_THROW(LexIO::ConsumeBuffer(ref, 0));
+}
+
+//******************************************************************************
+
+static void AcceptUnbufferedReader(LexIO::UnbufferedReaderRef ref)
+{
+    AcceptReader(ref);
+}
+
+TEST(UnbufferedReaderRef, CopyCtor)
+{
+    auto test = GoodReader{};
+    LexIO::UnbufferedReaderRef ref(test);
+    LexIO::UnbufferedReaderRef copy(ref);
+}
+
+TEST(UnbufferedReaderRef, Accept)
+{
+    auto test = GoodReader{};
+    LexIO::UnbufferedReaderRef ref(test);
+
+    EXPECT_NO_THROW(AcceptReader(ref));
+    EXPECT_NO_THROW(AcceptUnbufferedReader(ref));
+    EXPECT_NO_THROW(AmbiguousReader(ref));
+}
+
+TEST(UnbufferedReaderRef, Call)
+{
+    uint8_t buffer[4];
+    auto test = GoodReader{};
+    LexIO::UnbufferedReaderRef ref(test);
+
+    EXPECT_EQ(LexIO::RawRead(&buffer[0], sizeof(buffer), ref), 0);
+}
+
+//******************************************************************************
+
+static void AcceptWriter(LexIO::WriterRef) {}
+
+TEST(WriterRef, CopyCtor)
+{
+    auto test = GoodWriter{};
+    LexIO::WriterRef ref(test);
+    LexIO::WriterRef copy(ref);
+}
+
+TEST(WriterRef, Accept)
+{
+    auto test = GoodWriter{};
+    LexIO::WriterRef ref(test);
+
+    EXPECT_NO_THROW(AcceptWriter(ref));
+}
+
+TEST(WriterRef, Call)
+{
+    uint8_t buffer[4];
+    auto test = GoodWriter{};
+    LexIO::WriterRef ref(test);
+
+    EXPECT_EQ(LexIO::RawWrite(ref, &buffer[0], sizeof(buffer)), 0);
+    EXPECT_NO_THROW(LexIO::Flush(ref));
+}
+
+//******************************************************************************
+
+static void AcceptSeekable(LexIO::SeekableRef) {}
+
+TEST(SeekableRef, CopyCtor)
+{
+    auto test = GoodSeekable{};
+    LexIO::SeekableRef ref(test);
+    LexIO::SeekableRef copy(ref);
+}
+
+TEST(SeekableRef, Accept)
+{
+    auto test = GoodSeekable{};
+    LexIO::SeekableRef ref(test);
+
+    EXPECT_NO_THROW(AcceptSeekable(ref));
+}
+
+TEST(SeekableRef, Call)
+{
+    auto test = GoodSeekable{};
+    LexIO::SeekableRef ref(test);
+
+    EXPECT_EQ(LexIO::Seek(ref, LexIO::SeekPos{}), 0);
 }
 
 //******************************************************************************

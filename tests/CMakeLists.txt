@@ -21,7 +21,6 @@ set(TEST_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/test_float.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_int.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_lib.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/test_ref.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_varint.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_vector.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_view.cpp"

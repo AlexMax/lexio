@@ -47,7 +47,7 @@ class ViewStream
     {
     }
 
-    size_t LexRead(uint8_t *outDest, const size_t count)
+    size_t LexRead(uint8_t *outDest, size_t count)
     {
         BufferView data = LexFillBuffer(count);
         std::memcpy(outDest, data.first, data.second);
@@ -55,7 +55,7 @@ class ViewStream
         return data.second;
     }
 
-    BufferView LexFillBuffer(const size_t count)
+    BufferView LexFillBuffer(size_t count)
     {
         if (m_bufferOffset == Size())
         {
@@ -79,7 +79,7 @@ class ViewStream
         return BufferView{&m_start[m_bufferOffset], bufferLength};
     }
 
-    void LexConsumeBuffer(const size_t count)
+    void LexConsumeBuffer(size_t count)
     {
         if (count > BufferSize())
         {
@@ -90,7 +90,7 @@ class ViewStream
         m_bufferOffset += count;
     }
 
-    size_t LexWrite(const uint8_t *src, const size_t count)
+    size_t LexWrite(const uint8_t *src, size_t count)
     {
         const size_t wantedOffset = m_offset + count;
         const size_t destOffset = std::min(wantedOffset, Size());
@@ -160,7 +160,7 @@ class ConstViewStream
     {
     }
 
-    size_t LexRead(uint8_t *outDest, const size_t count)
+    size_t LexRead(uint8_t *outDest, size_t count)
     {
         BufferView data = LexFillBuffer(count);
         std::memcpy(outDest, data.first, data.second);
@@ -168,7 +168,7 @@ class ConstViewStream
         return data.second;
     }
 
-    BufferView LexFillBuffer(const size_t count)
+    BufferView LexFillBuffer(size_t count)
     {
         if (m_bufferOffset == Size())
         {
@@ -192,7 +192,7 @@ class ConstViewStream
         return BufferView{&m_start[m_bufferOffset], bufferLength};
     }
 
-    void LexConsumeBuffer(const size_t count)
+    void LexConsumeBuffer(size_t count)
     {
         if (count > BufferSize())
         {

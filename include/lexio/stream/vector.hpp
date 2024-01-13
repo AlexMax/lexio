@@ -71,7 +71,7 @@ class VectorStream
      */
     void Container(container_type &&container) { m_container = container; }
 
-    size_t LexRead(uint8_t *outDest, const size_t count)
+    size_t LexRead(uint8_t *outDest, size_t count)
     {
         BufferView data = LexFillBuffer(count);
         std::memcpy(outDest, data.first, data.second);
@@ -79,7 +79,7 @@ class VectorStream
         return data.second;
     }
 
-    BufferView LexFillBuffer(const size_t count)
+    BufferView LexFillBuffer(size_t count)
     {
         if (m_bufferOffset == m_container.size())
         {
@@ -103,7 +103,7 @@ class VectorStream
         return BufferView{&m_container[m_bufferOffset], bufferLength};
     }
 
-    void LexConsumeBuffer(const size_t count)
+    void LexConsumeBuffer(size_t count)
     {
         if (count > BufferSize())
         {
@@ -114,7 +114,7 @@ class VectorStream
         m_bufferOffset += count;
     }
 
-    size_t LexWrite(const uint8_t *src, const size_t count)
+    size_t LexWrite(const uint8_t *src, size_t count)
     {
         // Writes off the end of the burffer grow the buffer to fit.
         const size_t wantedOffset = m_offset + count;

@@ -116,8 +116,7 @@ class FileWin32
      * @return A constructed FileWin32 object.
      * @throws Win32Error if error was encountered.
      */
-    static FileWin32 Open(const char *path, const DWORD desiredAccess, const DWORD shareMode,
-                          const DWORD creationDisposition)
+    static FileWin32 Open(const char *path, DWORD desiredAccess, DWORD shareMode, DWORD creationDisposition)
     {
         // Request buffer size.
         const int wanted = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
@@ -162,7 +161,7 @@ class FileWin32
         }
     }
 
-    size_t LexRead(uint8_t *outDest, const size_t count)
+    size_t LexRead(uint8_t *outDest, size_t count)
     {
         DWORD bytesToRead = static_cast<DWORD>(count);
         DWORD bytesRead = 0;
@@ -174,7 +173,7 @@ class FileWin32
         return bytesRead;
     }
 
-    size_t LexWrite(const uint8_t *src, const size_t count)
+    size_t LexWrite(const uint8_t *src, size_t count)
     {
         DWORD bytesToRead = static_cast<DWORD>(count);
         DWORD bytesRead = 0;
@@ -351,7 +350,7 @@ class FilePOSIX
         }
     }
 
-    size_t LexRead(uint8_t *outDest, const size_t count)
+    size_t LexRead(uint8_t *outDest, size_t count)
     {
         ssize_t bytesRead = 0;
         do
@@ -366,7 +365,7 @@ class FilePOSIX
         return static_cast<size_t>(bytesRead);
     }
 
-    size_t LexWrite(const uint8_t *src, const size_t count)
+    size_t LexWrite(const uint8_t *src, size_t count)
     {
         ssize_t bytesWritten = 0;
         do

@@ -21,7 +21,6 @@ set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/core.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lexio.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lib.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/ref.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream.hpp"
 

@@ -60,9 +60,7 @@ class FixedBufWriter
      *
      * @param bufSize Size of write buffer in bytes.
      */
-    FixedBufWriter(const size_t bufSize = DEFAULT_ALLOC_SIZE) : m_buffer(::new uint8_t[bufSize]), m_allocSize(bufSize)
-    {
-    }
+    FixedBufWriter(size_t bufSize = DEFAULT_ALLOC_SIZE) : m_buffer(::new uint8_t[bufSize]), m_allocSize(bufSize) {}
 
     /**
      * @brief Copy constructor.
@@ -89,7 +87,7 @@ class FixedBufWriter
      * @param writer Writer to wrap with a buffer.
      * @param bufSize Size of write buffer in bytes.
      */
-    FixedBufWriter(WRITER &&writer, const size_t bufSize = DEFAULT_ALLOC_SIZE)
+    FixedBufWriter(WRITER &&writer, size_t bufSize = DEFAULT_ALLOC_SIZE)
         : m_writer(writer), m_buffer(::new uint8_t[bufSize]), m_allocSize(bufSize)
     {
     }
@@ -157,24 +155,24 @@ class FixedBufWriter
     WRITER Writer() && { return m_writer; }
 
     template <typename READER = WRITER, typename = std::enable_if_t<IsReaderV<READER>>>
-    size_t LexRead(uint8_t *outDest, const size_t count)
+    size_t LexRead(uint8_t *outDest, size_t count)
     {
         return Read(m_writer, outDest, count);
     }
 
     template <typename BUFFERED_READER = WRITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-    BufferView LexFillBuffer(const size_t count)
+    BufferView LexFillBuffer(size_t count)
     {
         return FillBuffer(m_writer, count);
     }
 
     template <typename BUFFERED_READER = WRITER, typename = std::enable_if_t<IsBufferedReaderV<BUFFERED_READER>>>
-    void LexConsumeBuffer(const size_t count)
+    void LexConsumeBuffer(size_t count)
     {
         ConsumeBuffer(m_writer, count);
     }
 
-    size_t LexWrite(const uint8_t *src, const size_t count)
+    size_t LexWrite(const uint8_t *src, size_t count)
     {
         const size_t wantSize = m_size + count;
         if (wantSize < m_allocSize)
@@ -207,7 +205,7 @@ class FixedBufWriter
     }
 
     template <typename SEEKABLE = WRITER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-    size_t LexSeek(const SeekPos pos)
+    size_t LexSeek(SeekPos pos)
     {
         LexFlush();
         return Seek(m_writer, pos);
