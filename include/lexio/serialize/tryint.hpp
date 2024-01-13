@@ -106,7 +106,7 @@ inline bool TryReadU8(uint8_t &out, ReaderRef reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWriteU8(WriterRef writer, const uint8_t value)
+inline bool TryWriteU8(WriterRef writer, uint8_t value)
 {
     const uint8_t buf[sizeof(uint8_t)] = {value};
     const size_t count = Write(writer, buf, sizeof(buf));
@@ -134,7 +134,7 @@ inline bool TryRead8(int8_t &out, ReaderRef reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWrite8(WriterRef writer, const int8_t value)
+inline bool TryWrite8(WriterRef writer, int8_t value)
 {
     return Detail::WriteSigned<int8_t>(writer, value, TryWriteU8);
 }
@@ -250,7 +250,7 @@ inline bool TryRead16BE(int16_t &out, ReaderRef reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWrite16LE(WriterRef writer, const int16_t value)
+inline bool TryWrite16LE(WriterRef writer, int16_t value)
 {
     return Detail::WriteSigned<int16_t>(writer, value, TryWriteU16LE);
 }
@@ -262,7 +262,7 @@ inline bool TryWrite16LE(WriterRef writer, const int16_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWrite16BE(WriterRef writer, const int16_t value)
+inline bool TryWrite16BE(WriterRef writer, int16_t value)
 {
     return Detail::WriteSigned<int16_t>(writer, value, TryWriteU16BE);
 }
@@ -378,7 +378,7 @@ inline bool TryRead32BE(int32_t &out, ReaderRef reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWrite32LE(WriterRef writer, const int32_t value)
+inline bool TryWrite32LE(WriterRef writer, int32_t value)
 {
     return Detail::WriteSigned<int32_t>(writer, value, TryWriteU32LE);
 }
@@ -390,7 +390,7 @@ inline bool TryWrite32LE(WriterRef writer, const int32_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWrite32BE(WriterRef writer, const int32_t value)
+inline bool TryWrite32BE(WriterRef writer, int32_t value)
 {
     return Detail::WriteSigned<int32_t>(writer, value, TryWriteU32BE);
 }
@@ -506,7 +506,7 @@ inline bool TryRead64BE(int64_t &out, ReaderRef reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWrite64LE(WriterRef writer, const int64_t value)
+inline bool TryWrite64LE(WriterRef writer, int64_t value)
 {
     return Detail::WriteSigned<int64_t>(writer, value, TryWriteU64LE);
 }
@@ -518,7 +518,7 @@ inline bool TryWrite64LE(WriterRef writer, const int64_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWrite64BE(WriterRef writer, const int64_t value)
+inline bool TryWrite64BE(WriterRef writer, int64_t value)
 {
     return Detail::WriteSigned<int64_t>(writer, value, TryWriteU64BE);
 }

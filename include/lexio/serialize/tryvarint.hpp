@@ -52,7 +52,7 @@ inline bool TryReadUVarint32(uint32_t &out, ReaderRef reader)
     return true;
 }
 
-inline bool TryWriteUVarint32(WriterRef writer, const uint32_t value)
+inline bool TryWriteUVarint32(WriterRef writer, uint32_t value)
 {
     uint32_t v = value;
     while (v >= 0x80)
@@ -66,7 +66,7 @@ inline bool TryWriteUVarint32(WriterRef writer, const uint32_t value)
     return TryWriteU8(writer, static_cast<uint8_t>(v));
 }
 
-constexpr size_t UVarint32Bytes(const uint32_t value)
+constexpr size_t UVarint32Bytes(uint32_t value)
 {
     size_t count = 1;
     uint32_t v = value;
@@ -85,12 +85,12 @@ inline bool TryReadVarint32(int32_t &out, ReaderRef reader)
     return Detail::ReadSigned<int32_t>(out, reader, TryReadUVarint32);
 }
 
-inline bool TryWriteVarint32(WriterRef writer, const int32_t value)
+inline bool TryWriteVarint32(WriterRef writer, int32_t value)
 {
     return Detail::WriteSigned<int32_t>(writer, value, TryWriteUVarint32);
 }
 
-constexpr size_t Varint32Bytes(const int32_t value)
+constexpr size_t Varint32Bytes(int32_t value)
 {
     size_t count = 1;
     uint32_t v = 0 + value;
@@ -115,13 +115,13 @@ inline bool TryReadSVarint32(int32_t &out, ReaderRef reader)
     return true;
 }
 
-inline bool TryWriteSVarint32(WriterRef writer, const int32_t value)
+inline bool TryWriteSVarint32(WriterRef writer, int32_t value)
 {
     const uint32_t var = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 31);
     return TryWriteUVarint32(writer, var);
 }
 
-constexpr size_t SVarint32Bytes(const int32_t value)
+constexpr size_t SVarint32Bytes(int32_t value)
 {
     size_t count = 1;
     uint32_t v = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 31);
@@ -197,12 +197,12 @@ inline bool TryReadVarint64(int64_t &out, ReaderRef reader)
     return Detail::ReadSigned<int64_t>(out, reader, TryReadUVarint64);
 }
 
-inline bool TryWriteVarint64(WriterRef writer, const int64_t value)
+inline bool TryWriteVarint64(WriterRef writer, int64_t value)
 {
     return Detail::WriteSigned<int64_t>(writer, value, TryWriteUVarint64);
 }
 
-constexpr size_t Varint64Bytes(const int64_t value)
+constexpr size_t Varint64Bytes(int64_t value)
 {
     size_t count = 1;
     uint64_t v = 0 + value;
@@ -227,13 +227,13 @@ inline bool TryReadSVarint64(int64_t &out, ReaderRef reader)
     return true;
 }
 
-inline bool TryWriteSVarint64(WriterRef writer, const int64_t value)
+inline bool TryWriteSVarint64(WriterRef writer, int64_t value)
 {
     const uint64_t var = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
     return TryWriteUVarint64(writer, var);
 }
 
-constexpr size_t SVarint64Bytes(const int64_t value)
+constexpr size_t SVarint64Bytes(int64_t value)
 {
     size_t count = 1;
     uint64_t v = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);

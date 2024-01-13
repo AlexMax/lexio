@@ -48,7 +48,7 @@ inline uint32_t ReadUVarint32(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 32-bit integer to write to the Writer.
  */
-inline void WriteUVarint32(WriterRef writer, const uint32_t value)
+inline void WriteUVarint32(WriterRef writer, uint32_t value)
 {
     Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteUVarint32);
 }
@@ -74,7 +74,7 @@ inline int32_t ReadVarint32(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 32-bit integer to write to the Writer.
  */
-inline void WriteVarint32(WriterRef writer, const int32_t value)
+inline void WriteVarint32(WriterRef writer, int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWriteVarint32);
 }
@@ -100,7 +100,7 @@ inline int32_t ReadSVarint32(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 32-bit integer to write to the Writer.
  */
-inline void WriteSVarint32(WriterRef writer, const int32_t value)
+inline void WriteSVarint32(WriterRef writer, int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWriteSVarint32);
 }
@@ -157,7 +157,7 @@ inline int64_t ReadVarint64(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 64-bit integer to write to the Writer.
  */
-inline void WriteVarint64(WriterRef writer, const int64_t value)
+inline void WriteVarint64(WriterRef writer, int64_t value)
 {
     Detail::WriteWithExcept<int64_t>(writer, value, TryWriteVarint64);
 }
@@ -183,7 +183,7 @@ inline int64_t ReadSVarint64(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 64-bit integer to write to the Writer.
  */
-inline void WriteSVarint64(WriterRef writer, const int64_t value)
+inline void WriteSVarint64(WriterRef writer, int64_t value)
 {
     Detail::WriteWithExcept<int64_t>(writer, value, TryWriteSVarint64);
 }

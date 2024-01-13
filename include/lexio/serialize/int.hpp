@@ -78,7 +78,7 @@ inline uint8_t ReadU8(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU8(WriterRef writer, const uint8_t value)
+inline void WriteU8(WriterRef writer, uint8_t value)
 {
     Detail::WriteWithExcept<uint8_t>(writer, value, TryWriteU8);
 }
@@ -104,7 +104,7 @@ inline int8_t Read8(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write8(WriterRef writer, const int8_t value)
+inline void Write8(WriterRef writer, int8_t value)
 {
     Detail::WriteWithExcept<int8_t>(writer, value, TryWrite8);
 }
@@ -192,7 +192,7 @@ inline int16_t Read16BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write16LE(WriterRef writer, const int16_t value)
+inline void Write16LE(WriterRef writer, int16_t value)
 {
     Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16LE);
 }
@@ -204,7 +204,7 @@ inline void Write16LE(WriterRef writer, const int16_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write16BE(WriterRef writer, const int16_t value)
+inline void Write16BE(WriterRef writer, int16_t value)
 {
     Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16BE);
 }
@@ -242,7 +242,7 @@ inline uint32_t ReadU32BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU32LE(WriterRef writer, const uint32_t value)
+inline void WriteU32LE(WriterRef writer, uint32_t value)
 {
     Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32LE);
 }
@@ -254,7 +254,7 @@ inline void WriteU32LE(WriterRef writer, const uint32_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU32BE(WriterRef writer, const uint32_t value)
+inline void WriteU32BE(WriterRef writer, uint32_t value)
 {
     Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32BE);
 }
@@ -292,7 +292,7 @@ inline int32_t Read32BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write32LE(WriterRef writer, const int32_t value)
+inline void Write32LE(WriterRef writer, int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32LE);
 }
@@ -304,7 +304,7 @@ inline void Write32LE(WriterRef writer, const int32_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write32BE(WriterRef writer, const int32_t value)
+inline void Write32BE(WriterRef writer, int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32BE);
 }
@@ -392,7 +392,7 @@ inline int64_t Read64BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write64LE(WriterRef writer, const int64_t value)
+inline void Write64LE(WriterRef writer, int64_t value)
 {
     Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64LE);
 }
@@ -404,7 +404,7 @@ inline void Write64LE(WriterRef writer, const int64_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write64BE(WriterRef writer, const int64_t value)
+inline void Write64BE(WriterRef writer, int64_t value)
 {
     Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64BE);
 }

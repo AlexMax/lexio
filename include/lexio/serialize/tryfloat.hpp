@@ -67,7 +67,7 @@ inline bool TryReadFloat32BE(float32_t &out, ReaderRef reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWriteFloat32LE(WriterRef writer, const float32_t value)
+inline bool TryWriteFloat32LE(WriterRef writer, float32_t value)
 {
     const uint32_t bits = Detail::BitCast<uint32_t>(value);
     return TryWriteU32LE(writer, bits);
@@ -80,7 +80,7 @@ inline bool TryWriteFloat32LE(WriterRef writer, const float32_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWriteFloat32BE(WriterRef writer, const float32_t value)
+inline bool TryWriteFloat32BE(WriterRef writer, float32_t value)
 {
     const uint32_t bits = Detail::BitCast<uint32_t>(value);
     return TryWriteU32BE(writer, bits);
@@ -131,7 +131,7 @@ inline bool TryReadFloat64BE(float64_t &out, ReaderRef reader)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWriteFloat64LE(WriterRef writer, const float64_t value)
+inline bool TryWriteFloat64LE(WriterRef writer, float64_t value)
 {
     const uint64_t bits = Detail::BitCast<uint64_t>(value);
     return TryWriteU64LE(writer, bits);
@@ -144,7 +144,7 @@ inline bool TryWriteFloat64LE(WriterRef writer, const float64_t value)
  * @param value Integer to write.
  * @return True if the write was successful.
  */
-inline bool TryWriteFloat64BE(WriterRef writer, const float64_t value)
+inline bool TryWriteFloat64BE(WriterRef writer, float64_t value)
 {
     const uint64_t bits = Detail::BitCast<uint64_t>(value);
     return TryWriteU64BE(writer, bits);
