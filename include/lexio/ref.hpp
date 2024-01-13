@@ -41,6 +41,9 @@ class ReaderWriterRef
     {
     }
 
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; }
+    operator WriterRef() const { return WriterRef{m_ptr, m_lexWrite, m_lexFlush}; }
+
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
     size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
     void LexFlush() const { m_lexFlush(m_ptr); }
@@ -69,6 +72,13 @@ class BufferedReaderWriterRef
     {
     }
 
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; }
+    operator BufferedReaderRef() const
+    {
+        return BufferedReaderRef{m_ptr, m_lexRead, m_lexFillBuffer, m_lexConsumeBuffer};
+    }
+    operator WriterRef() const { return WriterRef{m_ptr, m_lexWrite, m_lexFlush}; }
+
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
     BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
     void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
@@ -93,6 +103,9 @@ class ReaderSeekableRef
         : m_ptr(&readerSeekable), m_lexRead(Detail::WrapRead<STREAM>), m_lexSeek(Detail::WrapSeek<STREAM>)
     {
     }
+
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; }
+    operator SeekableRef() const { return SeekableRef{m_ptr, m_lexSeek}; }
 
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
     size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
@@ -120,6 +133,13 @@ class BufferedReaderSeekableRef
     {
     }
 
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; }
+    operator BufferedReaderRef() const
+    {
+        return BufferedReaderRef{m_ptr, m_lexRead, m_lexFillBuffer, m_lexConsumeBuffer};
+    }
+    operator SeekableRef() const { return SeekableRef{m_ptr, m_lexSeek}; }
+
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
     BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
     void LexConsumeBuffer(const size_t size) const { m_lexConsumeBuffer(m_ptr, size); }
@@ -146,6 +166,10 @@ class ReaderWriterSeekableRef
           m_lexFlush(Detail::WrapFlush<STREAM>), m_lexSeek(Detail::WrapSeek<STREAM>)
     {
     }
+
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; }
+    operator WriterRef() const { return WriterRef{m_ptr, m_lexWrite, m_lexFlush}; }
+    operator SeekableRef() const { return SeekableRef{m_ptr, m_lexSeek}; }
 
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
     size_t LexWrite(const uint8_t *src, const size_t count) const { return m_lexWrite(m_ptr, src, count); }
@@ -177,6 +201,14 @@ class BufferedReaderWriterSeekableRef
           m_lexSeek(Detail::WrapSeek<STREAM>)
     {
     }
+
+    operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; }
+    operator BufferedReaderRef() const
+    {
+        return BufferedReaderRef{m_ptr, m_lexRead, m_lexFillBuffer, m_lexConsumeBuffer};
+    }
+    operator WriterRef() const { return WriterRef{m_ptr, m_lexWrite, m_lexFlush}; }
+    operator SeekableRef() const { return SeekableRef{m_ptr, m_lexSeek}; }
 
     size_t LexRead(uint8_t *outDest, const size_t count) const { return m_lexRead(m_ptr, outDest, count); }
     BufferView LexFillBuffer(const size_t size) const { return m_lexFillBuffer(m_ptr, size); }
