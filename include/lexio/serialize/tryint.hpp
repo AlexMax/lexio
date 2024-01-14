@@ -15,9 +15,8 @@
 //
 
 /**
- * @file tryint.h
- *
- * Integer serialization functions that return false on failure.
+ * @file tryint.hpp
+ * @brief Integer serialization functions that return false on failure.
  */
 
 #pragma once

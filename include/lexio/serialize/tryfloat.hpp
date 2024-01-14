@@ -14,6 +14,11 @@
 //  limitations under the License.
 //
 
+/**
+ * @file tryfloat.hpp
+ * @brief Floating-point serialization functions that return false on failure.
+ */
+
 #pragma once
 
 #include "./tryint.hpp"

@@ -16,7 +16,7 @@
 
 /**
  * @file file.hpp
- * Stream implementation that wraps basic file input and output.
+ * @brief Stream implementation that wraps basic file input and output.
  */
 
 #pragma once

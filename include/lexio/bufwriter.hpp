@@ -16,7 +16,7 @@
 
 /**
  * @file bufwriter.hpp
- * Contains implementations of buffered writer functionality.
+ * @brief Contains implementations of buffered writer functionality.
  */
 
 #pragma once

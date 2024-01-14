@@ -14,6 +14,12 @@
 //  limitations under the License.
 //
 
+/**
+ * @file tryvarint.hpp
+ * @brief Protobuf-style varint serialization functions that return false on
+ *        failure.
+ */
+
 #pragma once
 
 #include "./tryint.hpp"

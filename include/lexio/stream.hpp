@@ -16,7 +16,7 @@
 
 /**
  * @file stream.hpp
- * Includes all stream functionality.
+ * @brief Includes all stream functionality.
  */
 
 #pragma once

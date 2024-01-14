@@ -16,7 +16,7 @@
 
 /**
  * @file core.hpp
- * Core interfaces and functions needed by LexIO streams.
+ * @brief Core interfaces and functions needed by LexIO streams.
  *
  * LexIO streams are not derived from abstract classes, but by classes that
  * adhere to traits that are enforced by the type traits in this file.  There

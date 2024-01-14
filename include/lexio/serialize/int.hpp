@@ -15,9 +15,8 @@
 //
 
 /**
- * @file int.h
- *
- * Integer serialization functions that throw exceptions on failure.
+ * @file int.hpp
+ * @brief Integer serialization functions that throw exceptions on failure.
  */
 
 #pragma once

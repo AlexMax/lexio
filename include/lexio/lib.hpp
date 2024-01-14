@@ -16,7 +16,7 @@
 
 /**
  * @file lib.hpp
- * Common stream functionality that builds off of basic functions.
+ * @brief Common stream functionality that builds off of basic functions.
  */
 
 #pragma once

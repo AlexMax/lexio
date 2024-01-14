@@ -16,7 +16,7 @@
 
 /**
  * @file bufreader.hpp
- * Contains implementations of buffered reader functionality.
+ * @brief Contains implementations of buffered reader functionality.
  */
 
 #pragma once

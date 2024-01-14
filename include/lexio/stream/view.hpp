@@ -16,7 +16,7 @@
 
 /**
  * @file view.hpp
- * Stream implementation that wraps a pair of pointers.
+ * @brief Stream implementation that wraps a pair of pointers.
  */
 
 #pragma once

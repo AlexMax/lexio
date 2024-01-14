@@ -16,7 +16,7 @@
 
 /**
  * @file lexio.hpp
- * Includes all of LexIO.
+ * @brief Includes all of LexIO.
  */
 
 #pragma once

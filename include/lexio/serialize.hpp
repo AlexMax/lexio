@@ -16,7 +16,7 @@
 
 /**
  * @file serialize.hpp
- * Includes all serialization functions.
+ * @brief Includes all serialization functions.
  */
 
 #pragma once

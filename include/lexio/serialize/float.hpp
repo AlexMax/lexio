@@ -14,6 +14,12 @@
 //  limitations under the License.
 //
 
+/**
+ * @file float.hpp
+ * @brief Floating-point serialization functions that throw exceptions on
+ *        failure.
+ */
+
 #pragma once
 
 #include "./int.hpp"

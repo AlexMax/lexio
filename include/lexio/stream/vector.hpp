@@ -16,7 +16,7 @@
 
 /**
  * @file vector.hpp
- * Stream implementation that uses std::vector under the hood.
+ * @brief Stream implementation that uses std::vector under the hood.
  */
 
 #pragma once
