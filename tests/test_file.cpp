@@ -166,6 +166,12 @@ TEST(File, Close)
     EXPECT_NO_THROW(file.Close());
 }
 
+TEST(File, Length)
+{
+    auto file = LexIO::Open(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
+    EXPECT_EQ(47, LexIO::Length(file));
+}
+
 TEST(File, ReadMode)
 {
     constexpr const char *firstLine = "The quick brown fox";

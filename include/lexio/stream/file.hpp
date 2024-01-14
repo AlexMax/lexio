@@ -102,6 +102,8 @@ class FileWin32
         m_fileHandle = INVALID_HANDLE_VALUE;
     }
 
+    handle_type FileHandle() const & noexcept { return m_fileHandle; }
+
     handle_type FileHandle() && { return m_fileHandle; }
 
     static handle_type InvalidFileHandle() { return INVALID_HANDLE_VALUE; }
@@ -248,6 +250,16 @@ inline File Open(const char *path, const OpenMode mode)
     default:
         throw std::runtime_error("Unknown open mode type.");
     }
+}
+
+inline size_t Length(const FileWin32 &file)
+{
+    LARGE_INTEGER size = {0};
+    if (FALSE == GetFileSizeEx(file.FileHandle(), &size))
+    {
+        throw Win32Error("Could not open file.", GetLastError());
+    }
+    return size_t(size.QuadPart);
 }
 
 } // namespace LexIO
