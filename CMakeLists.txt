@@ -58,5 +58,6 @@ message(STATUS "SANITIZE_UNDEFINED: ${SANITIZE_UNDEFINED}")
 ### Documentation ###
 find_package(Doxygen)
 if(TARGET Doxygen::doxygen)
+    set(DOXYGEN_EXCLUDE_SYMBOLS "LexIO::Detail")
     doxygen_add_docs(docs ${LEXIO_HEADERS})
 endif()

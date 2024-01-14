@@ -88,7 +88,7 @@ namespace LexIO
 {
 
 /**
- * @brief Pointer to a contiguous buffer, with its length.
+ * @brief View of a contiguous buffer of bytes.
  */
 class BufferView
 {
@@ -356,15 +356,28 @@ class ReaderRef
 
     ReaderRef() = delete;
 
+    /**
+     * @brief Copy constructor.
+     */
     ReaderRef(const ReaderRef &other) : m_ptr(other.m_ptr), m_lexRead(other.m_lexRead) {}
 
+    /**
+     * @brief Construct and wrap any Reader that isn't a Ref.
+     */
     template <typename READER, typename = EnableIfWrappable<READER>>
     ReaderRef(READER &reader) : m_ptr(&reader), m_lexRead(Detail::WrapRead<READER>)
     {
     }
 
+    /**
+     * @brief Member-wise constructor.  Useful if you want to construct a
+     *        ReaderRef from some other type of Ref.
+     */
     ReaderRef(void *ptr, WrapReadFunc lexRead) : m_ptr(ptr), m_lexRead(lexRead) {}
 
+    /**
+     * @brief Copy assignment operator.
+     */
     ReaderRef &operator=(const ReaderRef &other)
     {
         if (this == &other)
@@ -377,6 +390,9 @@ class ReaderRef
         return *this;
     }
 
+    /**
+     * @brief Copy-assign and wrap any Reader that isn't a Ref.
+     */
     template <typename READER, typename = EnableIfWrappable<READER>>
     ReaderRef &operator=(READER &reader)
     {
@@ -411,12 +427,18 @@ class BufferedReaderRef
 
     BufferedReaderRef() = delete;
 
+    /**
+     * @brief Copy constructor.
+     */
     BufferedReaderRef(const BufferedReaderRef &other)
         : m_ptr(other.m_ptr), m_lexRead(other.m_lexRead), m_lexFillBuffer(other.m_lexFillBuffer),
           m_lexConsumeBuffer(other.m_lexConsumeBuffer)
     {
     }
 
+    /**
+     * @brief Construct and wrap any BufferedReader that isn't a Ref.
+     */
     template <typename BUFFERED_READER, typename = EnableIfWrappable<BUFFERED_READER>>
     BufferedReaderRef(BUFFERED_READER &bufReader)
         : m_ptr(&bufReader), m_lexRead(Detail::WrapRead<BUFFERED_READER>),
@@ -425,12 +447,19 @@ class BufferedReaderRef
     {
     }
 
+    /**
+     * @brief Member-wise constructor.  Useful if you want to construct a
+     *        BufferedReaderRef from some other type of Ref.
+     */
     BufferedReaderRef(void *ptr, ReaderRef::WrapReadFunc lexRead, WrapFillBufferFunc lexFillBuffer,
                       WrapConsumeBufferFunc lexConsumeBuffer)
         : m_ptr(ptr), m_lexRead(lexRead), m_lexFillBuffer(lexFillBuffer), m_lexConsumeBuffer(lexConsumeBuffer)
     {
     }
 
+    /**
+     * @brief Copy assignment operator.
+     */
     BufferedReaderRef &operator=(const BufferedReaderRef &other)
     {
         if (this == &other)
@@ -445,6 +474,9 @@ class BufferedReaderRef
         return *this;
     }
 
+    /**
+     * @brief Copy-assign and wrap any BufferedReader that isn't a Ref.
+     */
     template <typename BUFFERED_READER, typename = EnableIfWrappable<BUFFERED_READER>>
     BufferedReaderRef &operator=(BUFFERED_READER &bufReader)
     {
@@ -455,6 +487,10 @@ class BufferedReaderRef
         return *this;
     }
 
+    /**
+     * @brief User-defined conversion that directly converts to a ReaderRef,
+     *        avoiding an extra indirection.
+     */
     operator ReaderRef() const { return ReaderRef{m_ptr, m_lexRead}; };
 
     size_t LexRead(uint8_t *outDest, size_t count) const { return m_lexRead(m_ptr, outDest, count); }
@@ -486,20 +522,33 @@ class UnbufferedReaderRef
 
     UnbufferedReaderRef() = delete;
 
+    /**
+     * @brief Copy constructor.
+     */
     UnbufferedReaderRef(const UnbufferedReaderRef &other) : m_ptr(other.m_ptr), m_lexRead(other.m_lexRead) {}
 
+    /**
+     * @brief Construct and wrap any Reader that isn't a Ref or BufferedReader.
+     */
     template <typename READER, typename = EnableIfWrappable<READER>>
     UnbufferedReaderRef(READER &reader) : m_ptr(&reader), m_lexRead(Detail::WrapRead<READER>)
     {
     }
 
     /**
-     * @brief Construct from a Reader.
+     * @brief Construct from a ReaderRef.  Avoids an extra indirection.
      */
     UnbufferedReaderRef(const ReaderRef &reader) : m_ptr(reader.m_ptr), m_lexRead(reader.m_lexRead) {}
 
+    /**
+     * @brief Member-wise constructor.  Useful if you want to construct an
+     *        UnbufferedReaderRef from some other type of Ref.
+     */
     UnbufferedReaderRef(void *ptr, ReaderRef::WrapReadFunc lexRead) : m_ptr(ptr), m_lexRead(lexRead) {}
 
+    /**
+     * @brief Copy assignment operator.
+     */
     UnbufferedReaderRef &operator=(const UnbufferedReaderRef &other)
     {
         if (this == &other)
@@ -512,6 +561,10 @@ class UnbufferedReaderRef
         return *this;
     }
 
+    /**
+     * @brief Copy-assign and wrap any Reader that isn't a Ref or
+     *        BufferedReader.
+     */
     template <typename READER, typename = EnableIfWrappable<READER>>
     UnbufferedReaderRef &operator=(READER &reader)
     {
@@ -551,21 +604,34 @@ class WriterRef
 
     WriterRef() = delete;
 
+    /**
+     * @brief Copy constructor.
+     */
     WriterRef(const WriterRef &other) : m_ptr(other.m_ptr), m_lexWrite(other.m_lexWrite), m_lexFlush(other.m_lexFlush)
     {
     }
 
+    /**
+     * @brief Construct and wrap any Writer that isn't a Ref.
+     */
     template <typename WRITER, typename = EnableIfWrappable<WRITER>>
     WriterRef(WRITER &writer)
         : m_ptr(&writer), m_lexWrite(Detail::WrapWrite<WRITER>), m_lexFlush(Detail::WrapFlush<WRITER>)
     {
     }
 
+    /**
+     * @brief Member-wise constructor.  Useful if you want to construct an
+     *        WriterRef from some other type of Ref.
+     */
     WriterRef(void *ptr, WrapWriteFunc lexWrite, WrapFlushFunc lexFlush)
         : m_ptr(ptr), m_lexWrite(lexWrite), m_lexFlush(lexFlush)
     {
     }
 
+    /**
+     * @brief Copy assignment operator.
+     */
     WriterRef &operator=(const WriterRef &other)
     {
         if (this == &other)
@@ -579,6 +645,9 @@ class WriterRef
         return *this;
     }
 
+    /**
+     * @brief Copy-assign and wrap any Writer that isn't a Ref.
+     */
     template <typename WRITER, typename = EnableIfWrappable<WRITER>>
     WriterRef &operator=(WRITER &writer)
     {
@@ -615,15 +684,28 @@ class SeekableRef
 
     SeekableRef() = delete;
 
+    /**
+     * @brief Copy constructor.
+     */
     SeekableRef(const SeekableRef &other) : m_ptr(other.m_ptr), m_lexSeek(other.m_lexSeek) {}
 
+    /**
+     * @brief Construct and wrap any Seekable that isn't a Ref.
+     */
     template <typename SEEKABLE, typename = EnableIfWrappable<SEEKABLE>>
     SeekableRef(SEEKABLE &seekable) : m_ptr(&seekable), m_lexSeek(Detail::WrapSeek<SEEKABLE>)
     {
     }
 
+    /**
+     * @brief Member-wise constructor.  Useful if you want to construct an
+     *        SeekableRef from some other type of Ref.
+     */
     SeekableRef(void *ptr, WrapSeekFunc lexSeek) : m_ptr(ptr), m_lexSeek(lexSeek) {}
 
+    /**
+     * @brief Copy assignment operator.
+     */
     SeekableRef &operator=(const SeekableRef &other)
     {
         if (this == &other)
@@ -636,6 +718,9 @@ class SeekableRef
         return *this;
     }
 
+    /**
+     * @brief Copy-assign and wrap any Seekable that isn't a Ref.
+     */
     template <typename SEEKABLE, typename = EnableIfWrappable<SEEKABLE>>
     SeekableRef &operator=(SEEKABLE &seekable)
     {
