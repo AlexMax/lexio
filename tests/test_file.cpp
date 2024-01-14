@@ -169,7 +169,12 @@ TEST(File, Close)
 TEST(File, Length)
 {
     auto file = LexIO::Open(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
-    EXPECT_EQ(47, LexIO::Length(file));
+    const size_t len = LexIO::Length(file);
+#if defined(_WIN32)
+    EXPECT_EQ(len, 47);
+#else
+    EXPECT_EQ(len, 45);
+#endif
 }
 
 TEST(File, ReadMode)

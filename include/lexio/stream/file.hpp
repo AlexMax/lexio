@@ -257,7 +257,7 @@ inline size_t Length(const FileWin32 &file)
     LARGE_INTEGER size = {0};
     if (FALSE == GetFileSizeEx(file.FileHandle(), &size))
     {
-        throw Win32Error("Could not open file.", GetLastError());
+        throw Win32Error("Could not get file size.", GetLastError());
     }
     return size_t(size.QuadPart);
 }
@@ -268,6 +268,7 @@ inline size_t Length(const FileWin32 &file)
 
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 namespace LexIO
@@ -312,6 +313,8 @@ class FilePOSIX
         }
         m_fd = -1;
     }
+
+    int FileHandle() const & noexcept { return m_fd; }
 
     int FileHandle() && { return m_fd; }
 
@@ -449,6 +452,16 @@ inline File Open(const char *path, const OpenMode mode)
     default:
         throw std::runtime_error("Unknown open mode type.");
     }
+}
+
+inline size_t Length(const int fd)
+{
+    struct stat st;
+    if (-1 == fstat(fd, &st))
+    {
+        throw POSIXError("Could not stat file.", errno);
+    }
+    return size_t(st.st_size);
 }
 
 } // namespace LexIO
