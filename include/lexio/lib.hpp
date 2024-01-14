@@ -91,18 +91,18 @@ inline size_t ReadToEOF(OUT_ITER outIt, BufferedReaderRef bufReader)
     for (;;)
     {
         BufferView buf = FillBuffer(bufReader, BUFFER_SIZE);
-        if (buf.second == 0)
+        if (buf.Size() == 0)
         {
             // Read all data there was to read.
             return total;
         }
 
         // Copy buffered data into the iterator.
-        std::copy(buf.first, buf.first + buf.second, outIt);
+        std::copy(buf.Data(), buf.Data() + buf.Size(), outIt);
 
         // Consume what we've read.
-        ConsumeBuffer(bufReader, buf.second);
-        total += buf.second;
+        ConsumeBuffer(bufReader, buf.Size());
+        total += buf.Size();
     }
 }
 
@@ -125,15 +125,15 @@ inline size_t ReadUntil(OUT_ITER outIt, BufferedReaderRef bufReader, const uint8
     for (;;)
     {
         BufferView buf = FillBuffer(bufReader, BUFFER_SIZE);
-        if (buf.second == 0)
+        if (buf.Size() == 0)
         {
             // Read all data there was to read.
             return size;
         }
 
         // Copy the buffered data into the iterator until we hit the passed byte.
-        const uint8_t *it = buf.first;
-        for (size_t i = 0; i < buf.second; i++)
+        const uint8_t *it = buf.Data();
+        for (size_t i = 0; i < buf.Size(); i++)
         {
             if (*it == term)
             {
@@ -168,12 +168,12 @@ inline size_t Copy(WriterRef writer, BufferedReaderRef bufReader)
     for (;;)
     {
         const BufferView buffer = FillBuffer(bufReader, BUFFER_SIZE);
-        if (buffer.second == 0)
+        if (buffer.Size() == 0)
         {
             return count;
         }
 
-        const size_t written = Write(writer, buffer.first, buffer.second);
+        const size_t written = Write(writer, buffer.Data(), buffer.Size());
         ConsumeBuffer(bufReader, written);
         count += written;
     }

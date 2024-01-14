@@ -74,9 +74,9 @@ class VectorStream
     size_t LexRead(uint8_t *outDest, size_t count)
     {
         BufferView data = LexFillBuffer(count);
-        std::memcpy(outDest, data.first, data.second);
-        LexConsumeBuffer(data.second);
-        return data.second;
+        std::memcpy(outDest, data.Data(), data.Size());
+        LexConsumeBuffer(data.Size());
+        return data.Size();
     }
 
     BufferView LexFillBuffer(size_t count)

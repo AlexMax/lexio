@@ -218,7 +218,7 @@ TEST(BufferedReaderRef, Call)
 
     EXPECT_EQ(LexIO::RawRead(&buffer[0], ref, sizeof(buffer)), 0);
     EXPECT_EQ(ref.LexRead(&buffer[0], sizeof(buffer)), 0);
-    EXPECT_EQ(LexIO::FillBuffer(ref, 0).second, 0);
+    EXPECT_EQ(LexIO::FillBuffer(ref, 0).Size(), 0);
     EXPECT_NO_THROW(LexIO::ConsumeBuffer(ref, 0));
 }
 

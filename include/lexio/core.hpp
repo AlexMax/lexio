@@ -90,7 +90,18 @@ namespace LexIO
 /**
  * @brief Pointer to a contiguous buffer, with its length.
  */
-using BufferView = std::pair<const uint8_t *, size_t>;
+class BufferView
+{
+  public:
+    constexpr BufferView() = default;
+    constexpr BufferView(const uint8_t *data, size_t size) : m_data(data), m_size(size) {}
+    constexpr const uint8_t *Data() const noexcept { return m_data; }
+    constexpr size_t Size() const noexcept { return m_size; }
+
+  protected:
+    const uint8_t *m_data = nullptr;
+    size_t m_size = 0;
+};
 
 /**
  * @brief Possible seek directions.
