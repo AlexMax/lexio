@@ -16,9 +16,11 @@ The base interfaces are heavily inspired by Rust's std::io traits, as they seem 
 
 How To Use
 ----------
-Reading and writing in LexIO involves using stream classes that have certain methods with specific signatures defined.  There is no subclassing or overriding virtual methods in the stream class, any class can be used so long as it provides the correct methods.  LexIO comes with several type traits to ensure that the method implementations you write adhere to the methods, as well as several classes that cover many common use cases.
+Reading and writing in LexIO involves using stream classes that have certain methods with specific signatures defined.  There is no subclassing or overriding virtual methods in the stream class, any class can be used so long as it provides the correct methods.  LexIO comes with several type traits to ensure that the method implementations you write adhere to the methods, plus a collection of type-erased reference types that wrap any valid implementation.  The library also comes with several classes that adhere to these traits that cover many common use cases.
 
-Once you have a stream class, LexIO then gives you free functions that take the stream as a parameter and use those methods to read or write data.  The core library includes implementations of many common operations, such as reading an entire buffer or returning the current position in a seekable stream, but other functions are included for reading and writing many common data types, such as fixed-length integers, strings, and varints.
+Once you have a stream class, LexIO then gives you free functions that take either a stream or a type-erased reference to a stream as a parameter and use those methods to read or write data.  The core library includes implementations of many common operations, such as reading an entire buffer or returning the current position in a seekable stream, but other functions are included for reading and writing many common data types, such as fixed-length integers, strings, and varints.
+
+An explanation of the four types of supported traits follows:
 
 ### Reader
 
