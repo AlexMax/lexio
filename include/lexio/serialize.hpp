@@ -14,6 +14,11 @@
 //  limitations under the License.
 //
 
+/**
+ * @file serialize.hpp
+ * Includes all serialization functions.
+ */
+
 #pragma once
 
 #include "./serialize/int.hpp"

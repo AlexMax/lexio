@@ -150,25 +150,25 @@ TEST(File, DefaultCtor)
 
 TEST(File, MoveCtor)
 {
-    auto file = LexIO::Open(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
+    auto file = LexIO::FileOpen(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
     LexIO::File moveFIle{std::move(file)};
 }
 
 TEST(File, MoveAssign)
 {
     auto file = LexIO::File{};
-    file = LexIO::Open(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
+    file = LexIO::FileOpen(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
 }
 
 TEST(File, Close)
 {
-    auto file = LexIO::Open(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
+    auto file = LexIO::FileOpen(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
     EXPECT_NO_THROW(file.Close());
 }
 
 TEST(File, Length)
 {
-    auto file = LexIO::Open(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
+    auto file = LexIO::FileOpen(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
     const size_t len = LexIO::Length(file);
 #if defined(_WIN32)
     EXPECT_EQ(len, 47);
@@ -181,7 +181,7 @@ TEST(File, ReadMode)
 {
     constexpr const char *firstLine = "The quick brown fox";
 
-    auto file = LexIO::Open(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
+    auto file = LexIO::FileOpen(LEXIO_TEST_DIR "/test_file.txt", LexIO::OpenMode::read);
 
     // Test reading.
     uint8_t readBuffer[32];
@@ -215,7 +215,7 @@ TEST(File, WriteMode)
     ScopeDelete deleteMe{filename};
 
     {
-        auto file = LexIO::Open(filename.c_str(), LexIO::OpenMode::write);
+        auto file = LexIO::FileOpen(filename.c_str(), LexIO::OpenMode::write);
 
         // Test reading.
         uint8_t readBuffer[32] = {0x00};

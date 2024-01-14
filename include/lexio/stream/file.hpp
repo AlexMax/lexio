@@ -14,9 +14,10 @@
 //  limitations under the License.
 //
 
-//
-// Stream abstraction that wraps basic file input and output.
-//
+/**
+ * @file file.hpp
+ * Stream implementation that wraps basic file input and output.
+ */
 
 #pragma once
 
@@ -27,6 +28,9 @@
 namespace LexIO
 {
 
+/**
+ * @brief Default modes that a file can be opened with.
+ */
 enum class OpenMode
 {
     // Read only, file must exist.
@@ -59,6 +63,9 @@ enum class OpenMode
 namespace LexIO
 {
 
+/**
+ * @brief A Win32 error returned by GetLastError.
+ */
 class Win32Error : public std::runtime_error
 {
     DWORD m_error = 0;
@@ -68,26 +75,28 @@ class Win32Error : public std::runtime_error
     DWORD GetError() const noexcept { return m_error; }
 };
 
+/**
+ * @brief A stream implementation that wraps a Win32 file handle.
+ */
 class FileWin32
 {
   public:
     using handle_type = HANDLE;
 
+    /**
+     * @brief Default constructor with an invalid file handle.
+     */
     FileWin32() = default;
-    FileWin32(const FileWin32 &other) = delete;
-    FileWin32 &operator=(const FileWin32 &other) = delete;
 
+    FileWin32(const FileWin32 &) = delete;
+
+    /**
+     * @brief Move constructor.
+     */
     FileWin32(FileWin32 &&other) noexcept
     {
         m_fileHandle = other.m_fileHandle;
         other.m_fileHandle = INVALID_HANDLE_VALUE;
-    }
-
-    FileWin32 &operator=(FileWin32 &&other) noexcept
-    {
-        m_fileHandle = other.m_fileHandle;
-        other.m_fileHandle = INVALID_HANDLE_VALUE;
-        return *this;
     }
 
     /**
@@ -102,10 +111,32 @@ class FileWin32
         m_fileHandle = INVALID_HANDLE_VALUE;
     }
 
+    FileWin32 &operator=(const FileWin32 &) = delete;
+
+    /**
+     * @brief Move assignment operator.
+     */
+    FileWin32 &operator=(FileWin32 &&other) noexcept
+    {
+        m_fileHandle = other.m_fileHandle;
+        other.m_fileHandle = INVALID_HANDLE_VALUE;
+        return *this;
+    }
+
+    /**
+     * @brief Return the internal file handle.  Reading, writing, and seeking
+     *        this handle directly is not recommended.
+     */
     handle_type FileHandle() const & noexcept { return m_fileHandle; }
 
+    /**
+     * @brief Taking ownership of file handle while moving-from a FileWin32.
+     */
     handle_type FileHandle() && { return m_fileHandle; }
 
+    /**
+     * @brief Returns an invalid file handle.
+     */
     static handle_type InvalidFileHandle() { return INVALID_HANDLE_VALUE; }
 
     /**
@@ -196,7 +227,7 @@ class FileWin32
         }
     }
 
-    size_t LexSeek(const SeekPos pos)
+    size_t LexSeek(SeekPos pos)
     {
         DWORD whence = 0;
         LARGE_INTEGER offset, newOffset;
@@ -226,27 +257,34 @@ class FileWin32
   protected:
     HANDLE m_fileHandle = INVALID_HANDLE_VALUE;
 
-    FileWin32(const HANDLE fileHandle) : m_fileHandle(fileHandle) {}
+    FileWin32(HANDLE fileHandle) : m_fileHandle(fileHandle) {}
 };
 
-using File = FileWin32;
-
-inline File Open(const char *path, const OpenMode mode)
+/**
+ * @brief Open a file, calling the appropriate invocation of File::Open.
+ *
+ * @param path Path to file.  Encoding is assumed to be UTF-8.
+ * @param mode Mode to open with.
+ * @return An opened file.
+ * @throws Win32Error if open operation failed.
+ * @throws std::runtime_error if invalid mode was passed.
+ */
+inline FileWin32 FileOpen(const char *path, const OpenMode mode)
 {
     switch (mode)
     {
     case OpenMode::read:
-        return File::Open(path, GENERIC_READ, 0, OPEN_EXISTING);
+        return FileWin32::Open(path, GENERIC_READ, 0, OPEN_EXISTING);
     case OpenMode::write:
-        return File::Open(path, GENERIC_WRITE, 0, CREATE_ALWAYS);
+        return FileWin32::Open(path, GENERIC_WRITE, 0, CREATE_ALWAYS);
     case OpenMode::append:
-        return File::Open(path, GENERIC_WRITE, 0, OPEN_ALWAYS);
+        return FileWin32::Open(path, GENERIC_WRITE, 0, OPEN_ALWAYS);
     case OpenMode::readPlus:
-        return File::Open(path, GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
+        return FileWin32::Open(path, GENERIC_READ | GENERIC_WRITE, 0, OPEN_EXISTING);
     case OpenMode::writePlus:
-        return File::Open(path, GENERIC_READ | GENERIC_WRITE, 0, CREATE_ALWAYS);
+        return FileWin32::Open(path, GENERIC_READ | GENERIC_WRITE, 0, CREATE_ALWAYS);
     case OpenMode::appendPlus:
-        return File::Open(path, GENERIC_READ | GENERIC_WRITE, 0, OPEN_ALWAYS);
+        return FileWin32::Open(path, GENERIC_READ | GENERIC_WRITE, 0, OPEN_ALWAYS);
     default:
         throw std::runtime_error("Unknown open mode type.");
     }
@@ -262,9 +300,16 @@ inline size_t Length(const FileWin32 &file)
     return size_t(size.QuadPart);
 }
 
+/**
+ * @brief On UNIX, File is a FileWin32.
+ */
+using File = FileWin32;
+
 } // namespace LexIO
 
-#else
+#endif // _WIN32
+
+#if defined(__linux__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__unix__)
 
 #include <errno.h>
 #include <fcntl.h>
@@ -274,6 +319,9 @@ inline size_t Length(const FileWin32 &file)
 namespace LexIO
 {
 
+/**
+ * @brief A POSIX error returned by errno.
+ */
 class POSIXError : public std::runtime_error
 {
     int m_error = 0;
@@ -283,24 +331,26 @@ class POSIXError : public std::runtime_error
     int GetError() const noexcept { return m_error; }
 };
 
+/**
+ * @brief A stream implementation that wraps a POSIX fd.
+ */
 class FilePOSIX
 {
     int m_fd = -1;
     FilePOSIX(const int fd) : m_fd(fd) {}
 
   public:
+    /**
+     * @brief Default constructor with an invalid fd.
+     */
     FilePOSIX() = default;
+
     FilePOSIX(const FilePOSIX &other) = delete;
-    FilePOSIX &operator=(const FilePOSIX &other) = delete;
 
+    /**
+     * @brief Move constructor.
+     */
     FilePOSIX(FilePOSIX &&other) noexcept : m_fd(other.m_fd) { other.m_fd = -1; }
-
-    FilePOSIX &operator=(FilePOSIX &&other) noexcept
-    {
-        m_fd = other.m_fd;
-        other.m_fd = -1;
-        return *this;
-    }
 
     /**
      * @brief Destructor closes file handle with no error handling.
@@ -314,10 +364,32 @@ class FilePOSIX
         m_fd = -1;
     }
 
+    FilePOSIX &operator=(const FilePOSIX &other) = delete;
+
+    /**
+     * @brief Move assignment operator.
+     */
+    FilePOSIX &operator=(FilePOSIX &&other) noexcept
+    {
+        m_fd = other.m_fd;
+        other.m_fd = -1;
+        return *this;
+    }
+
+    /**
+     * @brief Return the internal fd.  Reading, writing, and seeking this
+     *        handle directly is not recommended.
+     */
     int FileHandle() const & noexcept { return m_fd; }
 
+    /**
+     * @brief Taking ownership of fd while moving-from a FilePOSIX.
+     */
     int FileHandle() && { return m_fd; }
 
+    /**
+     * @brief Returns an invalid fd.
+     */
     static int InvalidFileHandle() { return -1; }
 
     /**
@@ -405,7 +477,7 @@ class FilePOSIX
         }
     }
 
-    size_t LexSeek(const SeekPos pos)
+    size_t LexSeek(SeekPos pos)
     {
         int whence = 0;
 
@@ -431,24 +503,31 @@ class FilePOSIX
     }
 };
 
-using File = FilePOSIX;
-
-inline File Open(const char *path, const OpenMode mode)
+/**
+ * @brief Open a file, calling the appropriate invocation of FilePOSIX::Open.
+ *
+ * @param path Path to file.  Encoding is assumed to be UTF-8.
+ * @param mode Mode to open with.
+ * @return An opened file.
+ * @throws POSIXError if open operation failed.
+ * @throws std::runtime_error if invalid mode was passed.
+ */
+inline FilePOSIX FileOpen(const char *path, const OpenMode mode)
 {
     switch (mode)
     {
     case OpenMode::read:
-        return File::Open(path, O_RDONLY, 0666);
+        return FilePOSIX::Open(path, O_RDONLY, 0666);
     case OpenMode::write:
-        return File::Open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+        return FilePOSIX::Open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
     case OpenMode::append:
-        return File::Open(path, O_WRONLY | O_CREAT, 0666);
+        return FilePOSIX::Open(path, O_WRONLY | O_CREAT, 0666);
     case OpenMode::readPlus:
-        return File::Open(path, O_RDWR, 0666);
+        return FilePOSIX::Open(path, O_RDWR, 0666);
     case OpenMode::writePlus:
-        return File::Open(path, O_RDWR | O_CREAT | O_TRUNC, 0666);
+        return FilePOSIX::Open(path, O_RDWR | O_CREAT | O_TRUNC, 0666);
     case OpenMode::appendPlus:
-        return File::Open(path, O_RDWR | O_CREAT, 0666);
+        return FilePOSIX::Open(path, O_RDWR | O_CREAT, 0666);
     default:
         throw std::runtime_error("Unknown open mode type.");
     }
@@ -463,6 +542,11 @@ inline size_t Length(const int fd)
     }
     return size_t(st.st_size);
 }
+
+/**
+ * @brief On UNIX, File is a FilePOSIX.
+ */
+using File = FilePOSIX;
 
 } // namespace LexIO
 

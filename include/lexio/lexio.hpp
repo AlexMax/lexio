@@ -14,6 +14,11 @@
 //  limitations under the License.
 //
 
+/**
+ * @file lexio.hpp
+ * Includes all of LexIO.
+ */
+
 #pragma once
 
 #include "./core.hpp"

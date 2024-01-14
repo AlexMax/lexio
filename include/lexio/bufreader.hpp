@@ -14,6 +14,11 @@
 //  limitations under the License.
 //
 
+/**
+ * @file bufreader.hpp
+ * Contains implementations of buffered reader functionality.
+ */
+
 #pragma once
 
 #include "./core.hpp"

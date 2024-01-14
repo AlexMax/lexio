@@ -14,6 +14,11 @@
 //  limitations under the License.
 //
 
+/**
+ * @file stream.hpp
+ * Includes all stream functionality.
+ */
+
 #pragma once
 
 #include "./stream/file.hpp"

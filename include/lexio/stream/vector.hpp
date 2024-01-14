@@ -14,9 +14,10 @@
 //  limitations under the License.
 //
 
-//
-// Stream and BufReader that uses std::vector under the hood.
-//
+/**
+ * @file vector.hpp
+ * Stream implementation that uses std::vector under the hood.
+ */
 
 #pragma once
 
@@ -28,6 +29,9 @@
 namespace LexIO
 {
 
+/**
+ * @brief Stream implementation that uses std::vector under the hood.
+ */
 class VectorStream
 {
   public:
@@ -127,7 +131,7 @@ class VectorStream
 
     void LexFlush() {}
 
-    size_t LexSeek(const SeekPos pos)
+    size_t LexSeek(SeekPos pos)
     {
         ptrdiff_t offset = 0;
         switch (pos.whence)

@@ -729,7 +729,7 @@ class SeekableRef
         return *this;
     }
 
-    size_t LexSeek(const SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
+    size_t LexSeek(SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
 
   protected:
     void *m_ptr;
@@ -841,7 +841,7 @@ inline void Flush(WriterRef writer)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-inline size_t Seek(SeekableRef seekable, const SeekPos pos)
+inline size_t Seek(SeekableRef seekable, SeekPos pos)
 {
     return seekable.LexSeek(pos);
 }

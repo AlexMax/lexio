@@ -14,6 +14,11 @@
 //  limitations under the License.
 //
 
+/**
+ * @file bufwriter.hpp
+ * Contains implementations of buffered writer functionality.
+ */
+
 #pragma once
 
 #include "./core.hpp"

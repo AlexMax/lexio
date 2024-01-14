@@ -14,9 +14,10 @@
 //  limitations under the License.
 //
 
-//
-// Stream and BufReader that uses std::vector under the hood.
-//
+/**
+ * @file view.hpp
+ * Stream implementation that wraps a pair of pointers.
+ */
 
 #pragma once
 
@@ -27,6 +28,9 @@
 namespace LexIO
 {
 
+/**
+ * @brief Stream implementation that wraps a pair of pointers.
+ */
 class ViewStream
 {
   public:
@@ -103,7 +107,7 @@ class ViewStream
 
     void LexFlush() {}
 
-    size_t LexSeek(const SeekPos pos)
+    size_t LexSeek(SeekPos pos)
     {
         ptrdiff_t offset = 0;
         switch (pos.whence)
@@ -140,6 +144,9 @@ class ViewStream
     size_t BufferSize() const { return m_offset - m_bufferOffset; }
 };
 
+/**
+ * @brief Stream implementation that wraps a pair of const pointers.
+ */
 class ConstViewStream
 {
   public:
@@ -203,7 +210,7 @@ class ConstViewStream
         m_bufferOffset += count;
     }
 
-    size_t LexSeek(const SeekPos pos)
+    size_t LexSeek(SeekPos pos)
     {
         ptrdiff_t offset = 0;
         switch (pos.whence)
