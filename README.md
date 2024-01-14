@@ -6,13 +6,13 @@ A library containing an API for reading and writing data to byte-based streams.
 
 Requirements
 ------------
-You need a C++14 compatible compiler.
+You need a C++14 compatible compiler with exceptions enabled.
 
 Why?
 ----
 I tend to run into situations where I need to read and write various data types to byte-based streams, but found many common C++ API designs made for this purpose cumbersome to use.  After doing some research and picking and choosing what I liked and disliked about previous API's I had used, this is what I came up with.
 
-The base interfaces are heavily inspired by Rust's std::io traits, as they seem like a reasonable and flexible set of primitives to build on top of.
+The base interfaces are heavily inspired by Rust's std::io traits, as they seem like a reasonable and flexible set of primitives to build on top of.  Streams throw exceptions when an unexpected or unrecoverable error happens, since each stream implementation can have its own unique failure conditions with additional stream-specific context.
 
 How To Use
 ----------
