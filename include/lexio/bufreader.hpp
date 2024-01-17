@@ -23,6 +23,7 @@
 
 #include "./core.hpp"
 
+#include <memory>
 #include <stdexcept>
 
 namespace LexIO
@@ -38,7 +39,7 @@ template <typename READER, typename = std::enable_if_t<IsReaderV<READER>>>
 class GenericBufReader
 {
     READER m_reader;
-    uint8_t *m_buffer = nullptr;
+    std::unique_ptr<uint8_t[]> m_buffer = nullptr;
     size_t m_allocSize = 0;
     size_t m_size = 0;
 
@@ -81,7 +82,7 @@ class GenericBufReader
         : m_reader(other.m_reader), m_buffer(::new uint8_t[other.m_allocSize]), m_allocSize(other.m_allocSize),
           m_size(other.m_size)
     {
-        std::memcpy(m_buffer, &other.m_buffer[0], m_size);
+        std::memcpy(m_buffer.get(), other.m_buffer.get(), m_size);
     }
 
     /**
@@ -103,7 +104,7 @@ class GenericBufReader
     /**
      * @brief Destructor.
      */
-    ~GenericBufReader() { ::delete[] m_buffer; }
+    ~GenericBufReader() {}
 
     /**
      * @brief Copy assignment operator.
@@ -133,7 +134,6 @@ class GenericBufReader
             return *this;
         }
 
-        ::delete[] m_buffer;
         m_reader = std::move(other.m_reader);
         m_buffer = std::exchange(other.m_buffer, nullptr);
         m_allocSize = other.m_allocSize;
@@ -166,7 +166,7 @@ class GenericBufReader
         if (count <= m_size)
         {
             // We already have enough data buffered.
-            return BufferView{m_buffer, m_size};
+            return BufferView{m_buffer.get(), m_size};
         }
 
         if (count > m_allocSize)
@@ -174,9 +174,8 @@ class GenericBufReader
             // Reallocate our buffer with any existing data.
             const size_t newAllocSize = CalcGrowth(count);
             uint8_t *buffer = ::new uint8_t[newAllocSize];
-            std::memcpy(buffer, &m_buffer[0], m_size);
-            ::delete[] m_buffer;
-            m_buffer = buffer;
+            std::memcpy(buffer, m_buffer.get(), m_size);
+            m_buffer.reset(buffer);
             m_allocSize = newAllocSize;
         }
 
@@ -184,7 +183,7 @@ class GenericBufReader
         const size_t wanted = count - m_size;
         const size_t actual = Read(&m_buffer[m_size], m_reader, wanted);
         m_size += actual;
-        return BufferView{m_buffer, m_size};
+        return BufferView{m_buffer.get(), m_size};
     }
 
     void LexConsumeBuffer(size_t count)
@@ -193,7 +192,7 @@ class GenericBufReader
         {
             throw new std::runtime_error("can't consume more bytes than buffer size");
         }
-        std::memcpy(&m_buffer[0], &m_buffer[count], m_size);
+        std::memcpy(m_buffer.get(), &m_buffer[count], m_size);
         m_size -= count;
     }
 
