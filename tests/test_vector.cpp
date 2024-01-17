@@ -324,6 +324,36 @@ TEST(VectorStream, ConsumeBufferTooLarge)
     EXPECT_ANY_THROW(LexIO::ConsumeBuffer(bufReader, 12));
 }
 
+TEST(VectorStream, FillBufferSmallRead)
+{
+    auto vectorStream = GetVectorStream();
+    uint8_t data[5] = {0};
+
+    auto view = LexIO::FillBuffer(vectorStream, 8);
+    EXPECT_EQ(8, view.Size());
+
+    // Do a small-enough read to where we don't use up our entire buffer.
+    EXPECT_EQ(5, LexIO::Read(data, vectorStream));
+
+    size_t i = 0;
+    EXPECT_EQ(data[i++], 'T');
+    EXPECT_EQ(data[i++], 'h');
+    EXPECT_EQ(data[i++], 'e');
+    EXPECT_EQ(data[i++], ' ');
+    EXPECT_EQ(data[i++], 'q');
+
+    // Do a larger read that goes past what we've previously filled the
+    // buffer with.
+    EXPECT_EQ(5, LexIO::Read(data, vectorStream));
+
+    i = 0;
+    EXPECT_EQ(data[i++], 'u');
+    EXPECT_EQ(data[i++], 'i');
+    EXPECT_EQ(data[i++], 'c');
+    EXPECT_EQ(data[i++], 'k');
+    EXPECT_EQ(data[i++], ' ');
+}
+
 TEST(VectorStream, FillBufferWrite)
 {
     auto bufReader = GetVectorStream();

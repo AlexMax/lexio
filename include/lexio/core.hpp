@@ -141,7 +141,16 @@ LEXIO_INLINE_VAR constexpr bool IsConstV = std::is_const<TYPE>::value;
 template <typename TYPE>
 constexpr const TYPE &Min(const TYPE &a, const TYPE &b)
 {
-    return a < b ? a : b;
+    return b < a ? b : a;
+}
+
+/**
+ * @see https://en.cppreference.com/w/cpp/algorithm/max
+ */
+template <typename TYPE>
+constexpr const TYPE &Max(const TYPE &a, const TYPE &b)
+{
+    return a < b ? b : a;
 }
 
 /**

@@ -224,6 +224,37 @@ TEST(ViewStream, FillBufferZeroRead)
     EXPECT_EQ(test.Size(), 0);
 }
 
+TEST(ViewStream, FillBufferSmallRead)
+{
+    uint8_t buffer[TEST_TEXT_LENGTH] = {0};
+    auto viewStream = GetViewStream(buffer);
+    uint8_t data[5] = {0};
+
+    auto view = LexIO::FillBuffer(viewStream, 8);
+    EXPECT_EQ(8, view.Size());
+
+    // Do a small-enough read to where we don't use up our entire buffer.
+    EXPECT_EQ(5, LexIO::Read(data, viewStream));
+
+    size_t i = 0;
+    EXPECT_EQ(data[i++], 'T');
+    EXPECT_EQ(data[i++], 'h');
+    EXPECT_EQ(data[i++], 'e');
+    EXPECT_EQ(data[i++], ' ');
+    EXPECT_EQ(data[i++], 'q');
+
+    // Do a larger read that goes past what we've previously filled the
+    // buffer with.
+    EXPECT_EQ(5, LexIO::Read(data, viewStream));
+
+    i = 0;
+    EXPECT_EQ(data[i++], 'u');
+    EXPECT_EQ(data[i++], 'i');
+    EXPECT_EQ(data[i++], 'c');
+    EXPECT_EQ(data[i++], 'k');
+    EXPECT_EQ(data[i++], ' ');
+}
+
 TEST(ViewStream, FillBufferWrite)
 {
     uint8_t buffer[TEST_TEXT_LENGTH] = {0};
@@ -572,6 +603,36 @@ TEST(ConstViewStream, FillBufferZeroRead)
 
     auto test = LexIO::FillBuffer(viewStream, 0);
     EXPECT_EQ(test.Size(), 0);
+}
+
+TEST(ConstViewStream, FillBufferSmallRead)
+{
+    auto viewStream = GetConstViewStream();
+    uint8_t data[5] = {0};
+
+    auto view = LexIO::FillBuffer(viewStream, 8);
+    EXPECT_EQ(8, view.Size());
+
+    // Do a small-enough read to where we don't use up our entire buffer.
+    EXPECT_EQ(5, LexIO::Read(data, viewStream));
+
+    size_t i = 0;
+    EXPECT_EQ(data[i++], 'T');
+    EXPECT_EQ(data[i++], 'h');
+    EXPECT_EQ(data[i++], 'e');
+    EXPECT_EQ(data[i++], ' ');
+    EXPECT_EQ(data[i++], 'q');
+
+    // Do a larger read that goes past what we've previously filled the
+    // buffer with.
+    EXPECT_EQ(5, LexIO::Read(data, viewStream));
+
+    i = 0;
+    EXPECT_EQ(data[i++], 'u');
+    EXPECT_EQ(data[i++], 'i');
+    EXPECT_EQ(data[i++], 'c');
+    EXPECT_EQ(data[i++], 'k');
+    EXPECT_EQ(data[i++], ' ');
 }
 
 TEST(ConstViewStream, FillBufferSeek)
