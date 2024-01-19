@@ -19,14 +19,15 @@
 #include "lexio/lexio.hpp"
 #include <sstream>
 
+//******************************************************************************
+
 constexpr size_t READ_ITERS = 128;
-constexpr size_t WRITE_ITERS = 128;
 
 static void Bench_ReadStringStream(benchmark::State &state)
 {
     std::stringstream stream;
     uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    for (size_t i = 0; i < WRITE_ITERS; i++)
+    for (size_t i = 0; i < READ_ITERS; i++)
     {
         stream.write((const char *)&data[0], sizeof(data));
     }
@@ -51,7 +52,7 @@ static void Bench_ReadLexIO(benchmark::State &state)
 {
     LexIO::VectorStream stream;
     uint8_t data[] = {'X', 'Y', 'Z', 'Z', 'Y'};
-    for (size_t i = 0; i < WRITE_ITERS; i++)
+    for (size_t i = 0; i < READ_ITERS; i++)
     {
         LexIO::Write(stream, data);
     }
@@ -71,6 +72,10 @@ static void Bench_ReadLexIO(benchmark::State &state)
     }
 }
 BENCHMARK(Bench_ReadLexIO);
+
+//******************************************************************************
+
+constexpr size_t WRITE_ITERS = 128;
 
 static void Bench_WriteStringStream(benchmark::State &state)
 {
@@ -114,5 +119,155 @@ static void Bench_WriteLexIO(benchmark::State &state)
     }
 }
 BENCHMARK(Bench_WriteLexIO);
+
+//******************************************************************************
+
+static void Bench_TryReadU8(benchmark::State &state)
+{
+    LexIO::VectorStream stream;
+    for (size_t i = 0; i < READ_ITERS; i++)
+    {
+        LexIO::WriteU8(stream, uint8_t('X'));
+    }
+
+    for (auto _ : state)
+    {
+        state.PauseTiming();
+        LexIO::Rewind(stream);
+        uint8_t data = 0;
+        state.ResumeTiming();
+
+        for (size_t i = 0; i < READ_ITERS; i++)
+        {
+            LexIO::TryReadU8(data, stream);
+        }
+        benchmark::DoNotOptimize(data);
+    }
+}
+BENCHMARK(Bench_TryReadU8);
+
+static void Bench_ReadU8(benchmark::State &state)
+{
+    LexIO::VectorStream stream;
+    for (size_t i = 0; i < READ_ITERS; i++)
+    {
+        LexIO::WriteU8(stream, uint8_t('X'));
+    }
+
+    for (auto _ : state)
+    {
+        state.PauseTiming();
+        LexIO::Rewind(stream);
+        uint8_t data = 0;
+        state.ResumeTiming();
+
+        for (size_t i = 0; i < READ_ITERS; i++)
+        {
+            data = LexIO::ReadU8(stream);
+        }
+        benchmark::DoNotOptimize(data);
+    }
+}
+BENCHMARK(Bench_ReadU8);
+
+//******************************************************************************
+
+static void Bench_TryReadU16LE(benchmark::State &state)
+{
+    LexIO::VectorStream stream;
+    for (size_t i = 0; i < READ_ITERS; i++)
+    {
+        LexIO::TryWriteU16LE(stream, 0xBEEF);
+    }
+
+    for (auto _ : state)
+    {
+        state.PauseTiming();
+        LexIO::Rewind(stream);
+        uint16_t data = 0;
+        state.ResumeTiming();
+
+        for (size_t i = 0; i < READ_ITERS; i++)
+        {
+            LexIO::TryReadU16LE(data, stream);
+        }
+        benchmark::DoNotOptimize(data);
+    }
+}
+BENCHMARK(Bench_TryReadU16LE);
+
+static void Bench_ReadU16LE(benchmark::State &state)
+{
+    LexIO::VectorStream stream;
+    for (size_t i = 0; i < READ_ITERS; i++)
+    {
+        LexIO::WriteU16LE(stream, 0xBEEF);
+    }
+
+    for (auto _ : state)
+    {
+        state.PauseTiming();
+        LexIO::Rewind(stream);
+        uint16_t data = 0;
+        state.ResumeTiming();
+
+        for (size_t i = 0; i < READ_ITERS; i++)
+        {
+            data = LexIO::ReadU16LE(stream);
+        }
+        benchmark::DoNotOptimize(data);
+    }
+}
+BENCHMARK(Bench_ReadU16LE);
+
+//******************************************************************************
+
+static void Bench_TryReadU32LE(benchmark::State &state)
+{
+    LexIO::VectorStream stream;
+    for (size_t i = 0; i < READ_ITERS; i++)
+    {
+        LexIO::TryWriteU32LE(stream, 0xDEADBEEF);
+    }
+
+    for (auto _ : state)
+    {
+        state.PauseTiming();
+        LexIO::Rewind(stream);
+        uint32_t data = 0;
+        state.ResumeTiming();
+
+        for (size_t i = 0; i < READ_ITERS; i++)
+        {
+            LexIO::TryReadU32LE(data, stream);
+        }
+        benchmark::DoNotOptimize(data);
+    }
+}
+BENCHMARK(Bench_TryReadU32LE);
+
+static void Bench_ReadU32LE(benchmark::State &state)
+{
+    LexIO::VectorStream stream;
+    for (size_t i = 0; i < READ_ITERS; i++)
+    {
+        LexIO::WriteU32LE(stream, 0xDEADBEEF);
+    }
+
+    for (auto _ : state)
+    {
+        state.PauseTiming();
+        LexIO::Rewind(stream);
+        uint32_t data = 0;
+        state.ResumeTiming();
+
+        for (size_t i = 0; i < READ_ITERS; i++)
+        {
+            data = LexIO::ReadU32LE(stream);
+        }
+        benchmark::DoNotOptimize(data);
+    }
+}
+BENCHMARK(Bench_ReadU32LE);
 
 BENCHMARK_MAIN();
