@@ -210,7 +210,7 @@ class GenericBufReader
     }
 
     template <typename SEEKABLE = READER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-    size_t LexSeek(SeekPos pos)
+    size_t LexSeek(const SeekPos &pos)
     {
         m_size = 0; // Invalidate buffer.
         return Seek(m_reader, pos);

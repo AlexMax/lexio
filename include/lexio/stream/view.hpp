@@ -108,7 +108,7 @@ class ViewStream
 
     void LexFlush() {}
 
-    size_t LexSeek(SeekPos pos)
+    size_t LexSeek(const SeekPos &pos)
     {
         ptrdiff_t offset = 0;
         switch (pos.whence)
@@ -212,7 +212,7 @@ class ConstViewStream
         m_bufferOffset += count;
     }
 
-    size_t LexSeek(SeekPos pos)
+    size_t LexSeek(const SeekPos &pos)
     {
         ptrdiff_t offset = 0;
         switch (pos.whence)

@@ -210,7 +210,7 @@ class FixedBufWriter
     }
 
     template <typename SEEKABLE = WRITER, typename = std::enable_if_t<IsSeekableV<SEEKABLE>>>
-    size_t LexSeek(SeekPos pos)
+    size_t LexSeek(const SeekPos &pos)
     {
         LexFlush();
         return Seek(m_writer, pos);

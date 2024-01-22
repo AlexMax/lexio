@@ -249,7 +249,7 @@ using WriterType = decltype(std::declval<size_t &>() =
  * @brief This type exists if the passed T conforms to Seekable.
  */
 template <typename T>
-using SeekableType = decltype(std::declval<size_t &>() = std::declval<T>().LexSeek(std::declval<SeekPos>()));
+using SeekableType = decltype(std::declval<size_t &>() = std::declval<T>().LexSeek(std::declval<const SeekPos &>()));
 
 /**
  * @brief Function that calls a wrapped LexRead.
@@ -285,7 +285,7 @@ inline void WrapFlush(void *ptr)
 }
 
 template <typename SEEKABLE>
-inline size_t WrapSeek(void *ptr, SeekPos pos)
+inline size_t WrapSeek(void *ptr, const SeekPos &pos)
 {
     return static_cast<SEEKABLE *>(ptr)->LexSeek(pos);
 }
@@ -696,7 +696,7 @@ struct IsRef<WriterRef> : std::true_type
 class SeekableRef
 {
   public:
-    using WrapSeekFunc = size_t (*)(void *, const SeekPos);
+    using WrapSeekFunc = size_t (*)(void *, const SeekPos &);
 
     template <typename SEEKABLE>
     using EnableIfWrappable = std::enable_if_t<!IsRefV<SEEKABLE> && IsSeekableV<SEEKABLE>>;
@@ -748,7 +748,7 @@ class SeekableRef
         return *this;
     }
 
-    size_t LexSeek(SeekPos pos) const { return m_lexSeek(m_ptr, pos); }
+    size_t LexSeek(const SeekPos &pos) const { return m_lexSeek(m_ptr, pos); }
 
   protected:
     void *m_ptr;
@@ -860,7 +860,7 @@ inline void Flush(const WriterRef &writer)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-inline size_t Seek(const SeekableRef &seekable, SeekPos pos)
+inline size_t Seek(const SeekableRef &seekable, const SeekPos &pos)
 {
     return seekable.LexSeek(pos);
 }
@@ -875,9 +875,9 @@ inline size_t Seek(const SeekableRef &seekable, SeekPos pos)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-inline size_t Seek(const SeekableRef &seekable, const ptrdiff_t offset, const Whence whence)
+inline size_t Seek(const SeekableRef &seekable, ptrdiff_t offset, Whence whence)
 {
-    return seekable.LexSeek(SeekPos(offset, whence));
+    return seekable.LexSeek({offset, whence});
 }
 
 /**

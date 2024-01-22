@@ -85,7 +85,7 @@ TEST(Writer, IsWriterV)
 
 struct GoodSeekable
 {
-    size_t LexSeek(const LexIO::SeekPos) { return 0; }
+    size_t LexSeek(const LexIO::SeekPos &) { return 0; }
 };
 
 TEST(Seekable, IsSeekable)
@@ -681,13 +681,13 @@ TEST(Seekable, Seek_Tell_SeekPos)
 {
     LexIO::VectorStream stream = GetVectorStream();
 
-    LexIO::Seek(stream, LexIO::SeekPos(5, LexIO::Whence::start));
+    LexIO::Seek(stream, LexIO::SeekPos{5, LexIO::Whence::start});
     EXPECT_EQ(LexIO::Tell(stream), 5);
 
-    LexIO::Seek(stream, LexIO::SeekPos(5, LexIO::Whence::current));
+    LexIO::Seek(stream, LexIO::SeekPos{5, LexIO::Whence::current});
     EXPECT_EQ(LexIO::Tell(stream), 10);
 
-    LexIO::Seek(stream, LexIO::SeekPos(5, LexIO::Whence::end));
+    LexIO::Seek(stream, LexIO::SeekPos{5, LexIO::Whence::end});
     EXPECT_EQ(LexIO::Tell(stream), TEST_TEXT_LENGTH - 5);
 }
 

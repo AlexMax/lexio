@@ -76,7 +76,7 @@ class PartialStream
 
     void LexFlush() { m_stream.LexFlush(); }
 
-    size_t LexSeek(const LexIO::SeekPos pos) { return m_stream.LexSeek(pos); }
+    size_t LexSeek(const LexIO::SeekPos &pos) { return m_stream.LexSeek(pos); }
 };
 
 template <typename STREAM>
@@ -107,5 +107,5 @@ class NoCopyStream
 
     void LexFlush() { m_stream.LexFlush(); }
 
-    size_t LexSeek(const LexIO::SeekPos pos) { return m_stream.LexSeek(pos); }
+    size_t LexSeek(const LexIO::SeekPos &pos) { return m_stream.LexSeek(pos); }
 };

@@ -132,7 +132,7 @@ class VectorStream
 
     void LexFlush() {}
 
-    size_t LexSeek(SeekPos pos)
+    size_t LexSeek(const SeekPos &pos)
     {
         ptrdiff_t offset = 0;
         switch (pos.whence)

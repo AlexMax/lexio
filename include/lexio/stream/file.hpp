@@ -227,7 +227,7 @@ class FileWin32
         }
     }
 
-    size_t LexSeek(SeekPos pos)
+    size_t LexSeek(const SeekPos &pos)
     {
         DWORD whence = 0;
         LARGE_INTEGER offset, newOffset;
@@ -477,7 +477,7 @@ class FilePOSIX
         }
     }
 
-    size_t LexSeek(SeekPos pos)
+    size_t LexSeek(const SeekPos &pos)
     {
         int whence = 0;
 
