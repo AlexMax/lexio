@@ -65,16 +65,6 @@ class VectorStream
      */
     container_type Container() && { return m_container; }
 
-    /**
-     * @brief Replace existing container with copy of passed container.
-     */
-    void Container(const container_type &container) { m_container = container; }
-
-    /**
-     * @brief Replace existing container with passed container.
-     */
-    void Container(container_type &&container) { m_container = container; }
-
     size_t LexRead(uint8_t *outDest, size_t count)
     {
         BufferView data = LexFillBuffer(count);

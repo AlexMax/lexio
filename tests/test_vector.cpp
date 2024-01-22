@@ -145,32 +145,6 @@ TEST(VectorStream, MoveFrom)
     }
 }
 
-TEST(VectorStream, CopyTo)
-{
-    auto vec = std::vector<uint8_t>{&TEST_TEXT_DATA[0], &TEST_TEXT_DATA[TEST_TEXT_LENGTH]};
-    auto vecStream = LexIO::VectorStream{};
-
-    vecStream.Container(vec);
-    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
-    {
-        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
-    }
-}
-
-TEST(VectorStream, MoveTo)
-{
-    auto vec = std::vector<uint8_t>{&TEST_TEXT_DATA[0], &TEST_TEXT_DATA[TEST_TEXT_LENGTH]};
-    auto vecStream = LexIO::VectorStream{};
-
-    vecStream.Container(std::move(vec));
-    EXPECT_EQ(TEST_TEXT_LENGTH, LexIO::Length(vecStream));
-    for (size_t i = 0; i < TEST_TEXT_LENGTH; i++)
-    {
-        EXPECT_EQ(vecStream.Container()[i], TEST_TEXT_DATA[i]);
-    }
-}
-
 TEST(VectorStream, Read)
 {
     auto vecStream = GetVectorStream();

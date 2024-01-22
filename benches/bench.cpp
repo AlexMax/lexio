@@ -108,8 +108,7 @@ static void Bench_WriteLexIO(benchmark::State &state)
         state.PauseTiming();
         std::vector<uint8_t> buffer;
         buffer.reserve(sizeof(data) * WRITE_ITERS);
-        stream.Container(std::move(buffer));
-        LexIO::Rewind(stream);
+        stream = LexIO::VectorStream{std::move(buffer)};
         state.ResumeTiming();
 
         for (size_t i = 0; i < WRITE_ITERS; i++)
