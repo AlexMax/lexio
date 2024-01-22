@@ -179,21 +179,6 @@ constexpr const TYPE &Max(const TYPE &a, const TYPE &b)
 }
 
 /**
- * @see https://en.cppreference.com/w/cpp/numeric/bit_cast
- */
-template <class TO, class FROM>
-inline std::enable_if_t<
-    sizeof(TO) == sizeof(FROM) && std::is_trivially_copyable<FROM>::value && std::is_trivially_copyable<TO>::value, TO>
-BitCast(const FROM &src) noexcept
-{
-    static_assert(std::is_trivially_constructible<TO>::value, "BitCast TO must be trivially constructible.");
-
-    TO dst;
-    std::memcpy(&dst, &src, sizeof(TO));
-    return dst;
-}
-
-/**
  * @see https://en.cppreference.com/w/cpp/types/void_t
  */
 template <class...>
