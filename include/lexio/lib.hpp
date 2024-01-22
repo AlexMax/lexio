@@ -90,7 +90,7 @@ inline size_t ReadToEOF(OUT_ITER outIt, const BufferedReaderRef &bufReader)
     size_t total = 0;
     for (;;)
     {
-        BufferView buf = FillBuffer(bufReader, BUFFER_SIZE);
+        BufferView buf = bufReader.LexFillBuffer(BUFFER_SIZE);
         if (buf.Size() == 0)
         {
             // Read all data there was to read.
@@ -101,7 +101,7 @@ inline size_t ReadToEOF(OUT_ITER outIt, const BufferedReaderRef &bufReader)
         std::copy(buf.Data(), buf.Data() + buf.Size(), outIt);
 
         // Consume what we've read.
-        ConsumeBuffer(bufReader, buf.Size());
+        bufReader.LexConsumeBuffer(buf.Size());
         total += buf.Size();
     }
 }
@@ -124,7 +124,7 @@ inline size_t ReadUntil(OUT_ITER outIt, const BufferedReaderRef &bufReader, cons
     size_t size = 0;
     for (;;)
     {
-        BufferView buf = FillBuffer(bufReader, BUFFER_SIZE);
+        BufferView buf = bufReader.LexFillBuffer(BUFFER_SIZE);
         if (buf.Size() == 0)
         {
             // Read all data there was to read.
@@ -139,7 +139,7 @@ inline size_t ReadUntil(OUT_ITER outIt, const BufferedReaderRef &bufReader, cons
             {
                 // Found the terminator, append it and stop.
                 *outIt++ = *it++;
-                ConsumeBuffer(bufReader, i + 1);
+                bufReader.LexConsumeBuffer(i + 1);
                 size += i + 1;
                 return size;
             }
@@ -147,7 +147,7 @@ inline size_t ReadUntil(OUT_ITER outIt, const BufferedReaderRef &bufReader, cons
         }
 
         // Consume what we've read.
-        ConsumeBuffer(bufReader, BUFFER_SIZE);
+        bufReader.LexConsumeBuffer(BUFFER_SIZE);
         size += BUFFER_SIZE;
     }
 }
@@ -167,14 +167,14 @@ inline size_t Copy(const WriterRef &writer, const BufferedReaderRef &bufReader)
     size_t count = 0;
     for (;;)
     {
-        const BufferView buffer = FillBuffer(bufReader, BUFFER_SIZE);
+        const BufferView buffer = bufReader.LexFillBuffer(BUFFER_SIZE);
         if (buffer.Size() == 0)
         {
             return count;
         }
 
         const size_t written = Write(writer, buffer.Data(), buffer.Size());
-        ConsumeBuffer(bufReader, written);
+        bufReader.LexConsumeBuffer(written);
         count += written;
     }
 }

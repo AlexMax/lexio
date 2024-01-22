@@ -953,7 +953,7 @@ inline size_t Read(BYTE (&outArray)[N], const ReaderRef &reader)
  */
 inline BufferView GetBuffer(const BufferedReaderRef &bufReader)
 {
-    return FillBuffer(bufReader, 0);
+    return bufReader.LexFillBuffer(0);
 }
 
 /**
@@ -1031,7 +1031,7 @@ inline size_t Write(const WriterRef &writer, const BYTE (&array)[N])
  */
 inline size_t Tell(const SeekableRef &seekable)
 {
-    return Seek(seekable, 0, Whence::current);
+    return seekable.LexSeek({0, Whence::current});
 }
 
 /**
@@ -1044,7 +1044,7 @@ inline size_t Tell(const SeekableRef &seekable)
  */
 inline size_t Rewind(const SeekableRef &seekable)
 {
-    return Seek(seekable, 0, Whence::start);
+    return seekable.LexSeek({0, Whence::start});
 }
 
 /**
@@ -1057,9 +1057,9 @@ inline size_t Rewind(const SeekableRef &seekable)
  */
 inline size_t Length(const SeekableRef &seekable)
 {
-    const size_t old = Seek(seekable, 0, Whence::current);
-    const size_t len = Seek(seekable, 0, Whence::end);
-    Seek(seekable, ptrdiff_t(old), Whence::start);
+    const size_t old = seekable.LexSeek({0, Whence::current});
+    const size_t len = seekable.LexSeek({0, Whence::end});
+    seekable.LexSeek({ptrdiff_t(old), Whence::start});
     return len;
 }
 
