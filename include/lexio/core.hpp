@@ -81,6 +81,31 @@
 #define LEXIO_INLINE_VAR
 #endif
 
+// C++14 does not have if constexpr
+
+#if defined(_MSC_VER) && !defined(__clang__) // MSVC only supports LE.
+#define LEXIO_IF_LE_BSWAP16(v) _byteswap_ushort(v)
+#define LEXIO_IF_LE_BSWAP32(v) _byteswap_ulong(v)
+#define LEXIO_IF_LE_BSWAP64(v) _byteswap_uint64(v)
+#define LEXIO_IF_BE_BSWAP16(v) (v)
+#define LEXIO_IF_BE_BSWAP32(v) (v)
+#define LEXIO_IF_BE_BSWAP64(v) (v)
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define LEXIO_IF_LE_BSWAP16(v) __builtin_bswap16(v)
+#define LEXIO_IF_LE_BSWAP32(v) __builtin_bswap32(v)
+#define LEXIO_IF_LE_BSWAP64(v) __builtin_bswap64(v)
+#define LEXIO_IF_BE_BSWAP16(v) (v)
+#define LEXIO_IF_BE_BSWAP32(v) (v)
+#define LEXIO_IF_BE_BSWAP64(v) (v)
+#else
+#define LEXIO_IF_LE_BSWAP16(v) (v)
+#define LEXIO_IF_LE_BSWAP32(v) (v)
+#define LEXIO_IF_LE_BSWAP64(v) (v)
+#define LEXIO_IF_BE_BSWAP16(v) __builtin_bswap16(v)
+#define LEXIO_IF_BE_BSWAP32(v) __builtin_bswap32(v)
+#define LEXIO_IF_BE_BSWAP64(v) __builtin_bswap64(v)
+#endif
+
 /**
  * @brief LexIO library namespace.
  */
@@ -777,7 +802,7 @@ struct IsRef<SeekableRef> : std::true_type
  * @throws std::runtime_error if an error with the read operation was
  *         encountered.  EOF is _not_ considered an error.
  */
-inline size_t RawRead(uint8_t *outDest, ReaderRef reader, size_t count)
+inline size_t RawRead(uint8_t *outDest, const ReaderRef &reader, size_t count)
 {
     return reader.LexRead(outDest, count);
 }
@@ -795,7 +820,7 @@ inline size_t RawRead(uint8_t *outDest, ReaderRef reader, size_t count)
  * @throws std::runtime_error if an error with the read operation was
  *         encountered, or if too large of a buffer was requested.
  */
-inline BufferView FillBuffer(BufferedReaderRef bufReader, size_t size)
+inline BufferView FillBuffer(const BufferedReaderRef &bufReader, size_t size)
 {
     return bufReader.LexFillBuffer(size);
 }
@@ -810,7 +835,7 @@ inline BufferView FillBuffer(BufferedReaderRef bufReader, size_t size)
  * @throws std::runtime_error if a size greater than the amount of data
  *         in the visible buffer is passed to the function.
  */
-inline void ConsumeBuffer(BufferedReaderRef bufReader, size_t size)
+inline void ConsumeBuffer(const BufferedReaderRef &bufReader, size_t size)
 {
     bufReader.LexConsumeBuffer(size);
 }
@@ -826,7 +851,7 @@ inline void ConsumeBuffer(BufferedReaderRef bufReader, size_t size)
  * @throws std::runtime_error if an error with the write operation was
  *         encountered.  A partial write is _not_ considered an error.
  */
-inline size_t RawWrite(WriterRef writer, const uint8_t *src, size_t count)
+inline size_t RawWrite(const WriterRef &writer, const uint8_t *src, size_t count)
 {
     return writer.LexWrite(src, count);
 }
@@ -836,7 +861,7 @@ inline size_t RawWrite(WriterRef writer, const uint8_t *src, size_t count)
  *
  * @param writer Writer to operate on.
  */
-inline void Flush(WriterRef writer)
+inline void Flush(const WriterRef &writer)
 {
     return writer.LexFlush();
 }
@@ -850,7 +875,7 @@ inline void Flush(WriterRef writer)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-inline size_t Seek(SeekableRef seekable, SeekPos pos)
+inline size_t Seek(const SeekableRef &seekable, SeekPos pos)
 {
     return seekable.LexSeek(pos);
 }
@@ -865,7 +890,7 @@ inline size_t Seek(SeekableRef seekable, SeekPos pos)
  * @throws std::runtime_error if underlying seek operation goes past start
  *         of data, or has some other error condition.
  */
-inline size_t Seek(SeekableRef seekable, const ptrdiff_t offset, const Whence whence)
+inline size_t Seek(const SeekableRef &seekable, const ptrdiff_t offset, const Whence whence)
 {
     return seekable.LexSeek(SeekPos(offset, whence));
 }
@@ -884,7 +909,7 @@ inline size_t Seek(SeekableRef seekable, const ptrdiff_t offset, const Whence wh
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename BYTE, typename = std::enable_if_t<!Detail::IsConstV<BYTE> && sizeof(BYTE) == 1>>
-inline size_t Read(BYTE *outDest, ReaderRef reader, size_t count)
+inline size_t Read(BYTE *outDest, const ReaderRef &reader, size_t count)
 {
     uint8_t *dest = reinterpret_cast<uint8_t *>(outDest);
     size_t offset = 0, remain = count;
@@ -916,7 +941,7 @@ inline size_t Read(BYTE *outDest, ReaderRef reader, size_t count)
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename BYTE, size_t N, typename = std::enable_if_t<!Detail::IsConstV<BYTE> && sizeof(BYTE) == 1>>
-inline size_t Read(BYTE (&outArray)[N], ReaderRef reader)
+inline size_t Read(BYTE (&outArray)[N], const ReaderRef &reader)
 {
     uint8_t *dest = reinterpret_cast<uint8_t *>(&outArray[0]);
     size_t offset = 0, remain = N;
@@ -941,7 +966,7 @@ inline size_t Read(BYTE (&outArray)[N], ReaderRef reader)
  * @param bufReader BufferedReader to operate on.
  * @return Span view of the internal buffer.
  */
-inline BufferView GetBuffer(BufferedReaderRef bufReader)
+inline BufferView GetBuffer(const BufferedReaderRef &bufReader)
 {
     return FillBuffer(bufReader, 0);
 }
@@ -960,7 +985,7 @@ inline BufferView GetBuffer(BufferedReaderRef bufReader)
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename BYTE, typename = std::enable_if_t<sizeof(BYTE) == 1>>
-inline size_t Write(WriterRef writer, const BYTE *src, size_t count)
+inline size_t Write(const WriterRef &writer, const BYTE *src, size_t count)
 {
     const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(src);
     size_t offset = 0, remain = count;
@@ -992,7 +1017,7 @@ inline size_t Write(WriterRef writer, const BYTE *src, size_t count)
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename BYTE, size_t N, typename = std::enable_if_t<sizeof(BYTE) == 1>>
-inline size_t Write(WriterRef writer, const BYTE (&array)[N])
+inline size_t Write(const WriterRef &writer, const BYTE (&array)[N])
 {
     const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(&array[0]);
     size_t offset = 0, remain = N;
@@ -1019,7 +1044,7 @@ inline size_t Write(WriterRef writer, const BYTE (&array)[N])
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-inline size_t Tell(SeekableRef seekable)
+inline size_t Tell(const SeekableRef &seekable)
 {
     return Seek(seekable, 0, Whence::current);
 }
@@ -1032,7 +1057,7 @@ inline size_t Tell(SeekableRef seekable)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-inline size_t Rewind(SeekableRef seekable)
+inline size_t Rewind(const SeekableRef &seekable)
 {
     return Seek(seekable, 0, Whence::start);
 }
@@ -1045,7 +1070,7 @@ inline size_t Rewind(SeekableRef seekable)
  * @throws std::runtime_error if Seek call throws, or some other error
  *         condition occurrs.
  */
-inline size_t Length(SeekableRef seekable)
+inline size_t Length(const SeekableRef &seekable)
 {
     const size_t old = Seek(seekable, 0, Whence::current);
     const size_t len = Seek(seekable, 0, Whence::end);

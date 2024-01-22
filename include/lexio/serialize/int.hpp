@@ -35,7 +35,7 @@ namespace Detail
 //******************************************************************************
 
 template <typename TYPE, typename TRY_READ>
-inline constexpr TYPE ReadWithExcept(ReaderRef reader, TRY_READ &tryRead)
+inline constexpr TYPE ReadWithExcept(const ReaderRef &reader, TRY_READ &tryRead)
 {
     TYPE rvo;
     if (!tryRead(rvo, reader))
@@ -46,7 +46,7 @@ inline constexpr TYPE ReadWithExcept(ReaderRef reader, TRY_READ &tryRead)
 }
 
 template <typename TYPE, typename TRY_WRITE>
-inline constexpr void WriteWithExcept(WriterRef writer, const TYPE &value, TRY_WRITE &tryWrite)
+inline constexpr void WriteWithExcept(const WriterRef &writer, const TYPE &value, TRY_WRITE &tryWrite)
 {
     if (!tryWrite(writer, value))
     {
@@ -65,9 +65,15 @@ inline constexpr void WriteWithExcept(WriterRef writer, const TYPE &value, TRY_W
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline uint8_t ReadU8(ReaderRef reader)
+inline uint8_t ReadU8(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint8_t>(reader, TryReadU8);
+    uint8_t buf[sizeof(uint8_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return buf[0];
 }
 
 /**
@@ -77,9 +83,14 @@ inline uint8_t ReadU8(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU8(WriterRef writer, uint8_t value)
+inline void WriteU8(const WriterRef &writer, uint8_t value)
 {
-    Detail::WriteWithExcept<uint8_t>(writer, value, TryWriteU8);
+    const uint8_t buf[sizeof(uint8_t)] = {value};
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 //******************************************************************************
@@ -91,9 +102,15 @@ inline void WriteU8(WriterRef writer, uint8_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline int8_t Read8(ReaderRef reader)
+inline int8_t Read8(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int8_t>(reader, TryRead8);
+    uint8_t buf[sizeof(uint8_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return int8_t(buf[0]);
 }
 
 /**
@@ -103,9 +120,14 @@ inline int8_t Read8(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write8(WriterRef writer, int8_t value)
+inline void Write8(const WriterRef &writer, int8_t value)
 {
-    Detail::WriteWithExcept<int8_t>(writer, value, TryWrite8);
+    const uint8_t buf[sizeof(uint8_t)] = {uint8_t(value)};
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 //******************************************************************************
@@ -117,9 +139,19 @@ inline void Write8(WriterRef writer, int8_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline uint16_t ReadU16LE(ReaderRef reader)
+inline uint16_t ReadU16LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint16_t>(reader, TryReadU16LE);
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint16_t out;
+    std::memcpy(&out, buf, sizeof(uint16_t));
+    out = LEXIO_IF_BE_BSWAP16(out);
+    return out;
 }
 
 /**
@@ -129,9 +161,19 @@ inline uint16_t ReadU16LE(ReaderRef reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline uint16_t ReadU16BE(ReaderRef reader)
+inline uint16_t ReadU16BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint16_t>(reader, TryReadU16BE);
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint16_t out;
+    std::memcpy(&out, buf, sizeof(out));
+    out = LEXIO_IF_LE_BSWAP16(out);
+    return out;
 }
 
 /**
@@ -141,9 +183,17 @@ inline uint16_t ReadU16BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU16LE(WriterRef writer, const uint16_t value)
+inline void WriteU16LE(const WriterRef &writer, uint16_t value)
 {
-    Detail::WriteWithExcept<uint16_t>(writer, value, TryWriteU16LE);
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    value = LEXIO_IF_BE_BSWAP16(value);
+    std::memcpy(buf, &value, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -153,9 +203,17 @@ inline void WriteU16LE(WriterRef writer, const uint16_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU16BE(WriterRef writer, const uint16_t value)
+inline void WriteU16BE(const WriterRef &writer, uint16_t value)
 {
-    Detail::WriteWithExcept<uint16_t>(writer, value, TryWriteU16BE);
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    value = LEXIO_IF_LE_BSWAP16(value);
+    std::memcpy(buf, &value, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 //******************************************************************************
@@ -167,7 +225,7 @@ inline void WriteU16BE(WriterRef writer, const uint16_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline int16_t Read16LE(ReaderRef reader)
+inline int16_t Read16LE(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int16_t>(reader, TryRead16LE);
 }
@@ -179,7 +237,7 @@ inline int16_t Read16LE(ReaderRef reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline int16_t Read16BE(ReaderRef reader)
+inline int16_t Read16BE(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int16_t>(reader, TryRead16BE);
 }
@@ -191,7 +249,7 @@ inline int16_t Read16BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write16LE(WriterRef writer, int16_t value)
+inline void Write16LE(const WriterRef &writer, int16_t value)
 {
     Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16LE);
 }
@@ -203,7 +261,7 @@ inline void Write16LE(WriterRef writer, int16_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write16BE(WriterRef writer, int16_t value)
+inline void Write16BE(const WriterRef &writer, int16_t value)
 {
     Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16BE);
 }
@@ -217,9 +275,19 @@ inline void Write16BE(WriterRef writer, int16_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline uint32_t ReadU32LE(ReaderRef reader)
+inline uint32_t ReadU32LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint32_t>(reader, TryReadU32LE);
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint32_t out;
+    std::memcpy(&out, buf, sizeof(out));
+    out = LEXIO_IF_BE_BSWAP32(out);
+    return out;
 }
 
 /**
@@ -229,9 +297,19 @@ inline uint32_t ReadU32LE(ReaderRef reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline uint32_t ReadU32BE(ReaderRef reader)
+inline uint32_t ReadU32BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint32_t>(reader, TryReadU32BE);
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint32_t out;
+    std::memcpy(&out, buf, sizeof(out));
+    out = LEXIO_IF_LE_BSWAP32(out);
+    return out;
 }
 
 /**
@@ -241,9 +319,17 @@ inline uint32_t ReadU32BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU32LE(WriterRef writer, uint32_t value)
+inline void WriteU32LE(const WriterRef &writer, uint32_t value)
 {
-    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32LE);
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    value = LEXIO_IF_BE_BSWAP32(value);
+    std::memcpy(buf, &value, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -253,9 +339,17 @@ inline void WriteU32LE(WriterRef writer, uint32_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU32BE(WriterRef writer, uint32_t value)
+inline void WriteU32BE(const WriterRef &writer, uint32_t value)
 {
-    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteU32BE);
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    value = LEXIO_IF_LE_BSWAP32(value);
+    std::memcpy(buf, &value, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 //******************************************************************************
@@ -267,7 +361,7 @@ inline void WriteU32BE(WriterRef writer, uint32_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline int32_t Read32LE(ReaderRef reader)
+inline int32_t Read32LE(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int32_t>(reader, TryRead32LE);
 }
@@ -279,7 +373,7 @@ inline int32_t Read32LE(ReaderRef reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline int32_t Read32BE(ReaderRef reader)
+inline int32_t Read32BE(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int32_t>(reader, TryRead32BE);
 }
@@ -291,7 +385,7 @@ inline int32_t Read32BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write32LE(WriterRef writer, int32_t value)
+inline void Write32LE(const WriterRef &writer, int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32LE);
 }
@@ -303,7 +397,7 @@ inline void Write32LE(WriterRef writer, int32_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write32BE(WriterRef writer, int32_t value)
+inline void Write32BE(const WriterRef &writer, int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32BE);
 }
@@ -317,9 +411,19 @@ inline void Write32BE(WriterRef writer, int32_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline uint64_t ReadU64LE(ReaderRef reader)
+inline uint64_t ReadU64LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint64_t>(reader, TryReadU64LE);
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint64_t out;
+    std::memcpy(&out, buf, sizeof(out));
+    out = LEXIO_IF_BE_BSWAP64(out);
+    return out;
 }
 
 /**
@@ -329,9 +433,19 @@ inline uint64_t ReadU64LE(ReaderRef reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline uint64_t ReadU64BE(ReaderRef reader)
+inline uint64_t ReadU64BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint64_t>(reader, TryReadU64BE);
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint64_t out;
+    std::memcpy(&out, buf, sizeof(out));
+    out = LEXIO_IF_LE_BSWAP64(out);
+    return out;
 }
 
 /**
@@ -341,9 +455,17 @@ inline uint64_t ReadU64BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU64LE(WriterRef writer, const uint64_t value)
+inline void WriteU64LE(const WriterRef &writer, uint64_t value)
 {
-    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteU64LE);
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    value = LEXIO_IF_BE_BSWAP64(value);
+    std::memcpy(buf, &value, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -353,9 +475,17 @@ inline void WriteU64LE(WriterRef writer, const uint64_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void WriteU64BE(WriterRef writer, const uint64_t value)
+inline void WriteU64BE(const WriterRef &writer, uint64_t value)
 {
-    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteU64BE);
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    value = LEXIO_IF_LE_BSWAP64(value);
+    std::memcpy(buf, &value, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 //******************************************************************************
@@ -367,7 +497,7 @@ inline void WriteU64BE(WriterRef writer, const uint64_t value)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline int64_t Read64LE(ReaderRef reader)
+inline int64_t Read64LE(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int64_t>(reader, TryRead64LE);
 }
@@ -379,7 +509,7 @@ inline int64_t Read64LE(ReaderRef reader)
  * @return Integer that was read.
  * @throws std::runtime_error if stream could not be read.
  */
-inline int64_t Read64BE(ReaderRef reader)
+inline int64_t Read64BE(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int64_t>(reader, TryRead64BE);
 }
@@ -391,7 +521,7 @@ inline int64_t Read64BE(ReaderRef reader)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write64LE(WriterRef writer, int64_t value)
+inline void Write64LE(const WriterRef &writer, int64_t value)
 {
     Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64LE);
 }
@@ -403,7 +533,7 @@ inline void Write64LE(WriterRef writer, int64_t value)
  * @param value Integer to write.
  * @throws std::runtime_error if stream could not be written.
  */
-inline void Write64BE(WriterRef writer, int64_t value)
+inline void Write64BE(const WriterRef &writer, int64_t value)
 {
     Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64BE);
 }

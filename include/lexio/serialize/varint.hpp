@@ -39,7 +39,7 @@ namespace LexIO
  * @return An unsigned 32-bit integer from the Reader.
  * @throws std::runtime_error if there are too many varint bytes for a 64-bit integer.
  */
-inline uint32_t ReadUVarint32(ReaderRef reader)
+inline uint32_t ReadUVarint32(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<uint32_t>(reader, TryReadUVarint32);
 }
@@ -54,7 +54,7 @@ inline uint32_t ReadUVarint32(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 32-bit integer to write to the Writer.
  */
-inline void WriteUVarint32(WriterRef writer, uint32_t value)
+inline void WriteUVarint32(const WriterRef &writer, uint32_t value)
 {
     Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteUVarint32);
 }
@@ -67,7 +67,7 @@ inline void WriteUVarint32(WriterRef writer, uint32_t value)
  * @param reader Reader to operate on.
  * @return An signed 32-bit integer from the Reader.
  */
-inline int32_t ReadVarint32(ReaderRef reader)
+inline int32_t ReadVarint32(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int32_t>(reader, TryReadVarint32);
 }
@@ -80,7 +80,7 @@ inline int32_t ReadVarint32(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 32-bit integer to write to the Writer.
  */
-inline void WriteVarint32(WriterRef writer, int32_t value)
+inline void WriteVarint32(const WriterRef &writer, int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWriteVarint32);
 }
@@ -93,7 +93,7 @@ inline void WriteVarint32(WriterRef writer, int32_t value)
  * @param reader Reader to operate on.
  * @return An signed 32-bit integer from the Reader.
  */
-inline int32_t ReadSVarint32(ReaderRef reader)
+inline int32_t ReadSVarint32(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int32_t>(reader, TryReadSVarint32);
 }
@@ -106,7 +106,7 @@ inline int32_t ReadSVarint32(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 32-bit integer to write to the Writer.
  */
-inline void WriteSVarint32(WriterRef writer, int32_t value)
+inline void WriteSVarint32(const WriterRef &writer, int32_t value)
 {
     Detail::WriteWithExcept<int32_t>(writer, value, TryWriteSVarint32);
 }
@@ -122,7 +122,7 @@ inline void WriteSVarint32(WriterRef writer, int32_t value)
  * @return An unsigned 64-bit integer from the Reader.
  * @throws std::runtime_error if there are too many varint bytes for a 64-bit integer.
  */
-inline uint64_t ReadUVarint64(ReaderRef reader)
+inline uint64_t ReadUVarint64(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<uint64_t>(reader, TryReadUVarint64);
 }
@@ -137,7 +137,7 @@ inline uint64_t ReadUVarint64(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 64-bit integer to write to the Writer.
  */
-inline void WriteUVarint64(WriterRef writer, const uint64_t value)
+inline void WriteUVarint64(const WriterRef &writer, const uint64_t value)
 {
     Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteUVarint64);
 }
@@ -150,7 +150,7 @@ inline void WriteUVarint64(WriterRef writer, const uint64_t value)
  * @param reader Reader to operate on.
  * @return An signed 64-bit integer from the Reader.
  */
-inline int64_t ReadVarint64(ReaderRef reader)
+inline int64_t ReadVarint64(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int64_t>(reader, TryReadVarint64);
 }
@@ -163,7 +163,7 @@ inline int64_t ReadVarint64(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 64-bit integer to write to the Writer.
  */
-inline void WriteVarint64(WriterRef writer, int64_t value)
+inline void WriteVarint64(const WriterRef &writer, int64_t value)
 {
     Detail::WriteWithExcept<int64_t>(writer, value, TryWriteVarint64);
 }
@@ -176,7 +176,7 @@ inline void WriteVarint64(WriterRef writer, int64_t value)
  * @param reader Reader to operate on.
  * @return An signed 64-bit integer from the Reader.
  */
-inline int64_t ReadSVarint64(ReaderRef reader)
+inline int64_t ReadSVarint64(const ReaderRef &reader)
 {
     return Detail::ReadWithExcept<int64_t>(reader, TryReadSVarint64);
 }
@@ -189,7 +189,7 @@ inline int64_t ReadSVarint64(ReaderRef reader)
  * @param writer Writer to operate on.
  * @param value An unsigned 64-bit integer to write to the Writer.
  */
-inline void WriteSVarint64(WriterRef writer, int64_t value)
+inline void WriteSVarint64(const WriterRef &writer, int64_t value)
 {
     Detail::WriteWithExcept<int64_t>(writer, value, TryWriteSVarint64);
 }

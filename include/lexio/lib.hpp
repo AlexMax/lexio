@@ -37,7 +37,7 @@ namespace LexIO
  * @return Total number of bytes read.
  */
 template <typename OUT_ITER>
-inline size_t ReadToEOF(OUT_ITER outIt, UnbufferedReaderRef reader)
+inline size_t ReadToEOF(OUT_ITER outIt, const UnbufferedReaderRef &reader)
 {
     constexpr size_t BUFFER_SIZE = 8192;
 
@@ -83,7 +83,7 @@ inline size_t ReadToEOF(OUT_ITER outIt, UnbufferedReaderRef reader)
  * @return Total number of bytes read.
  */
 template <typename OUT_ITER>
-inline size_t ReadToEOF(OUT_ITER outIt, BufferedReaderRef bufReader)
+inline size_t ReadToEOF(OUT_ITER outIt, const BufferedReaderRef &bufReader)
 {
     constexpr size_t BUFFER_SIZE = 8192;
 
@@ -117,7 +117,7 @@ inline size_t ReadToEOF(OUT_ITER outIt, BufferedReaderRef bufReader)
  * @return Total number of bytes read.
  */
 template <typename OUT_ITER>
-inline size_t ReadUntil(OUT_ITER outIt, BufferedReaderRef bufReader, const uint8_t term)
+inline size_t ReadUntil(OUT_ITER outIt, const BufferedReaderRef &bufReader, const uint8_t term)
 {
     constexpr size_t BUFFER_SIZE = 8192;
 
@@ -160,7 +160,7 @@ inline size_t ReadUntil(OUT_ITER outIt, BufferedReaderRef bufReader, const uint8
  * @param bufReader Buffered read to read from.
  * @return Number of bytes copied.
  */
-inline size_t Copy(WriterRef writer, BufferedReaderRef bufReader)
+inline size_t Copy(const WriterRef &writer, const BufferedReaderRef &bufReader)
 {
     constexpr size_t BUFFER_SIZE = 8192;
 
