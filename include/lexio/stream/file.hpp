@@ -292,7 +292,7 @@ inline FileWin32 FileOpen(const char *path, const OpenMode mode)
 
 inline size_t Length(const FileWin32 &file)
 {
-    LARGE_INTEGER size = {0};
+    LARGE_INTEGER size;
     if (FALSE == GetFileSizeEx(file.FileHandle(), &size))
     {
         throw Win32Error("Could not get file size.", GetLastError());
