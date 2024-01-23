@@ -107,7 +107,7 @@ If your **Writer** is also a **BufferedReader**, you should leave the buffer alo
 ```cpp
 struct Seekable
 {
-    size_t LexSeek(const LexIO::SeekPos pos);
+    size_t LexSeek(const LexIO::SeekPos &pos);
 };
 ```
 
