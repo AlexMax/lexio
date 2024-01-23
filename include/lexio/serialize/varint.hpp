@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "./int.hpp"
 #include "./tryvarint.hpp"
+#include <stdexcept>
 
 namespace LexIO
 {
@@ -41,7 +41,12 @@ namespace LexIO
  */
 inline uint32_t ReadUVarint32(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint32_t>(reader, TryReadUVarint32);
+    uint32_t rvo;
+    if (!TryReadUVarint32(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -56,7 +61,10 @@ inline uint32_t ReadUVarint32(const ReaderRef &reader)
  */
 inline void WriteUVarint32(const WriterRef &writer, uint32_t value)
 {
-    Detail::WriteWithExcept<uint32_t>(writer, value, TryWriteUVarint32);
+    if (!TryWriteUVarint32(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -69,7 +77,12 @@ inline void WriteUVarint32(const WriterRef &writer, uint32_t value)
  */
 inline int32_t ReadVarint32(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int32_t>(reader, TryReadVarint32);
+    int32_t rvo;
+    if (!TryReadVarint32(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -82,7 +95,10 @@ inline int32_t ReadVarint32(const ReaderRef &reader)
  */
 inline void WriteVarint32(const WriterRef &writer, int32_t value)
 {
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteVarint32);
+    if (!TryWriteVarint32(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -95,7 +111,12 @@ inline void WriteVarint32(const WriterRef &writer, int32_t value)
  */
 inline int32_t ReadSVarint32(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int32_t>(reader, TryReadSVarint32);
+    int32_t rvo;
+    if (!TryReadSVarint32(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -108,7 +129,10 @@ inline int32_t ReadSVarint32(const ReaderRef &reader)
  */
 inline void WriteSVarint32(const WriterRef &writer, int32_t value)
 {
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWriteSVarint32);
+    if (!TryWriteSVarint32(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -124,7 +148,12 @@ inline void WriteSVarint32(const WriterRef &writer, int32_t value)
  */
 inline uint64_t ReadUVarint64(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<uint64_t>(reader, TryReadUVarint64);
+    uint64_t rvo;
+    if (!TryReadUVarint64(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -139,7 +168,10 @@ inline uint64_t ReadUVarint64(const ReaderRef &reader)
  */
 inline void WriteUVarint64(const WriterRef &writer, const uint64_t value)
 {
-    Detail::WriteWithExcept<uint64_t>(writer, value, TryWriteUVarint64);
+    if (!TryWriteUVarint64(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -152,7 +184,12 @@ inline void WriteUVarint64(const WriterRef &writer, const uint64_t value)
  */
 inline int64_t ReadVarint64(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int64_t>(reader, TryReadVarint64);
+    int64_t rvo;
+    if (!TryReadVarint64(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -165,7 +202,10 @@ inline int64_t ReadVarint64(const ReaderRef &reader)
  */
 inline void WriteVarint64(const WriterRef &writer, int64_t value)
 {
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteVarint64);
+    if (!TryWriteVarint64(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -178,7 +218,12 @@ inline void WriteVarint64(const WriterRef &writer, int64_t value)
  */
 inline int64_t ReadSVarint64(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int64_t>(reader, TryReadSVarint64);
+    int64_t rvo;
+    if (!TryReadSVarint64(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -191,7 +236,10 @@ inline int64_t ReadSVarint64(const ReaderRef &reader)
  */
 inline void WriteSVarint64(const WriterRef &writer, int64_t value)
 {
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWriteSVarint64);
+    if (!TryWriteSVarint64(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 } // namespace LexIO

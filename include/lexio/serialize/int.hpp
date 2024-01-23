@@ -29,33 +29,6 @@
 namespace LexIO
 {
 
-namespace Detail
-{
-
-//******************************************************************************
-
-template <typename TYPE, typename TRY_READ>
-inline constexpr TYPE ReadWithExcept(const ReaderRef &reader, TRY_READ &tryRead)
-{
-    TYPE rvo;
-    if (!tryRead(rvo, reader))
-    {
-        throw std::runtime_error("could not read");
-    }
-    return rvo;
-}
-
-template <typename TYPE, typename TRY_WRITE>
-inline constexpr void WriteWithExcept(const WriterRef &writer, const TYPE &value, TRY_WRITE &tryWrite)
-{
-    if (!tryWrite(writer, value))
-    {
-        throw std::runtime_error("could not write");
-    }
-}
-
-} // namespace Detail
-
 //******************************************************************************
 
 /**

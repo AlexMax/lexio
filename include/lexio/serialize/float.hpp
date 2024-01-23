@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "./int.hpp"
 #include "./tryfloat.hpp"
+#include <stdexcept>
 
 namespace LexIO
 {
@@ -37,7 +37,12 @@ namespace LexIO
  */
 inline float32_t ReadFloat32LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<float32_t>(reader, TryReadFloat32LE);
+    float32_t rvo;
+    if (!TryReadFloat32LE(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -49,7 +54,12 @@ inline float32_t ReadFloat32LE(const ReaderRef &reader)
  */
 inline float32_t ReadFloat32BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<float32_t>(reader, TryReadFloat32BE);
+    float32_t rvo;
+    if (!TryReadFloat32BE(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -61,7 +71,10 @@ inline float32_t ReadFloat32BE(const ReaderRef &reader)
  */
 inline void WriteFloat32LE(const WriterRef &writer, float32_t value)
 {
-    Detail::WriteWithExcept<float32_t>(writer, value, TryWriteFloat32LE);
+    if (!TryWriteFloat32LE(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -73,7 +86,10 @@ inline void WriteFloat32LE(const WriterRef &writer, float32_t value)
  */
 inline void WriteFloat32BE(const WriterRef &writer, float32_t value)
 {
-    Detail::WriteWithExcept<float32_t>(writer, value, TryWriteFloat32BE);
+    if (!TryWriteFloat32BE(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 //******************************************************************************
@@ -87,7 +103,12 @@ inline void WriteFloat32BE(const WriterRef &writer, float32_t value)
  */
 inline float64_t ReadFloat64LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<float64_t>(reader, TryReadFloat64LE);
+    float64_t rvo;
+    if (!TryReadFloat64LE(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -99,7 +120,12 @@ inline float64_t ReadFloat64LE(const ReaderRef &reader)
  */
 inline float64_t ReadFloat64BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<float64_t>(reader, TryReadFloat64BE);
+    float64_t rvo;
+    if (!TryReadFloat64BE(rvo, reader))
+    {
+        throw std::runtime_error("could not read");
+    }
+    return rvo;
 }
 
 /**
@@ -111,7 +137,10 @@ inline float64_t ReadFloat64BE(const ReaderRef &reader)
  */
 inline void WriteFloat64LE(const WriterRef &writer, float64_t value)
 {
-    Detail::WriteWithExcept<float64_t>(writer, value, TryWriteFloat64LE);
+    if (!TryWriteFloat64LE(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -123,7 +152,10 @@ inline void WriteFloat64LE(const WriterRef &writer, float64_t value)
  */
 inline void WriteFloat64BE(const WriterRef &writer, float64_t value)
 {
-    Detail::WriteWithExcept<float64_t>(writer, value, TryWriteFloat64BE);
+    if (!TryWriteFloat64BE(writer, value))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 } // namespace LexIO
