@@ -29,6 +29,13 @@ namespace LexIO
 
 //******************************************************************************
 
+/**
+ * @brief Try to read a uint32_t from a stream as a varint.
+ *
+ * @param out Integer that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 inline bool TryReadUVarint32(uint32_t &out, const ReaderRef &reader)
 {
     constexpr int MAX_BYTES = 5;
@@ -58,6 +65,13 @@ inline bool TryReadUVarint32(uint32_t &out, const ReaderRef &reader)
     return true;
 }
 
+/**
+ * @brief Try to write a uint32_t to a stream as a varint.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 inline bool TryWriteUVarint32(const WriterRef &writer, uint32_t value)
 {
     uint32_t v = value;
@@ -72,6 +86,9 @@ inline bool TryWriteUVarint32(const WriterRef &writer, uint32_t value)
     return TryWriteU8(writer, static_cast<uint8_t>(v));
 }
 
+/**
+ * @brief Return number of bytes needed to encode an uint32_t as a varint.
+ */
 constexpr size_t UVarint32Bytes(uint32_t value)
 {
     size_t count = 1;
@@ -86,16 +103,41 @@ constexpr size_t UVarint32Bytes(uint32_t value)
 
 //******************************************************************************
 
+/**
+ * @brief Try to read a int32_t from a stream as a varint.  Negative values
+ *        are decoded as large positive integers.
+ *
+ * @param out Integer that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 inline bool TryReadVarint32(int32_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int32_t>(out, reader, TryReadUVarint32);
+    uint32_t outVal = 0;
+    if (!TryReadUVarint32(outVal, reader))
+    {
+        return false;
+    }
+    out = static_cast<int32_t>(outVal);
+    return true;
 }
 
+/**
+ * @brief Try to write a int32_t to a stream as a varint.  Negative values
+ *        are encoded as large positive integers.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 inline bool TryWriteVarint32(const WriterRef &writer, int32_t value)
 {
-    return Detail::WriteSigned<int32_t>(writer, value, TryWriteUVarint32);
+    return TryWriteUVarint32(writer, static_cast<uint32_t>(value));
 }
 
+/**
+ * @brief Return number of bytes needed to encode an int32_t as a varint.
+ */
 constexpr size_t Varint32Bytes(int32_t value)
 {
     size_t count = 1;
@@ -110,6 +152,14 @@ constexpr size_t Varint32Bytes(int32_t value)
 
 //******************************************************************************
 
+/**
+ * @brief Try to read a int32_t from a stream as a varint.  Negative values
+ *        are decoded as small positive integers using zig-zag encoding.
+ *
+ * @param out Integer that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 inline bool TryReadSVarint32(int32_t &out, const ReaderRef &reader)
 {
     uint32_t outVal;
@@ -121,12 +171,24 @@ inline bool TryReadSVarint32(int32_t &out, const ReaderRef &reader)
     return true;
 }
 
+/**
+ * @brief Try to write a int32_t to a stream as a varint.  Negative values
+ *        are encoded as small positive integers using zig-zag encoding.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 inline bool TryWriteSVarint32(const WriterRef &writer, int32_t value)
 {
     const uint32_t var = (static_cast<uint32_t>(value) << 1) ^ static_cast<uint32_t>(value >> 31);
     return TryWriteUVarint32(writer, var);
 }
 
+/**
+ * @brief Return number of bytes needed to encode an int32_t as a varint using
+ *        zig-zag encoding.
+ */
 constexpr size_t SVarint32Bytes(int32_t value)
 {
     size_t count = 1;
@@ -141,6 +203,13 @@ constexpr size_t SVarint32Bytes(int32_t value)
 
 //******************************************************************************
 
+/**
+ * @brief Try to read a uint64_t from a stream as a varint.
+ *
+ * @param out Integer that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 inline bool TryReadUVarint64(uint64_t &out, const ReaderRef &reader)
 {
     constexpr int MAX_BYTES = 10;
@@ -170,6 +239,13 @@ inline bool TryReadUVarint64(uint64_t &out, const ReaderRef &reader)
     return true;
 }
 
+/**
+ * @brief Try to write a uint64_t to a stream as a varint.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 inline bool TryWriteUVarint64(const WriterRef &writer, const uint64_t value)
 {
     uint64_t v = value;
@@ -184,6 +260,9 @@ inline bool TryWriteUVarint64(const WriterRef &writer, const uint64_t value)
     return TryWriteU8(writer, static_cast<uint8_t>(v));
 }
 
+/**
+ * @brief Return number of bytes needed to encode an uint64_t as a varint.
+ */
 constexpr size_t UVarint64Bytes(const uint64_t value)
 {
     size_t count = 1;
@@ -198,16 +277,41 @@ constexpr size_t UVarint64Bytes(const uint64_t value)
 
 //******************************************************************************
 
+/**
+ * @brief Try to read a int64_t from a stream as a varint.  Negative values
+ *        are decoded as large positive integers.
+ *
+ * @param out Integer that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 inline bool TryReadVarint64(int64_t &out, const ReaderRef &reader)
 {
-    return Detail::ReadSigned<int64_t>(out, reader, TryReadUVarint64);
+    uint64_t outVal = 0;
+    if (!TryReadUVarint64(outVal, reader))
+    {
+        return false;
+    }
+    out = static_cast<int64_t>(outVal);
+    return true;
 }
 
+/**
+ * @brief Try to write a int64_t to a stream as a varint.  Negative values
+ *        are encoded as large positive integers.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 inline bool TryWriteVarint64(const WriterRef &writer, int64_t value)
 {
-    return Detail::WriteSigned<int64_t>(writer, value, TryWriteUVarint64);
+    return TryWriteUVarint64(writer, static_cast<uint64_t>(value));
 }
 
+/**
+ * @brief Return number of bytes needed to encode an int64_t as a varint.
+ */
 constexpr size_t Varint64Bytes(int64_t value)
 {
     size_t count = 1;
@@ -222,6 +326,14 @@ constexpr size_t Varint64Bytes(int64_t value)
 
 //******************************************************************************
 
+/**
+ * @brief Try to read a int64_t from a stream as a varint.  Negative values
+ *        are decoded as small positive integers using zig-zag encoding.
+ *
+ * @param out Integer that was read.  Not modified if read failed.
+ * @param reader Reader to read from.
+ * @return True if the read was successful.
+ */
 inline bool TryReadSVarint64(int64_t &out, const ReaderRef &reader)
 {
     uint64_t outVal;
@@ -233,12 +345,24 @@ inline bool TryReadSVarint64(int64_t &out, const ReaderRef &reader)
     return true;
 }
 
+/**
+ * @brief Try to write a int64_t to a stream as a varint.  Negative values
+ *        are encoded as small positive integers using zig-zag encoding.
+ *
+ * @param writer Writer to write to.
+ * @param value Integer to write.
+ * @return True if the write was successful.
+ */
 inline bool TryWriteSVarint64(const WriterRef &writer, int64_t value)
 {
     const uint64_t var = (static_cast<uint64_t>(value) << 1) ^ static_cast<uint64_t>(value >> 63);
     return TryWriteUVarint64(writer, var);
 }
 
+/**
+ * @brief Return number of bytes needed to encode an int64_t as a varint using
+ *        zig-zag encoding.
+ */
 constexpr size_t SVarint64Bytes(int64_t value)
 {
     size_t count = 1;
@@ -250,5 +374,7 @@ constexpr size_t SVarint64Bytes(int64_t value)
     }
     return count;
 }
+
+//******************************************************************************
 
 } // namespace LexIO

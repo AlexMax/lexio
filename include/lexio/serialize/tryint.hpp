@@ -28,32 +28,6 @@
 namespace LexIO
 {
 
-namespace Detail
-{
-
-//******************************************************************************
-
-template <typename TYPE, typename TRY_READ>
-inline constexpr bool ReadSigned(TYPE &out, const ReaderRef &reader, TRY_READ &tryRead)
-{
-    using UNSIGNED_TYPE = std::make_unsigned_t<TYPE>;
-    UNSIGNED_TYPE outVal;
-    if (!tryRead(outVal, reader))
-    {
-        return false;
-    }
-    out = static_cast<TYPE>(outVal);
-    return true;
-}
-
-template <typename TYPE, typename TRY_WRITE>
-inline constexpr bool WriteSigned(const WriterRef &writer, const TYPE &value, TRY_WRITE &tryWrite)
-{
-    return tryWrite(writer, static_cast<TYPE>(value));
-}
-
-} // namespace Detail
-
 //******************************************************************************
 
 /**
