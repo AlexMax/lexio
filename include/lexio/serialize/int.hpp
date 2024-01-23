@@ -227,7 +227,20 @@ inline void WriteU16BE(const WriterRef &writer, uint16_t value)
  */
 inline int16_t Read16LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int16_t>(reader, TryRead16LE);
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint16_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_BE_BSWAP16(bits);
+
+    int16_t out = 0;
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -239,7 +252,20 @@ inline int16_t Read16LE(const ReaderRef &reader)
  */
 inline int16_t Read16BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int16_t>(reader, TryRead16BE);
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint16_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_LE_BSWAP16(bits);
+
+    int16_t out = 0;
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -251,7 +277,18 @@ inline int16_t Read16BE(const ReaderRef &reader)
  */
 inline void Write16LE(const WriterRef &writer, int16_t value)
 {
-    Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16LE);
+    uint16_t uvalue;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_BE_BSWAP16(uvalue);
+
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -263,7 +300,18 @@ inline void Write16LE(const WriterRef &writer, int16_t value)
  */
 inline void Write16BE(const WriterRef &writer, int16_t value)
 {
-    Detail::WriteWithExcept<int16_t>(writer, value, TryWrite16BE);
+    uint16_t uvalue;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_LE_BSWAP16(uvalue);
+
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 //******************************************************************************
@@ -363,7 +411,20 @@ inline void WriteU32BE(const WriterRef &writer, uint32_t value)
  */
 inline int32_t Read32LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int32_t>(reader, TryRead32LE);
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint32_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_BE_BSWAP32(bits);
+
+    int32_t out = 0;
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -375,7 +436,20 @@ inline int32_t Read32LE(const ReaderRef &reader)
  */
 inline int32_t Read32BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int32_t>(reader, TryRead32BE);
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint32_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_LE_BSWAP32(bits);
+
+    int32_t out = 0;
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -387,7 +461,18 @@ inline int32_t Read32BE(const ReaderRef &reader)
  */
 inline void Write32LE(const WriterRef &writer, int32_t value)
 {
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32LE);
+    uint32_t uvalue;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_BE_BSWAP32(uvalue);
+
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -399,7 +484,18 @@ inline void Write32LE(const WriterRef &writer, int32_t value)
  */
 inline void Write32BE(const WriterRef &writer, int32_t value)
 {
-    Detail::WriteWithExcept<int32_t>(writer, value, TryWrite32BE);
+    uint32_t uvalue;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_LE_BSWAP32(uvalue);
+
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 //******************************************************************************
@@ -499,7 +595,20 @@ inline void WriteU64BE(const WriterRef &writer, uint64_t value)
  */
 inline int64_t Read64LE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int64_t>(reader, TryRead64LE);
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint64_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_BE_BSWAP64(bits);
+
+    int64_t out = 0;
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -511,7 +620,20 @@ inline int64_t Read64LE(const ReaderRef &reader)
  */
 inline int64_t Read64BE(const ReaderRef &reader)
 {
-    return Detail::ReadWithExcept<int64_t>(reader, TryRead64BE);
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    const size_t count = Read(buf, reader);
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not read");
+    }
+
+    uint64_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_LE_BSWAP64(bits);
+
+    int64_t out = 0;
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -523,7 +645,18 @@ inline int64_t Read64BE(const ReaderRef &reader)
  */
 inline void Write64LE(const WriterRef &writer, int64_t value)
 {
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64LE);
+    uint64_t uvalue;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_BE_BSWAP64(uvalue);
+
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 /**
@@ -535,7 +668,18 @@ inline void Write64LE(const WriterRef &writer, int64_t value)
  */
 inline void Write64BE(const WriterRef &writer, int64_t value)
 {
-    Detail::WriteWithExcept<int64_t>(writer, value, TryWrite64BE);
+    uint64_t uvalue;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_LE_BSWAP64(uvalue);
+
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
+
+    const size_t count = Write(writer, buf, sizeof(buf));
+    if (count != sizeof(buf))
+    {
+        throw std::runtime_error("could not write");
+    }
 }
 
 } // namespace LexIO
