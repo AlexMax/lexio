@@ -306,7 +306,7 @@ inline bool TryWrite16LE(const WriterRef &writer, int16_t value)
 {
     try
     {
-        uint16_t uvalue;
+        uint16_t uvalue = 0;
         std::memcpy(&uvalue, &value, sizeof(uvalue));
         uvalue = LEXIO_IF_BE_BSWAP16(uvalue);
 
@@ -333,7 +333,7 @@ inline bool TryWrite16BE(const WriterRef &writer, int16_t value)
 {
     try
     {
-        uint16_t uvalue;
+        uint16_t uvalue = 0;
         std::memcpy(&uvalue, &value, sizeof(uvalue));
         uvalue = LEXIO_IF_LE_BSWAP16(uvalue);
 
@@ -528,7 +528,7 @@ inline bool TryWrite32LE(const WriterRef &writer, int32_t value)
 {
     try
     {
-        uint32_t uvalue;
+        uint32_t uvalue = 0;
         std::memcpy(&uvalue, &value, sizeof(uvalue));
         uvalue = LEXIO_IF_BE_BSWAP32(uvalue);
 
@@ -555,7 +555,7 @@ inline bool TryWrite32BE(const WriterRef &writer, int32_t value)
 {
     try
     {
-        uint32_t uvalue;
+        uint32_t uvalue = 0;
         std::memcpy(&uvalue, &value, sizeof(uvalue));
         uvalue = LEXIO_IF_LE_BSWAP32(uvalue);
 
@@ -750,7 +750,7 @@ inline bool TryWrite64LE(const WriterRef &writer, int64_t value)
 {
     try
     {
-        uint64_t uvalue;
+        uint64_t uvalue = 0;
         std::memcpy(&uvalue, &value, sizeof(uvalue));
         uvalue = LEXIO_IF_BE_BSWAP64(uvalue);
 
@@ -777,7 +777,7 @@ inline bool TryWrite64BE(const WriterRef &writer, int64_t value)
 {
     try
     {
-        uint64_t uvalue;
+        uint64_t uvalue = 0;
         std::memcpy(&uvalue, &value, sizeof(uvalue));
         uvalue = LEXIO_IF_LE_BSWAP64(uvalue);
 
