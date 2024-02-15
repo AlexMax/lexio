@@ -18,6 +18,8 @@
 
 #include "./test.h"
 
+static ErrorStream g_errorStream;
+
 TEST(Int, TryReadU8_ReadU8)
 {
     LexIO::VectorStream buffer = {0x88};
@@ -26,6 +28,7 @@ TEST(Int, TryReadU8_ReadU8)
     EXPECT_EQ(LexIO::TryReadU8(test, buffer), true);
     EXPECT_EQ(test, 0x88);
     EXPECT_EQ(LexIO::TryReadU8(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadU8(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::ReadU8(buffer), 0x88);
@@ -41,6 +44,7 @@ TEST(Int, TryWriteU8_WriteU8)
         EXPECT_EQ(LexIO::TryWriteU8(buffer, 0x88), true);
         EXPECT_EQ(streamBuf[0], 0x88);
         EXPECT_EQ(LexIO::TryWriteU8(buffer, 0x88), false);
+        EXPECT_EQ(LexIO::TryWriteU8(g_errorStream, 0x88), false);
     }
 
     {
@@ -61,6 +65,7 @@ TEST(Int, TryRead8_Read8)
     EXPECT_EQ(LexIO::TryRead8(test, buffer), true);
     EXPECT_EQ(test, -120);
     EXPECT_EQ(LexIO::TryRead8(test, buffer), false);
+    EXPECT_EQ(LexIO::TryRead8(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::Read8(buffer), -120);
@@ -76,6 +81,7 @@ TEST(Int, TryWrite8_Write8)
         EXPECT_EQ(LexIO::TryWrite8(buffer, -120), true);
         EXPECT_EQ(streamBuf[0], 0x88);
         EXPECT_EQ(LexIO::TryWrite8(buffer, -120), false);
+        EXPECT_EQ(LexIO::TryWrite8(g_errorStream, -120), false);
     }
 
     {
@@ -96,6 +102,7 @@ TEST(Int, TryReadU16LE_ReadU16LE)
     EXPECT_EQ(LexIO::TryReadU16LE(test, buffer), true);
     EXPECT_EQ(test, 0x9988);
     EXPECT_EQ(LexIO::TryReadU16LE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadU16LE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::ReadU16LE(buffer), 0x9988);
@@ -113,6 +120,7 @@ TEST(Int, TryWriteU16LE_WriteU16LE)
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(LexIO::TryWriteU16LE(buffer, 0x9988), false);
+        EXPECT_EQ(LexIO::TryWriteU16LE(g_errorStream, 0x9988), false);
     }
 
     {
@@ -135,6 +143,7 @@ TEST(Int, TryReadU16BE_ReadU16BE)
     EXPECT_EQ(LexIO::TryReadU16BE(test, buffer), true);
     EXPECT_EQ(test, 0x8899);
     EXPECT_EQ(LexIO::TryReadU16BE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadU16BE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::ReadU16BE(buffer), 0x8899);
@@ -152,6 +161,7 @@ TEST(Int, TryWriteU16BE_WriteU16BE)
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(LexIO::TryWriteU16BE(buffer, 0x9988), false);
+        EXPECT_EQ(LexIO::TryWriteU16BE(g_errorStream, 0x9988), false);
     }
 
     {
@@ -174,6 +184,7 @@ TEST(Int, TryRead16LE_Read16LE)
     EXPECT_EQ(LexIO::TryRead16LE(test, buffer), true);
     EXPECT_EQ(test, -26232);
     EXPECT_EQ(LexIO::TryRead16LE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryRead16LE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::Read16LE(buffer), -26232);
@@ -191,6 +202,7 @@ TEST(Int, TryWrite16LE_Write16LE)
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(LexIO::TryWrite16LE(buffer, -26232), false);
+        EXPECT_EQ(LexIO::TryWrite16LE(g_errorStream, -26232), false);
     }
 
     {
@@ -213,6 +225,7 @@ TEST(Int, TryRead16BE_Read16BE)
     EXPECT_EQ(LexIO::TryRead16BE(test, buffer), true);
     EXPECT_EQ(test, -26232);
     EXPECT_EQ(LexIO::TryRead16BE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryRead16BE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::Read16BE(buffer), -26232);
@@ -230,6 +243,7 @@ TEST(Int, TryWrite16BE_Write16BE)
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(LexIO::TryWrite16BE(buffer, -26232), false);
+        EXPECT_EQ(LexIO::TryWrite16BE(g_errorStream, -26232), false);
     }
 
     {
@@ -252,6 +266,7 @@ TEST(Int, TryReadU32LE_ReadU32LE)
     EXPECT_EQ(LexIO::TryReadU32LE(test, buffer), true);
     EXPECT_EQ(test, 0xbbaa9988);
     EXPECT_EQ(LexIO::TryReadU32LE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadU32LE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::ReadU32LE(buffer), 0xbbaa9988);
@@ -271,6 +286,7 @@ TEST(Int, TryWriteU32LE_WriteU32LE)
         EXPECT_EQ(streamBuf[i++], 0xaa);
         EXPECT_EQ(streamBuf[i++], 0xbb);
         EXPECT_EQ(LexIO::TryWriteU32LE(buffer, 0xbbaa9988), false);
+        EXPECT_EQ(LexIO::TryWriteU32LE(g_errorStream, 0xbbaa9988), false);
     }
 
     {
@@ -295,6 +311,7 @@ TEST(Int, TryReadU32BE_ReadU32BE)
     EXPECT_EQ(LexIO::TryReadU32BE(test, buffer), true);
     EXPECT_EQ(test, 0xbbaa9988);
     EXPECT_EQ(LexIO::TryReadU32BE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadU32BE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::ReadU32BE(buffer), 0xbbaa9988);
@@ -314,6 +331,7 @@ TEST(Int, TryWriteU32BE_WriteU32BE)
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(LexIO::TryWriteU32BE(buffer, 0xbbaa9988), false);
+        EXPECT_EQ(LexIO::TryWriteU32BE(g_errorStream, 0xbbaa9988), false);
     }
 
     {
@@ -338,6 +356,7 @@ TEST(Int, TryRead32LE_Read32LE)
     EXPECT_EQ(LexIO::TryRead32LE(test, buffer), true);
     EXPECT_EQ(test, -1146447480);
     EXPECT_EQ(LexIO::TryRead32LE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryRead32LE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::Read32LE(buffer), -1146447480);
@@ -357,6 +376,7 @@ TEST(Int, TryWrite32LE_Write32LE)
         EXPECT_EQ(streamBuf[i++], 0xaa);
         EXPECT_EQ(streamBuf[i++], 0xbb);
         EXPECT_EQ(LexIO::TryWrite32LE(buffer, -1146447480), false);
+        EXPECT_EQ(LexIO::TryWrite32LE(g_errorStream, -1146447480), false);
     }
 
     {
@@ -381,6 +401,7 @@ TEST(Int, TryRead32BE_Read32BE)
     EXPECT_EQ(LexIO::TryRead32BE(test, buffer), true);
     EXPECT_EQ(test, -1146447480);
     EXPECT_EQ(LexIO::TryRead32BE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryRead32BE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::Read32BE(buffer), -1146447480);
@@ -400,6 +421,7 @@ TEST(Int, TryWrite32BE_Write32BE)
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(LexIO::TryWrite32BE(buffer, -1146447480), false);
+        EXPECT_EQ(LexIO::TryWrite32BE(g_errorStream, -1146447480), false);
     }
 
     {
@@ -424,6 +446,7 @@ TEST(Int, TryReadU64LE_ReadU64LE)
     EXPECT_EQ(LexIO::TryReadU64LE(test, buffer), true);
     EXPECT_EQ(test, 0xffeeddccbbaa9988);
     EXPECT_EQ(LexIO::TryReadU64LE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadU64LE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::ReadU64LE(buffer), 0xffeeddccbbaa9988);
@@ -447,6 +470,7 @@ TEST(Int, TryWriteU64LE_WriteU64LE)
         EXPECT_EQ(streamBuf[i++], 0xee);
         EXPECT_EQ(streamBuf[i++], 0xff);
         EXPECT_EQ(LexIO::TryWriteU64LE(buffer, 0xffeeddccbbaa9988), false);
+        EXPECT_EQ(LexIO::TryWriteU64LE(g_errorStream, 0xffeeddccbbaa9988), false);
     }
 
     {
@@ -464,6 +488,7 @@ TEST(Int, TryWriteU64LE_WriteU64LE)
         EXPECT_EQ(streamBuf[i++], 0xee);
         EXPECT_EQ(streamBuf[i++], 0xff);
         EXPECT_ANY_THROW(LexIO::WriteU64LE(buffer, 0xffeeddccbbaa9988));
+        EXPECT_ANY_THROW(LexIO::WriteU64LE(g_errorStream, 0xffeeddccbbaa9988));
     }
 }
 
@@ -475,6 +500,7 @@ TEST(Int, TryReadU64BE_ReadU64BE)
     EXPECT_EQ(LexIO::TryReadU64BE(test, buffer), true);
     EXPECT_EQ(test, 0xffeeddccbbaa9988);
     EXPECT_EQ(LexIO::TryReadU64BE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadU64BE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::ReadU64BE(buffer), 0xffeeddccbbaa9988);
@@ -498,6 +524,7 @@ TEST(Int, TryWriteU64BE_WriteU64BE)
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(LexIO::TryWriteU64BE(buffer, 0xffeeddccbbaa9988), false);
+        EXPECT_EQ(LexIO::TryWriteU64BE(g_errorStream, 0xffeeddccbbaa9988), false);
     }
 
     {
@@ -526,6 +553,7 @@ TEST(Int, TryRead64LE_Read64LE)
     EXPECT_EQ(LexIO::TryRead64LE(test, buffer), true);
     EXPECT_EQ(test, -4822678189205112);
     EXPECT_EQ(LexIO::TryRead64LE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryRead64LE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::Read64LE(buffer), -4822678189205112);
@@ -549,6 +577,7 @@ TEST(Int, TryWrite64LE_Write64LE)
         EXPECT_EQ(streamBuf[i++], 0xee);
         EXPECT_EQ(streamBuf[i++], 0xff);
         EXPECT_EQ(LexIO::TryWrite64LE(buffer, -4822678189205112), false);
+        EXPECT_EQ(LexIO::TryWrite64LE(g_errorStream, -4822678189205112), false);
     }
 
     {
@@ -577,6 +606,7 @@ TEST(Int, TryRead64BE_Read64BE)
     EXPECT_EQ(LexIO::TryRead64BE(test, buffer), true);
     EXPECT_EQ(test, -4822678189205112);
     EXPECT_EQ(LexIO::TryRead64BE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryRead64BE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_EQ(LexIO::Read64BE(buffer), -4822678189205112);
@@ -600,6 +630,7 @@ TEST(Int, TryWrite64BE_Write64BE)
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(LexIO::TryWrite64BE(buffer, -4822678189205112), false);
+        EXPECT_EQ(LexIO::TryWrite64BE(g_errorStream, -4822678189205112), false);
     }
 
     {

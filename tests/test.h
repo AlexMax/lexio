@@ -18,6 +18,7 @@
 
 #include <cstring>
 #include <iterator>
+#include <stdexcept>
 
 #include "config.h"
 
@@ -108,4 +109,26 @@ class NoCopyStream
     void LexFlush() { m_stream.LexFlush(); }
 
     size_t LexSeek(const LexIO::SeekPos &pos) { return m_stream.LexSeek(pos); }
+};
+
+class ErrorStream
+{
+  public:
+    ErrorStream() = default;
+    ErrorStream(const ErrorStream &) = delete;
+    ErrorStream(ErrorStream &&) noexcept = default;
+    ErrorStream &operator=(const ErrorStream &) = delete;
+    ErrorStream &operator=(ErrorStream &&) noexcept = default;
+
+    size_t LexRead(uint8_t *, const size_t) { throw std::runtime_error("intended"); }
+
+    LexIO::BufferView LexFillBuffer(const size_t) { throw std::runtime_error("intended"); }
+
+    void LexConsumeBuffer(const size_t) { throw std::runtime_error("intended"); }
+
+    size_t LexWrite(const uint8_t *, const size_t) { throw std::runtime_error("intended"); }
+
+    void LexFlush() { throw std::runtime_error("intended"); }
+
+    size_t LexSeek(const LexIO::SeekPos &) { throw std::runtime_error("intended"); }
 };

@@ -19,6 +19,8 @@
 #include "./test.h"
 #include <cmath>
 
+static ErrorStream g_errorStream;
+
 TEST(Float, TryReadFloat32LE_ReadFloat32LE)
 {
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb});
@@ -30,6 +32,7 @@ TEST(Float, TryReadFloat32LE_ReadFloat32LE)
     EXPECT_EQ(x, -0.666405201f);
     EXPECT_EQ(exp, -7);
     EXPECT_EQ(LexIO::TryReadFloat32LE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadFloat32LE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_NO_THROW(test = LexIO::ReadFloat32LE(buffer));
@@ -54,6 +57,7 @@ TEST(Float, TryWriteFloat32LE_WriteFloat32LE)
         EXPECT_EQ(streamBuf[i++], 0xaa);
         EXPECT_EQ(streamBuf[i++], 0xbb);
         EXPECT_EQ(LexIO::TryWriteFloat32LE(buffer, test), false);
+        EXPECT_EQ(LexIO::TryWriteFloat32LE(g_errorStream, test), false);
     }
 
     {
@@ -81,6 +85,7 @@ TEST(Float, TryReadFloat32BE_ReadFloat32BE)
     EXPECT_EQ(x, -0.666405201f);
     EXPECT_EQ(exp, -7);
     EXPECT_EQ(LexIO::TryReadFloat32BE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadFloat32BE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_NO_THROW(test = LexIO::ReadFloat32BE(buffer));
@@ -105,6 +110,7 @@ TEST(Float, TryWriteFloat32BE_WriteFloat32BE)
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(LexIO::TryWriteFloat32BE(buffer, test), false);
+        EXPECT_EQ(LexIO::TryWriteFloat32BE(g_errorStream, test), false);
     }
 
     {
@@ -132,6 +138,7 @@ TEST(Float, TryReadFloat64LE_ReadFloat64LE)
     EXPECT_EQ(x, -0.96457516339869276);
     EXPECT_EQ(exp, 1024);
     EXPECT_EQ(LexIO::TryReadFloat64LE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadFloat64LE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_NO_THROW(test = LexIO::ReadFloat64LE(buffer));
@@ -160,6 +167,7 @@ TEST(Float, TryWriteFloat64LE_WriteFloat64LE)
         EXPECT_EQ(streamBuf[i++], 0xee);
         EXPECT_EQ(streamBuf[i++], 0xff);
         EXPECT_EQ(LexIO::TryWriteFloat64LE(buffer, test), false);
+        EXPECT_EQ(LexIO::TryWriteFloat64LE(g_errorStream, test), false);
     }
 
     {
@@ -191,6 +199,7 @@ TEST(Float, TryReadFloat64BE_ReadFloat64BE)
     EXPECT_EQ(x, -0.96457516339869276);
     EXPECT_EQ(exp, 1024);
     EXPECT_EQ(LexIO::TryReadFloat64BE(test, buffer), false);
+    EXPECT_EQ(LexIO::TryReadFloat64BE(test, g_errorStream), false);
 
     LexIO::Rewind(buffer);
     EXPECT_NO_THROW(test = LexIO::ReadFloat64BE(buffer));
@@ -219,6 +228,7 @@ TEST(Float, TryWriteFloat64LE_WriteFloat64BE)
         EXPECT_EQ(streamBuf[i++], 0x99);
         EXPECT_EQ(streamBuf[i++], 0x88);
         EXPECT_EQ(LexIO::TryWriteFloat64BE(buffer, test), false);
+        EXPECT_EQ(LexIO::TryWriteFloat64BE(g_errorStream, test), false);
     }
 
     {
