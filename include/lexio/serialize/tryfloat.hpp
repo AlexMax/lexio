@@ -23,6 +23,8 @@
 
 #include "./tryint.hpp"
 
+#include <stdexcept>
+
 namespace LexIO
 {
 
@@ -38,18 +40,25 @@ using float64_t = double;
  */
 inline bool TryReadFloat32LE(float32_t &out, const ReaderRef &reader)
 {
-    uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
+    try
+    {
+        uint8_t buf[sizeof(uint32_t)] = {0};
+        const size_t count = Read(buf, reader);
+        if (count != sizeof(buf))
+        {
+            return false;
+        }
+
+        uint32_t bits = 0;
+        std::memcpy(&bits, buf, sizeof(bits));
+        bits = LEXIO_IF_BE_BSWAP32(bits);
+        std::memcpy(&out, &bits, sizeof(out));
+        return true;
+    }
+    catch (std::runtime_error &)
     {
         return false;
     }
-
-    uint32_t bits = 0;
-    std::memcpy(&bits, buf, sizeof(bits));
-    bits = LEXIO_IF_BE_BSWAP32(bits);
-    std::memcpy(&out, &bits, sizeof(out));
-    return true;
 }
 
 /**
@@ -61,18 +70,25 @@ inline bool TryReadFloat32LE(float32_t &out, const ReaderRef &reader)
  */
 inline bool TryReadFloat32BE(float32_t &out, const ReaderRef &reader)
 {
-    uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
+    try
+    {
+        uint8_t buf[sizeof(uint32_t)] = {0};
+        const size_t count = Read(buf, reader);
+        if (count != sizeof(buf))
+        {
+            return false;
+        }
+
+        uint32_t bits = 0;
+        std::memcpy(&bits, buf, sizeof(bits));
+        bits = LEXIO_IF_LE_BSWAP32(bits);
+        std::memcpy(&out, &bits, sizeof(out));
+        return true;
+    }
+    catch (std::runtime_error &)
     {
         return false;
     }
-
-    uint32_t bits = 0;
-    std::memcpy(&bits, buf, sizeof(bits));
-    bits = LEXIO_IF_LE_BSWAP32(bits);
-    std::memcpy(&out, &bits, sizeof(out));
-    return true;
 }
 
 /**
@@ -84,15 +100,22 @@ inline bool TryReadFloat32BE(float32_t &out, const ReaderRef &reader)
  */
 inline bool TryWriteFloat32LE(const WriterRef &writer, float32_t value)
 {
-    uint32_t bits = 0;
-    std::memcpy(&bits, &value, sizeof(bits));
+    try
+    {
+        uint32_t bits = 0;
+        std::memcpy(&bits, &value, sizeof(bits));
 
-    uint8_t buf[sizeof(bits)] = {0};
-    bits = LEXIO_IF_BE_BSWAP32(bits);
-    std::memcpy(buf, &bits, sizeof(buf));
+        uint8_t buf[sizeof(bits)] = {0};
+        bits = LEXIO_IF_BE_BSWAP32(bits);
+        std::memcpy(buf, &bits, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    return count == sizeof(buf);
+        const size_t count = Write(writer, buf, sizeof(buf));
+        return count == sizeof(buf);
+    }
+    catch (std::runtime_error &)
+    {
+        return false;
+    }
 }
 
 /**
@@ -104,15 +127,22 @@ inline bool TryWriteFloat32LE(const WriterRef &writer, float32_t value)
  */
 inline bool TryWriteFloat32BE(const WriterRef &writer, float32_t value)
 {
-    uint32_t bits = 0;
-    std::memcpy(&bits, &value, sizeof(bits));
+    try
+    {
+        uint32_t bits = 0;
+        std::memcpy(&bits, &value, sizeof(bits));
 
-    uint8_t buf[sizeof(bits)] = {0};
-    bits = LEXIO_IF_LE_BSWAP32(bits);
-    std::memcpy(buf, &bits, sizeof(buf));
+        uint8_t buf[sizeof(bits)] = {0};
+        bits = LEXIO_IF_LE_BSWAP32(bits);
+        std::memcpy(buf, &bits, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    return count == sizeof(buf);
+        const size_t count = Write(writer, buf, sizeof(buf));
+        return count == sizeof(buf);
+    }
+    catch (std::runtime_error &)
+    {
+        return false;
+    }
 }
 
 //******************************************************************************
@@ -126,18 +156,25 @@ inline bool TryWriteFloat32BE(const WriterRef &writer, float32_t value)
  */
 inline bool TryReadFloat64LE(float64_t &out, const ReaderRef &reader)
 {
-    uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
+    try
+    {
+        uint8_t buf[sizeof(uint64_t)] = {0};
+        const size_t count = Read(buf, reader);
+        if (count != sizeof(buf))
+        {
+            return false;
+        }
+
+        uint64_t bits = 0;
+        std::memcpy(&bits, buf, sizeof(bits));
+        bits = LEXIO_IF_BE_BSWAP64(bits);
+        std::memcpy(&out, &bits, sizeof(out));
+        return true;
+    }
+    catch (std::runtime_error &)
     {
         return false;
     }
-
-    uint64_t bits = 0;
-    std::memcpy(&bits, buf, sizeof(bits));
-    bits = LEXIO_IF_BE_BSWAP64(bits);
-    std::memcpy(&out, &bits, sizeof(out));
-    return true;
 }
 
 /**
@@ -149,18 +186,25 @@ inline bool TryReadFloat64LE(float64_t &out, const ReaderRef &reader)
  */
 inline bool TryReadFloat64BE(float64_t &out, const ReaderRef &reader)
 {
-    uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
+    try
+    {
+        uint8_t buf[sizeof(uint64_t)] = {0};
+        const size_t count = Read(buf, reader);
+        if (count != sizeof(buf))
+        {
+            return false;
+        }
+
+        uint64_t bits = 0;
+        std::memcpy(&bits, buf, sizeof(bits));
+        bits = LEXIO_IF_LE_BSWAP64(bits);
+        std::memcpy(&out, &bits, sizeof(out));
+        return true;
+    }
+    catch (std::runtime_error &)
     {
         return false;
     }
-
-    uint64_t bits = 0;
-    std::memcpy(&bits, buf, sizeof(bits));
-    bits = LEXIO_IF_LE_BSWAP64(bits);
-    std::memcpy(&out, &bits, sizeof(out));
-    return true;
 }
 
 /**
@@ -172,15 +216,22 @@ inline bool TryReadFloat64BE(float64_t &out, const ReaderRef &reader)
  */
 inline bool TryWriteFloat64LE(const WriterRef &writer, float64_t value)
 {
-    uint64_t bits = 0;
-    std::memcpy(&bits, &value, sizeof(bits));
+    try
+    {
+        uint64_t bits = 0;
+        std::memcpy(&bits, &value, sizeof(bits));
 
-    uint8_t buf[sizeof(bits)] = {0};
-    bits = LEXIO_IF_BE_BSWAP64(bits);
-    std::memcpy(buf, &bits, sizeof(buf));
+        uint8_t buf[sizeof(bits)] = {0};
+        bits = LEXIO_IF_BE_BSWAP64(bits);
+        std::memcpy(buf, &bits, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    return count == sizeof(buf);
+        const size_t count = Write(writer, buf, sizeof(buf));
+        return count == sizeof(buf);
+    }
+    catch (std::runtime_error &)
+    {
+        return false;
+    }
 }
 
 /**
@@ -192,15 +243,22 @@ inline bool TryWriteFloat64LE(const WriterRef &writer, float64_t value)
  */
 inline bool TryWriteFloat64BE(const WriterRef &writer, float64_t value)
 {
-    uint64_t bits = 0;
-    std::memcpy(&bits, &value, sizeof(bits));
+    try
+    {
+        uint64_t bits = 0;
+        std::memcpy(&bits, &value, sizeof(bits));
 
-    uint8_t buf[sizeof(bits)] = {0};
-    bits = LEXIO_IF_LE_BSWAP64(bits);
-    std::memcpy(buf, &bits, sizeof(buf));
+        uint8_t buf[sizeof(bits)] = {0};
+        bits = LEXIO_IF_LE_BSWAP64(bits);
+        std::memcpy(buf, &bits, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    return count == sizeof(buf);
+        const size_t count = Write(writer, buf, sizeof(buf));
+        return count == sizeof(buf);
+    }
+    catch (std::runtime_error &)
+    {
+        return false;
+    }
 }
 
 } // namespace LexIO
