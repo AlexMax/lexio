@@ -18,15 +18,113 @@
  * @file core.hpp
  * @brief Core interfaces and functions needed by LexIO streams.
  *
- * LexIO streams are not derived from abstract classes, but by classes that
- * adhere to traits that are enforced by the type traits in this file.  There
- * are four basic types of stream.
+ * LexIO streams are not derived from abstract classes - any class that defines
+ * specific methods can act as a LexIO stream.  There are four basic types of
+ * stream.
  *
- * - Reader: These classes can read from a data source.
- * - BufferedReader: These classes read from a data source and keep said
- *                   data in an internal buffer.
- * - Writer: These classes can write to a data source.
- * - Seekable: These classes can seek to various points in the stream.
+ * ### Reader
+ *
+ * Reader classes can read from a data source.  Define the following method
+ * to make a class a Reader:
+ *
+ *     size_t LexRead(uint8_t *outDest, size_t count)
+ *
+ * `LexRead` attempts a single read operation of `count` bytes and writes them
+ * into the data buffer pointed to by `outDest`.
+ *
+ * The return value is the number of bytes that were actually read from the
+ * stream, which can be less than `count` bytes.  A return value of 0 either
+ * means that the caller requested 0 bytes or that the stream has hit EOF.
+ *
+ * If the `LexRead` method encounters an error tantamount to `EINTR` or other
+ * error that can be immediately retried, `LexRead` is expected to retry the
+ * operation.  Otherwise, throw `std::runtime_error` or a subclass of it.
+ *
+ * If the class is also a Seekable, the read operation is done from the current
+ * cursor position, and advances the cursor by the number of actual bytes read.
+ *
+ * ### BufferedReader
+ *
+ * BufferedReader classes are special Readers that keep an internal buffer.  This
+ * is useful if you want to read data into a temporary buffer to be examined
+ * before consuming it.  You can use `LexIO::GenericBufReader` to provide this
+ * functionality to any Reader.  If you want to implement your own buffering,
+ * define these methods in your class:
+ *
+ *     size_t LexRead(uint8_t *outDest, size_t count)
+ *     BufferView LexFillBuffer(size_t count)
+ *     void LexConsumeBuffer(size_t count)
+ *
+ * `LexFillBuffer` attempts to fill the internal buffer to at least `count`
+ * bytes.  If there are fewer bytes in the buffer than the passed `count`, the
+ * method must read and fill the buffer to hold at least `count` bytes.  If
+ * there are more bytes in the buffer than the passed `count`, then no additional
+ * data is read.
+ *
+ * The return value of `LexFillBuffer` is a pointer/length pair that offers a
+ * view of the internal buffer after the fill operation.  A `count` of 0 is
+ * expected to offer a view of the internal buffer without changing it.
+ *
+ * `LexConsumeBuffer` removes `count` bytes from the front of the internal
+ * buffer, shrinking it.  A `count` of more than the current size of the internal
+ * buffer is expected to throw a `std::runtime_error` or a subclass of it.
+ *
+ * `LexRead` must also be implemented.  The method has similar constraints to
+ * a Reader, but is expected to operate in terms of a call to `LexFillBuffer`,
+ * then `LexConsumeBuffer`.
+ *
+ * ### Writer
+ *
+ * Writer classes can write to a data source.  Define the following methods
+ * to make a class a Writer:
+ *
+ *     size_t LexWrite(const uint8_t *src, size_t count)
+ *     void LexFlush()
+ *
+ * `LexWrite` attempts a single write operation from the buffer pointed to by
+ * `src` of size `count` in bytes.
+ *
+ * The return value of `LexWrite` is the number of bytes that were actually
+ * written to the stream, which can be less than `count` bytes.  A return value
+ * of 0 either means that the caller attempted to write 0 bytes or that the
+ * stream has hit some sort of EOF-like condition.
+ *
+ * If the `LexWrite` method encounters an error tantamount to `EINTR` or other
+ * error that can be immediately retried, `LexWrite` is expected to retry the
+ * operation.  Otherwise, throw `std::runtime_error` or a subclass of it.
+ *
+ * `LexFlush` attempts a flush operation on the underlying stream.  If the
+ * underlying stream has no such operation, it can be a no-op.
+ *
+ * If the class is also a BufferedReader, `LexWrite` should empty the buffer.
+ *
+ * If the class is also a Seekable, it is implementation-dependent how the write
+ * operation behaves.  Typical implementations write to the current cursor
+ * position, overwriting any existing data.  However, a behavior of always
+ * appending to the end of the stream can be done if behavior similar to
+ * `fopen`'s "append" mode is preferred.
+ *
+ * ### Seekable
+ *
+ * Seekable classes have an internal cursor, which determines where in the stream
+ * data will be read from, and possibly written to.  Define the following methods
+ * to make a class a Seekable:
+ *
+ *     size_t LexSeek(const SeekPos &pos)
+ *
+ * `LexSeek` attempts a single seek operation with the parameters given by `pos`.
+ * `LexIO::SeekPos` contains a byte position and a "whence" that dictates if
+ * the offset represents a seek from the start of the stream, the current cursor
+ * position, or the end of the stream.
+ *
+ * The return value is the absolute cursor position _after_ the seek operation
+ * was successful.
+ *
+ * If the `LexSeek` method encounters an error tantamount to `EINTR` or other
+ * error that can be immediately retried, `LexSeek` is expected to retry the
+ * operation.  Otherwise, throw `std::runtime_error` or a subclass of it.
+ *
+ * If the class is also a BufferedReader, `LexSeek` should empty the buffer.
  */
 
 #pragma once
