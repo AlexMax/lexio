@@ -1153,6 +1153,56 @@ LEXIO_FORCEINLINE size_t Write(const WriterRef &writer, const BYTE (&array)[N])
 }
 
 /**
+ * @brief Write a buffer of data at the current offset.  Calls LexIO::RawWrite
+ *        as many times as necessary to write the entire buffer, throwing
+ *        an exception if not enough bytes could be written.
+ *
+ * @param writer Writer to operate on.
+ * @param src Pointer to starting byte of input buffer.
+ * @param count Size of input buffer in bytes.
+ * @return Actual number of bytes written, or 0 if EOF-like condition was
+ *         encountered.
+ * @throws std::runtime_error if stream encountered an EOF-like condition before
+ *         enough bytes could be written, or if an error with the write
+ *         operation was encountered.
+ */
+template <typename BYTE, typename = std::enable_if_t<sizeof(BYTE) == 1>>
+inline void WriteExact(const WriterRef &writer, const BYTE *src, size_t count)
+{
+    const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(src);
+    size_t offset = 0, remain = count;
+    while (offset != count)
+    {
+        const size_t written = writer.LexWrite(srcByte + offset, remain);
+        if (written == 0)
+        {
+            throw std::runtime_error("could not write exact number of bytes");
+        }
+
+        offset += written;
+        remain -= written;
+    }
+}
+
+/**
+ * @brief Write a buffer of data at the current offset.  Calls LexIO::RawWrite
+ *        as many times as necessary to write the entire buffer, throwing
+ *        an exception if not enough bytes could be written.
+ *
+ * @param writer Writer to operate on.
+ * @param array Input buffer array.
+ * @return Actual number of bytes written, or 0 if EOF-like condition was
+ *         encountered.
+ * @throws std::runtime_error if an error with the write operation was
+ *         encountered.  A partial write is _not_ considered an error.
+ */
+template <typename BYTE, size_t N, typename = std::enable_if_t<sizeof(BYTE) == 1>>
+LEXIO_FORCEINLINE void WriteExact(const WriterRef &writer, const BYTE (&array)[N])
+{
+    return WriteExact(writer, array, N);
+}
+
+/**
  * @brief Return the current offset position.
  *
  * @param seekable Seekable to operate on.

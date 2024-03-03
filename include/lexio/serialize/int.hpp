@@ -54,11 +54,7 @@ inline uint8_t ReadU8(const ReaderRef &reader)
 inline void WriteU8(const WriterRef &writer, uint8_t value)
 {
     const uint8_t buf[sizeof(uint8_t)] = {value};
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -87,11 +83,7 @@ inline int8_t Read8(const ReaderRef &reader)
 inline void Write8(const WriterRef &writer, int8_t value)
 {
     const uint8_t buf[sizeof(uint8_t)] = {uint8_t(value)};
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -145,11 +137,7 @@ inline void WriteU16LE(const WriterRef &writer, uint16_t value)
     value = LEXIO_IF_BE_BSWAP16(value);
     std::memcpy(buf, &value, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -165,11 +153,7 @@ inline void WriteU16BE(const WriterRef &writer, uint16_t value)
     value = LEXIO_IF_LE_BSWAP16(value);
     std::memcpy(buf, &value, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -232,11 +216,7 @@ inline void Write16LE(const WriterRef &writer, int16_t value)
     uint8_t buf[sizeof(uint16_t)] = {0};
     std::memcpy(buf, &uvalue, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -255,11 +235,7 @@ inline void Write16BE(const WriterRef &writer, int16_t value)
     uint8_t buf[sizeof(uint16_t)] = {0};
     std::memcpy(buf, &uvalue, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -313,11 +289,7 @@ inline void WriteU32LE(const WriterRef &writer, uint32_t value)
     value = LEXIO_IF_BE_BSWAP32(value);
     std::memcpy(buf, &value, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -333,11 +305,7 @@ inline void WriteU32BE(const WriterRef &writer, uint32_t value)
     value = LEXIO_IF_LE_BSWAP32(value);
     std::memcpy(buf, &value, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -400,11 +368,7 @@ inline void Write32LE(const WriterRef &writer, int32_t value)
     uint8_t buf[sizeof(uint32_t)] = {0};
     std::memcpy(buf, &uvalue, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -423,11 +387,7 @@ inline void Write32BE(const WriterRef &writer, int32_t value)
     uint8_t buf[sizeof(uint32_t)] = {0};
     std::memcpy(buf, &uvalue, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -481,11 +441,7 @@ inline void WriteU64LE(const WriterRef &writer, uint64_t value)
     value = LEXIO_IF_BE_BSWAP64(value);
     std::memcpy(buf, &value, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -501,11 +457,7 @@ inline void WriteU64BE(const WriterRef &writer, uint64_t value)
     value = LEXIO_IF_LE_BSWAP64(value);
     std::memcpy(buf, &value, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -568,11 +520,7 @@ inline void Write64LE(const WriterRef &writer, int64_t value)
     uint8_t buf[sizeof(uint64_t)] = {0};
     std::memcpy(buf, &uvalue, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -591,11 +539,7 @@ inline void Write64BE(const WriterRef &writer, int64_t value)
     uint8_t buf[sizeof(uint64_t)] = {0};
     std::memcpy(buf, &uvalue, sizeof(buf));
 
-    const size_t count = Write(writer, buf, sizeof(buf));
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not write");
-    }
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 } // namespace LexIO
