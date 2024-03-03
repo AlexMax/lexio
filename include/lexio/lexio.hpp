@@ -28,3 +28,4 @@
 #include "./lib.hpp"
 #include "./serialize.hpp"
 #include "./stream.hpp"
+#include "./try.hpp"

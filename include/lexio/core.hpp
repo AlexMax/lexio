@@ -162,6 +162,12 @@
 #error "LexIO requires support for at least C++14"
 #endif
 
+#if (LEXIO_MSC_VER > 0)
+#define LEXIO_FORCEINLINE __forceinline
+#else
+#define LEXIO_FORCEINLINE inline __attribute__((always_inline))
+#endif
+
 // Inline variables were added in GCC 7, Clang 3.9, VS 2017 15.5
 
 #if !defined(LEXIO_HAS_INLINE_VARS)
@@ -1024,23 +1030,9 @@ inline size_t Read(BYTE *outDest, const ReaderRef &reader, size_t count)
  *         encountered.  EOF is _not_ considered an error.
  */
 template <typename BYTE, size_t N, typename = std::enable_if_t<!Detail::IsConstV<BYTE> && sizeof(BYTE) == 1>>
-inline size_t Read(BYTE (&outArray)[N], const ReaderRef &reader)
+LEXIO_FORCEINLINE size_t Read(BYTE (&outArray)[N], const ReaderRef &reader)
 {
-    uint8_t *dest = reinterpret_cast<uint8_t *>(&outArray[0]);
-    size_t offset = 0, remain = N;
-    while (offset != N)
-    {
-        const size_t read = reader.LexRead(dest + offset, remain);
-        if (read == 0)
-        {
-            return offset;
-        }
-
-        offset += read;
-        remain -= read;
-    }
-
-    return N;
+    return Read(outArray, reader, N);
 }
 
 /**
@@ -1100,23 +1092,9 @@ inline size_t Write(const WriterRef &writer, const BYTE *src, size_t count)
  *         encountered.  A partial write is _not_ considered an error.
  */
 template <typename BYTE, size_t N, typename = std::enable_if_t<sizeof(BYTE) == 1>>
-inline size_t Write(const WriterRef &writer, const BYTE (&array)[N])
+LEXIO_FORCEINLINE size_t Write(const WriterRef &writer, const BYTE (&array)[N])
 {
-    const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(&array[0]);
-    size_t offset = 0, remain = N;
-    while (offset != N)
-    {
-        const size_t written = writer.LexWrite(srcByte + offset, remain);
-        if (written == 0)
-        {
-            return offset;
-        }
-
-        offset += written;
-        remain -= written;
-    }
-
-    return N;
+    return Write(writer, array, N);
 }
 
 /**

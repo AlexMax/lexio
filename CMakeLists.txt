@@ -22,6 +22,7 @@ set(LEXIO_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/lib.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/stream.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/try.hpp"
 
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/float.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/lexio/serialize/int.hpp"
