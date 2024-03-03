@@ -63,7 +63,8 @@
  *
  * The return value of `LexFillBuffer` is a pointer/length pair that offers a
  * view of the internal buffer after the fill operation.  A `count` of 0 is
- * expected to offer a view of the internal buffer without changing it.
+ * expected to offer a view of the internal buffer without changing it, and
+ * shall not throw an exception.
  *
  * `LexConsumeBuffer` removes `count` bytes from the front of the internal
  * buffer, shrinking it.  A `count` of more than the current size of the internal
@@ -949,6 +950,8 @@ inline size_t RawWrite(const WriterRef &writer, const uint8_t *src, size_t count
  * @brief Flushes data to underlying storage.  Can be a no-op.
  *
  * @param writer Writer to operate on.
+ * @throws std::runtime_error if an error with the flush operation was
+ *         encountered.
  */
 inline void Flush(const WriterRef &writer)
 {
@@ -1037,11 +1040,13 @@ LEXIO_FORCEINLINE size_t Read(BYTE (&outArray)[N], const ReaderRef &reader)
 
 /**
  * @brief Get the current contents of the buffer.
+ * 
+ * @details LexIO::FillBuffer(0) should NEVER throw an exception.
  *
  * @param bufReader BufferedReader to operate on.
- * @return Span view of the internal buffer.
+ * @return View of the internal buffer.
  */
-inline BufferView GetBuffer(const BufferedReaderRef &bufReader)
+inline BufferView GetBuffer(const BufferedReaderRef &bufReader) noexcept
 {
     return bufReader.LexFillBuffer(0);
 }
