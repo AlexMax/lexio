@@ -26,7 +26,7 @@ namespace LexIO
 namespace Detail
 {
 
-std::exception_ptr &LastError() noexcept
+inline std::exception_ptr &LastError() noexcept
 {
     static thread_local std::exception_ptr ex;
     return ex;
@@ -299,6 +299,66 @@ template <typename BYTE, size_t N, typename = std::enable_if_t<!Detail::IsConstV
 LEXIO_FORCEINLINE bool TryRead(size_t &outActual, BYTE (&outArray)[N], const ReaderRef &reader) noexcept
 {
     return TryRead(outActual, outArray, reader, N);
+}
+
+/**
+ * @brief Read data from the current offset, inserting it into the passed
+ *        buffer.  Calls LexIO::RawRead as many times as necessary to fill
+ *        the output buffer, returning failure if not enough bytes could
+ *        be read.
+ *
+ * @param outDest Pointer to starting byte of output buffer.
+ * @param reader Reader to operate on.
+ * @param count Number of bytes to read.
+ * @return True if successful, false if stream encountered an EOF-like condition
+ *         before enough bytes could be read, or if an error with the read
+ *         operation was encountered.  To get specific error, call
+ *         LexIO::ThrowLastError.
+ */
+template <typename BYTE, typename = std::enable_if_t<!Detail::IsConstV<BYTE> && sizeof(BYTE) == 1>>
+inline bool TryReadExact(BYTE *outDest, const ReaderRef &reader, size_t count) noexcept
+{
+    try
+    {
+        uint8_t *dest = reinterpret_cast<uint8_t *>(outDest);
+        size_t offset = 0, remain = count;
+        while (offset != count)
+        {
+            const size_t read = reader.LexRead(dest + offset, remain);
+            if (read == 0)
+            {
+                throw std::runtime_error("could not read exact number of bytes");
+            }
+
+            offset += read;
+            remain -= read;
+        }
+        return true;
+    }
+    catch (...)
+    {
+        SetLastError(std::current_exception());
+        return false;
+    }
+}
+
+/**
+ * @brief Read data from the current offset, inserting it into the passed
+ *        buffer.  Calls LexIO::RawRead as many times as necessary to fill
+ *        the output buffer, returning failure if not enough bytes could
+ *        be read.
+ *
+ * @param outArray Output buffer array.
+ * @param reader Reader to operate on.
+ * @return True if successful, false if stream encountered an EOF-like condition
+ *         before enough bytes could be read, or if an error with the read
+ *         operation was encountered.  To get specific error, call
+ *         LexIO::ThrowLastError.
+ */
+template <typename BYTE, size_t N, typename = std::enable_if_t<!Detail::IsConstV<BYTE> && sizeof(BYTE) == 1>>
+LEXIO_FORCEINLINE bool TryReadExact(BYTE (&outArray)[N], const ReaderRef &reader) noexcept
+{
+    return TryReadExact(outArray, reader, N);
 }
 
 /**

@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include "../core.hpp"
+#include "../try.hpp"
 
 #include <cstring>
-#include <stdexcept>
 
 namespace LexIO
 {
@@ -38,23 +37,15 @@ namespace LexIO
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-inline bool TryReadU8(uint8_t &out, const ReaderRef &reader)
+inline bool TryReadU8(uint8_t &out, const ReaderRef &reader) noexcept
 {
-    try
-    {
-        uint8_t buf[sizeof(uint8_t)] = {0};
-        const size_t count = Read(buf, reader);
-        if (count != sizeof(buf))
-        {
-            return false;
-        }
-        out = buf[0];
-        return true;
-    }
-    catch (std::runtime_error &)
+    uint8_t buf[sizeof(uint8_t)] = {0};
+    if (!TryReadExact(buf, reader))
     {
         return false;
     }
+    out = buf[0];
+    return true;
 }
 
 /**
@@ -87,23 +78,15 @@ inline bool TryWriteU8(const WriterRef &writer, uint8_t value)
  * @param reader Reader to read from.
  * @return True if the read was successful.
  */
-inline bool TryRead8(int8_t &out, const ReaderRef &reader)
+inline bool TryRead8(int8_t &out, const ReaderRef &reader) noexcept
 {
-    try
-    {
-        uint8_t buf[sizeof(uint8_t)] = {0};
-        const size_t count = Read(buf, reader);
-        if (count != sizeof(buf))
-        {
-            return false;
-        }
-        out = int8_t(buf[0]);
-        return true;
-    }
-    catch (std::runtime_error &)
+    uint8_t buf[sizeof(uint8_t)] = {0};
+    if (!TryReadExact(buf, reader))
     {
         return false;
     }
+    out = int8_t(buf[0]);
+    return true;
 }
 
 /**

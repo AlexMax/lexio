@@ -23,7 +23,6 @@
 #pragma once
 
 #include "./tryvarint.hpp"
-#include <stdexcept>
 
 namespace LexIO
 {

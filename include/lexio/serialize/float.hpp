@@ -23,7 +23,6 @@
 #pragma once
 
 #include "./tryfloat.hpp"
-#include <stdexcept>
 
 namespace LexIO
 {

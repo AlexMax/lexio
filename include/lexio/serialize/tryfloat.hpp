@@ -23,8 +23,6 @@
 
 #include "./tryint.hpp"
 
-#include <stdexcept>
-
 namespace LexIO
 {
 

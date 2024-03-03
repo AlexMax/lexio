@@ -23,8 +23,6 @@
 
 #include "../core.hpp"
 
-#include <stdexcept>
-
 namespace LexIO
 {
 

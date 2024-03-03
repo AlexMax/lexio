@@ -24,7 +24,6 @@
 #include "./core.hpp"
 
 #include <memory>
-#include <stdexcept>
 
 namespace LexIO
 {

@@ -24,7 +24,6 @@
 #include "../core.hpp"
 
 #include "./tryint.hpp"
-#include <stdexcept>
 
 namespace LexIO
 {
@@ -41,11 +40,7 @@ namespace LexIO
 inline uint8_t ReadU8(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint8_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
     return buf[0];
 }
 
