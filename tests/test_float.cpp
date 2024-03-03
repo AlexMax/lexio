@@ -26,7 +26,7 @@ TEST(Float, TryReadFloat32LE_ReadFloat32LE)
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb});
 
     int exp = 0;
-    LexIO::float32_t test, x;
+    LexIO::float32_t test = 0, x = 0;
     EXPECT_EQ(LexIO::TryReadFloat32LE(test, buffer), true);
     x = std::frexp(test, &exp);
     EXPECT_EQ(x, -0.666405201f);
@@ -79,7 +79,7 @@ TEST(Float, TryReadFloat32BE_ReadFloat32BE)
     LexIO::VectorStream buffer({0xbb, 0xaa, 0x99, 0x88});
 
     int exp = 0;
-    LexIO::float32_t test, x;
+    LexIO::float32_t test = 0, x = 0;
     EXPECT_EQ(LexIO::TryReadFloat32BE(test, buffer), true);
     x = std::frexp(test, &exp);
     EXPECT_EQ(x, -0.666405201f);
@@ -132,7 +132,7 @@ TEST(Float, TryReadFloat64LE_ReadFloat64LE)
     LexIO::VectorStream buffer({0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff});
 
     int exp = 0;
-    LexIO::float64_t test, x;
+    LexIO::float64_t test = 0, x = 0;
     EXPECT_EQ(LexIO::TryReadFloat64LE(test, buffer), true);
     x = std::frexp(test, &exp);
     EXPECT_EQ(x, -0.96457516339869276);
@@ -193,7 +193,7 @@ TEST(Float, TryReadFloat64BE_ReadFloat64BE)
     LexIO::VectorStream buffer({0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88});
 
     int exp = 0;
-    LexIO::float64_t test, x;
+    LexIO::float64_t test = 0, x = 0;
     EXPECT_EQ(LexIO::TryReadFloat64BE(test, buffer), true);
     x = std::frexp(test, &exp);
     EXPECT_EQ(x, -0.96457516339869276);
