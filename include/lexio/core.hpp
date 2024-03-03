@@ -1160,8 +1160,6 @@ LEXIO_FORCEINLINE size_t Write(const WriterRef &writer, const BYTE (&array)[N])
  * @param writer Writer to operate on.
  * @param src Pointer to starting byte of input buffer.
  * @param count Size of input buffer in bytes.
- * @return Actual number of bytes written, or 0 if EOF-like condition was
- *         encountered.
  * @throws std::runtime_error if stream encountered an EOF-like condition before
  *         enough bytes could be written, or if an error with the write
  *         operation was encountered.
@@ -1191,10 +1189,9 @@ inline void WriteExact(const WriterRef &writer, const BYTE *src, size_t count)
  *
  * @param writer Writer to operate on.
  * @param array Input buffer array.
- * @return Actual number of bytes written, or 0 if EOF-like condition was
- *         encountered.
- * @throws std::runtime_error if an error with the write operation was
- *         encountered.  A partial write is _not_ considered an error.
+ * @throws std::runtime_error if stream encountered an EOF-like condition before
+ *         enough bytes could be written, or if an error with the write
+ *         operation was encountered.
  */
 template <typename BYTE, size_t N, typename = std::enable_if_t<sizeof(BYTE) == 1>>
 LEXIO_FORCEINLINE void WriteExact(const WriterRef &writer, const BYTE (&array)[N])

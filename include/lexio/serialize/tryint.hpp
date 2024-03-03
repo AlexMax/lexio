@@ -57,16 +57,8 @@ inline bool TryReadU8(uint8_t &out, const ReaderRef &reader) noexcept
  */
 inline bool TryWriteU8(const WriterRef &writer, uint8_t value) noexcept
 {
-    try
-    {
-        const uint8_t buf[sizeof(uint8_t)] = {value};
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    const uint8_t buf[sizeof(uint8_t)] = {value};
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -98,16 +90,8 @@ inline bool TryRead8(int8_t &out, const ReaderRef &reader) noexcept
  */
 inline bool TryWrite8(const WriterRef &writer, int8_t value) noexcept
 {
-    try
-    {
-        const uint8_t buf[sizeof(uint8_t)] = {uint8_t(value)};
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    const uint8_t buf[sizeof(uint8_t)] = {uint8_t(value)};
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -161,19 +145,11 @@ inline bool TryReadU16BE(uint16_t &out, const ReaderRef &reader) noexcept
  */
 inline bool TryWriteU16LE(const WriterRef &writer, uint16_t value) noexcept
 {
-    try
-    {
-        uint8_t buf[sizeof(uint16_t)] = {0};
-        value = LEXIO_IF_BE_BSWAP16(value);
-        std::memcpy(buf, &value, sizeof(buf));
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    value = LEXIO_IF_BE_BSWAP16(value);
+    std::memcpy(buf, &value, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -185,19 +161,11 @@ inline bool TryWriteU16LE(const WriterRef &writer, uint16_t value) noexcept
  */
 inline bool TryWriteU16BE(const WriterRef &writer, uint16_t value) noexcept
 {
-    try
-    {
-        uint8_t buf[sizeof(uint16_t)] = {0};
-        value = LEXIO_IF_LE_BSWAP16(value);
-        std::memcpy(buf, &value, sizeof(buf));
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    value = LEXIO_IF_LE_BSWAP16(value);
+    std::memcpy(buf, &value, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -255,22 +223,14 @@ inline bool TryRead16BE(int16_t &out, const ReaderRef &reader) noexcept
  */
 inline bool TryWrite16LE(const WriterRef &writer, int16_t value) noexcept
 {
-    try
-    {
-        uint16_t uvalue = 0;
-        std::memcpy(&uvalue, &value, sizeof(uvalue));
-        uvalue = LEXIO_IF_BE_BSWAP16(uvalue);
+    uint16_t uvalue = 0;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_BE_BSWAP16(uvalue);
 
-        uint8_t buf[sizeof(uint16_t)] = {0};
-        std::memcpy(buf, &uvalue, sizeof(buf));
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -282,22 +242,14 @@ inline bool TryWrite16LE(const WriterRef &writer, int16_t value) noexcept
  */
 inline bool TryWrite16BE(const WriterRef &writer, int16_t value) noexcept
 {
-    try
-    {
-        uint16_t uvalue = 0;
-        std::memcpy(&uvalue, &value, sizeof(uvalue));
-        uvalue = LEXIO_IF_LE_BSWAP16(uvalue);
+    uint16_t uvalue = 0;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_LE_BSWAP16(uvalue);
 
-        uint8_t buf[sizeof(uint16_t)] = {0};
-        std::memcpy(buf, &uvalue, sizeof(buf));
+    uint8_t buf[sizeof(uint16_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -351,19 +303,11 @@ inline bool TryReadU32BE(uint32_t &out, const ReaderRef &reader) noexcept
  */
 inline bool TryWriteU32LE(const WriterRef &writer, uint32_t value) noexcept
 {
-    try
-    {
-        uint8_t buf[sizeof(uint32_t)] = {0};
-        value = LEXIO_IF_BE_BSWAP32(value);
-        std::memcpy(buf, &value, sizeof(buf));
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    value = LEXIO_IF_BE_BSWAP32(value);
+    std::memcpy(buf, &value, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -375,19 +319,11 @@ inline bool TryWriteU32LE(const WriterRef &writer, uint32_t value) noexcept
  */
 inline bool TryWriteU32BE(const WriterRef &writer, uint32_t value) noexcept
 {
-    try
-    {
-        uint8_t buf[sizeof(uint32_t)] = {0};
-        value = LEXIO_IF_LE_BSWAP32(value);
-        std::memcpy(buf, &value, sizeof(buf));
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    value = LEXIO_IF_LE_BSWAP32(value);
+    std::memcpy(buf, &value, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -445,22 +381,14 @@ inline bool TryRead32BE(int32_t &out, const ReaderRef &reader) noexcept
  */
 inline bool TryWrite32LE(const WriterRef &writer, int32_t value) noexcept
 {
-    try
-    {
-        uint32_t uvalue = 0;
-        std::memcpy(&uvalue, &value, sizeof(uvalue));
-        uvalue = LEXIO_IF_BE_BSWAP32(uvalue);
+    uint32_t uvalue = 0;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_BE_BSWAP32(uvalue);
 
-        uint8_t buf[sizeof(uint32_t)] = {0};
-        std::memcpy(buf, &uvalue, sizeof(buf));
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -472,22 +400,14 @@ inline bool TryWrite32LE(const WriterRef &writer, int32_t value) noexcept
  */
 inline bool TryWrite32BE(const WriterRef &writer, int32_t value) noexcept
 {
-    try
-    {
-        uint32_t uvalue = 0;
-        std::memcpy(&uvalue, &value, sizeof(uvalue));
-        uvalue = LEXIO_IF_LE_BSWAP32(uvalue);
+    uint32_t uvalue = 0;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_LE_BSWAP32(uvalue);
 
-        uint8_t buf[sizeof(uint32_t)] = {0};
-        std::memcpy(buf, &uvalue, sizeof(buf));
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -541,19 +461,11 @@ inline bool TryReadU64BE(uint64_t &out, const ReaderRef &reader) noexcept
  */
 inline bool TryWriteU64LE(const WriterRef &writer, uint64_t value) noexcept
 {
-    try
-    {
-        uint8_t buf[sizeof(uint64_t)] = {0};
-        value = LEXIO_IF_BE_BSWAP64(value);
-        std::memcpy(buf, &value, sizeof(buf));
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    value = LEXIO_IF_BE_BSWAP64(value);
+    std::memcpy(buf, &value, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -565,19 +477,11 @@ inline bool TryWriteU64LE(const WriterRef &writer, uint64_t value) noexcept
  */
 inline bool TryWriteU64BE(const WriterRef &writer, uint64_t value) noexcept
 {
-    try
-    {
-        uint8_t buf[sizeof(uint64_t)] = {0};
-        value = LEXIO_IF_LE_BSWAP64(value);
-        std::memcpy(buf, &value, sizeof(buf));
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    value = LEXIO_IF_LE_BSWAP64(value);
+    std::memcpy(buf, &value, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -635,22 +539,14 @@ inline bool TryRead64BE(int64_t &out, const ReaderRef &reader) noexcept
  */
 inline bool TryWrite64LE(const WriterRef &writer, int64_t value) noexcept
 {
-    try
-    {
-        uint64_t uvalue = 0;
-        std::memcpy(&uvalue, &value, sizeof(uvalue));
-        uvalue = LEXIO_IF_BE_BSWAP64(uvalue);
+    uint64_t uvalue = 0;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_BE_BSWAP64(uvalue);
 
-        uint8_t buf[sizeof(uint64_t)] = {0};
-        std::memcpy(buf, &uvalue, sizeof(buf));
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -662,22 +558,14 @@ inline bool TryWrite64LE(const WriterRef &writer, int64_t value) noexcept
  */
 inline bool TryWrite64BE(const WriterRef &writer, int64_t value) noexcept
 {
-    try
-    {
-        uint64_t uvalue = 0;
-        std::memcpy(&uvalue, &value, sizeof(uvalue));
-        uvalue = LEXIO_IF_LE_BSWAP64(uvalue);
+    uint64_t uvalue = 0;
+    std::memcpy(&uvalue, &value, sizeof(uvalue));
+    uvalue = LEXIO_IF_LE_BSWAP64(uvalue);
 
-        uint8_t buf[sizeof(uint64_t)] = {0};
-        std::memcpy(buf, &uvalue, sizeof(buf));
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    std::memcpy(buf, &uvalue, sizeof(buf));
 
-        const size_t count = Write(writer, buf, sizeof(buf));
-        return count == sizeof(buf);
-    }
-    catch (std::runtime_error &)
-    {
-        return false;
-    }
+    return TryWriteExact(writer, buf, sizeof(buf));
 }
 
 } // namespace LexIO

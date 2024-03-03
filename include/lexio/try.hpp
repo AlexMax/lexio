@@ -427,6 +427,64 @@ LEXIO_FORCEINLINE bool TryWrite(size_t &outActual, const WriterRef &writer, cons
 }
 
 /**
+ * @brief Write a buffer of data at the current offset.  Calls LexIO::RawWrite
+ *        as many times as necessary to write the entire buffer, returning
+ *        failure if not enough bytes could be written.
+ *
+ * @param writer Writer to operate on.
+ * @param src Pointer to starting byte of input buffer.
+ * @param count Size of input buffer in bytes.
+ * @return True if successful, false if stream encountered an EOF-like condition
+ *         before enough bytes could be written, or if an error with the write
+ *         operation was encountered.  To get specific error, call
+ *         LexIO::ThrowLastError.
+ */
+template <typename BYTE, typename = std::enable_if_t<sizeof(BYTE) == 1>>
+inline bool TryWriteExact(const WriterRef &writer, const BYTE *src, size_t count)
+{
+    try
+    {
+        const uint8_t *srcByte = reinterpret_cast<const uint8_t *>(src);
+        size_t offset = 0, remain = count;
+        while (offset != count)
+        {
+            const size_t written = writer.LexWrite(srcByte + offset, remain);
+            if (written == 0)
+            {
+                throw std::runtime_error("could not write exact number of bytes");
+            }
+
+            offset += written;
+            remain -= written;
+        }
+        return true;
+    }
+    catch (...)
+    {
+        SetLastError(std::current_exception());
+        return false;
+    }
+}
+
+/**
+ * @brief Write a buffer of data at the current offset.  Calls LexIO::RawWrite
+ *        as many times as necessary to write the entire buffer, returning
+ *        failure if not enough bytes could be written.
+ *
+ * @param writer Writer to operate on.
+ * @param array Input buffer array.
+ * @return True if successful, false if stream encountered an EOF-like condition
+ *         before enough bytes could be written, or if an error with the write
+ *         operation was encountered.  To get specific error, call
+ *         LexIO::ThrowLastError.
+ */
+template <typename BYTE, size_t N, typename = std::enable_if_t<sizeof(BYTE) == 1>>
+LEXIO_FORCEINLINE bool TryWriteExact(const WriterRef &writer, const BYTE (&array)[N])
+{
+    return WriteExact(writer, array, N);
+}
+
+/**
  * @brief Return the current offset position.
  *
  * @param outOffset Absolute position in stream.
