@@ -16,6 +16,15 @@
 
 #pragma once
 
+/**
+ * @file core.hpp
+ * @brief Core interfaces and functions implemented without exceptions.
+ * 
+ * Since LexIO traits use exceptions, we store the exception in a thread-local
+ * global.  Ideally, we would use <expected>, but supporting C++14 means no
+ * std::expected or even std::variant without a third-party implementation.
+ */
+
 #include "./core.hpp"
 
 #include <exception>

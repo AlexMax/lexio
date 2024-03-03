@@ -36,12 +36,15 @@ namespace LexIO
  */
 inline float32_t ReadFloat32LE(const ReaderRef &reader)
 {
-    float32_t rvo;
-    if (!TryReadFloat32LE(rvo, reader))
-    {
-        throw std::runtime_error("could not read");
-    }
-    return rvo;
+    float32_t out = 0;
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    ReadExact(buf, reader);
+
+    uint32_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_BE_BSWAP32(bits);
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -53,12 +56,15 @@ inline float32_t ReadFloat32LE(const ReaderRef &reader)
  */
 inline float32_t ReadFloat32BE(const ReaderRef &reader)
 {
-    float32_t rvo;
-    if (!TryReadFloat32BE(rvo, reader))
-    {
-        throw std::runtime_error("could not read");
-    }
-    return rvo;
+    float32_t out = 0;
+    uint8_t buf[sizeof(uint32_t)] = {0};
+    ReadExact(buf, reader);
+
+    uint32_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_LE_BSWAP32(bits);
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -70,10 +76,14 @@ inline float32_t ReadFloat32BE(const ReaderRef &reader)
  */
 inline void WriteFloat32LE(const WriterRef &writer, float32_t value)
 {
-    if (!TryWriteFloat32LE(writer, value))
-    {
-        throw std::runtime_error("could not write");
-    }
+    uint32_t bits = 0;
+    std::memcpy(&bits, &value, sizeof(bits));
+
+    uint8_t buf[sizeof(bits)] = {0};
+    bits = LEXIO_IF_BE_BSWAP32(bits);
+    std::memcpy(buf, &bits, sizeof(buf));
+
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -85,10 +95,14 @@ inline void WriteFloat32LE(const WriterRef &writer, float32_t value)
  */
 inline void WriteFloat32BE(const WriterRef &writer, float32_t value)
 {
-    if (!TryWriteFloat32BE(writer, value))
-    {
-        throw std::runtime_error("could not write");
-    }
+    uint32_t bits = 0;
+    std::memcpy(&bits, &value, sizeof(bits));
+
+    uint8_t buf[sizeof(bits)] = {0};
+    bits = LEXIO_IF_LE_BSWAP32(bits);
+    std::memcpy(buf, &bits, sizeof(buf));
+
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 //******************************************************************************
@@ -102,12 +116,15 @@ inline void WriteFloat32BE(const WriterRef &writer, float32_t value)
  */
 inline float64_t ReadFloat64LE(const ReaderRef &reader)
 {
-    float64_t rvo;
-    if (!TryReadFloat64LE(rvo, reader))
-    {
-        throw std::runtime_error("could not read");
-    }
-    return rvo;
+    float64_t out = 0;
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    ReadExact(buf, reader);
+
+    uint64_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_BE_BSWAP64(bits);
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -119,12 +136,15 @@ inline float64_t ReadFloat64LE(const ReaderRef &reader)
  */
 inline float64_t ReadFloat64BE(const ReaderRef &reader)
 {
-    float64_t rvo;
-    if (!TryReadFloat64BE(rvo, reader))
-    {
-        throw std::runtime_error("could not read");
-    }
-    return rvo;
+    float64_t out = 0;
+    uint8_t buf[sizeof(uint64_t)] = {0};
+    ReadExact(buf, reader);
+
+    uint64_t bits = 0;
+    std::memcpy(&bits, buf, sizeof(bits));
+    bits = LEXIO_IF_LE_BSWAP64(bits);
+    std::memcpy(&out, &bits, sizeof(out));
+    return out;
 }
 
 /**
@@ -136,10 +156,14 @@ inline float64_t ReadFloat64BE(const ReaderRef &reader)
  */
 inline void WriteFloat64LE(const WriterRef &writer, float64_t value)
 {
-    if (!TryWriteFloat64LE(writer, value))
-    {
-        throw std::runtime_error("could not write");
-    }
+    uint64_t bits = 0;
+    std::memcpy(&bits, &value, sizeof(bits));
+
+    uint8_t buf[sizeof(bits)] = {0};
+    bits = LEXIO_IF_BE_BSWAP64(bits);
+    std::memcpy(buf, &bits, sizeof(buf));
+
+    WriteExact(writer, buf, sizeof(buf));
 }
 
 /**
@@ -151,10 +175,14 @@ inline void WriteFloat64LE(const WriterRef &writer, float64_t value)
  */
 inline void WriteFloat64BE(const WriterRef &writer, float64_t value)
 {
-    if (!TryWriteFloat64BE(writer, value))
-    {
-        throw std::runtime_error("could not write");
-    }
+    uint64_t bits = 0;
+    std::memcpy(&bits, &value, sizeof(bits));
+
+    uint8_t buf[sizeof(bits)] = {0};
+    bits = LEXIO_IF_LE_BSWAP64(bits);
+    std::memcpy(buf, &bits, sizeof(buf));
+
+    return WriteExact(writer, buf, sizeof(buf));
 }
 
 } // namespace LexIO
