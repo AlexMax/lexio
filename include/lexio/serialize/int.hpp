@@ -73,11 +73,7 @@ inline void WriteU8(const WriterRef &writer, uint8_t value)
 inline int8_t Read8(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint8_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
     return int8_t(buf[0]);
 }
 
@@ -110,11 +106,7 @@ inline void Write8(const WriterRef &writer, int8_t value)
 inline uint16_t ReadU16LE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint16_t out;
     std::memcpy(&out, buf, sizeof(uint16_t));
@@ -132,11 +124,7 @@ inline uint16_t ReadU16LE(const ReaderRef &reader)
 inline uint16_t ReadU16BE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint16_t out;
     std::memcpy(&out, buf, sizeof(out));
@@ -196,11 +184,7 @@ inline void WriteU16BE(const WriterRef &writer, uint16_t value)
 inline int16_t Read16LE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint16_t bits = 0;
     std::memcpy(&bits, buf, sizeof(bits));
@@ -221,11 +205,7 @@ inline int16_t Read16LE(const ReaderRef &reader)
 inline int16_t Read16BE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint16_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint16_t bits = 0;
     std::memcpy(&bits, buf, sizeof(bits));
@@ -294,11 +274,7 @@ inline void Write16BE(const WriterRef &writer, int16_t value)
 inline uint32_t ReadU32LE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint32_t out;
     std::memcpy(&out, buf, sizeof(out));
@@ -316,11 +292,7 @@ inline uint32_t ReadU32LE(const ReaderRef &reader)
 inline uint32_t ReadU32BE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint32_t out;
     std::memcpy(&out, buf, sizeof(out));
@@ -380,11 +352,7 @@ inline void WriteU32BE(const WriterRef &writer, uint32_t value)
 inline int32_t Read32LE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint32_t bits = 0;
     std::memcpy(&bits, buf, sizeof(bits));
@@ -405,11 +373,7 @@ inline int32_t Read32LE(const ReaderRef &reader)
 inline int32_t Read32BE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint32_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint32_t bits = 0;
     std::memcpy(&bits, buf, sizeof(bits));
@@ -478,11 +442,7 @@ inline void Write32BE(const WriterRef &writer, int32_t value)
 inline uint64_t ReadU64LE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint64_t out;
     std::memcpy(&out, buf, sizeof(out));
@@ -500,11 +460,7 @@ inline uint64_t ReadU64LE(const ReaderRef &reader)
 inline uint64_t ReadU64BE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint64_t out;
     std::memcpy(&out, buf, sizeof(out));
@@ -564,11 +520,7 @@ inline void WriteU64BE(const WriterRef &writer, uint64_t value)
 inline int64_t Read64LE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint64_t bits = 0;
     std::memcpy(&bits, buf, sizeof(bits));
@@ -589,11 +541,7 @@ inline int64_t Read64LE(const ReaderRef &reader)
 inline int64_t Read64BE(const ReaderRef &reader)
 {
     uint8_t buf[sizeof(uint64_t)] = {0};
-    const size_t count = Read(buf, reader);
-    if (count != sizeof(buf))
-    {
-        throw std::runtime_error("could not read");
-    }
+    ReadExact(buf, reader);
 
     uint64_t bits = 0;
     std::memcpy(&bits, buf, sizeof(bits));
